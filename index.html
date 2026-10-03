@@ -202,6 +202,31 @@ details.sec[open] summary::after{transform:rotate(225deg)}
 .hint b{display:block;color:var(--label);font-size:17px;margin-bottom:4px}
 .seg-label{font-size:13px;color:var(--label-2);margin:14px 4px -4px}
 
+
+/* ---------- Foto ---------- */
+.photo-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.pbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px 10px;border-radius:16px;background:var(--surface);color:var(--moss);font-weight:600;font-size:15px;box-shadow:var(--shadow);cursor:pointer;text-align:center}
+.pbtn.main{background:radial-gradient(circle at 35% 30%,#5C9A6E,var(--moss-deep));color:#F3F1E7}
+.pbtn.wide{flex-direction:row;margin-top:14px;padding:14px;font-size:15px}
+.pbtn:active{transform:scale(.98)}
+.ppreview{margin-top:18px;border-radius:18px;overflow:hidden;box-shadow:var(--shadow);background:var(--fill)}
+.ppreview img{display:block;width:100%;max-height:52vh;object-fit:cover}
+.pres{background:var(--surface);border-radius:16px;box-shadow:var(--shadow);padding:14px;margin-top:14px}
+.pres-top{display:flex;gap:12px;align-items:center}
+.pres-top img,.pres-top .ph{width:72px;height:72px;border-radius:14px;object-fit:cover;background:var(--fill);flex:none}
+.pres-top .k{font-size:13px;color:var(--label-2)}
+.pres-top .n{font-size:22px;font-weight:700;line-height:1.15}
+.pres-top .s{font-size:14px;color:var(--label-2);font-style:italic}
+.pres .conf{margin-top:12px}
+.pres .lin{font-size:13px;color:var(--label-2);margin-top:8px}
+.breed{margin-top:14px;padding-top:12px;border-top:.5px solid var(--sep)}
+.breed .bk{font-size:13px;color:var(--label-2)}
+.breed .bn{font-size:19px;font-weight:700;margin-top:2px}
+.breed .bn span{font-size:14px;font-weight:600;color:var(--moss)}
+.breed p{font-size:15px;line-height:1.45;margin:8px 0 4px}
+.breed a{color:var(--moss);font-size:14px;font-weight:600}
+.breed .bo{font-size:13px;color:var(--label-2);margin-top:8px}
+
 /* ---------- Barra de pestañas ---------- */
 .tabbar{position:fixed;z-index:50;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:0;padding:6px 0 calc(var(--sb) + 4px);
   background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep)}
@@ -223,6 +248,10 @@ footer{color:var(--label-3);font-size:12px;margin:28px 4px 0;line-height:1.4}
   <a href="#/cerca" id="tab-near">
     <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 25s8-7.2 8-13.5a8 8 0 0 0-16 0C6 17.8 14 25 14 25z"/><circle cx="14" cy="11.5" r="3"/></svg>
     Cerca
+  </a>
+  <a href="#/foto" id="tab-photo">
+    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9.5h3.5l1.8-2.8h7.4l1.8 2.8H23a1 1 0 0 1 1 1V21a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V10.5a1 1 0 0 1 1-1z"/><circle cx="14" cy="15.3" r="4"/></svg>
+    Foto
   </a>
   <a href="#/escuchar" id="tab-listen">
     <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 12v4M8.5 8v12M13 4v20M17.5 9v10M22 6v16"/></svg>
@@ -258,11 +287,12 @@ function route(){
   stopAudio();
   const h = location.hash || "#/";
   if (!h.startsWith("#/escuchar")) stopListening();
-  const tab = h.startsWith("#/escuchar") ? "listen" : h.startsWith("#/cerca") ? "near" : "explore";
-  ["explore","near","listen"].forEach(k => document.getElementById("tab-" + k).setAttribute("aria-current", k === tab ? "page" : "false"));
+  const tab = h.startsWith("#/escuchar") ? "listen" : h.startsWith("#/cerca") ? "near" : h.startsWith("#/foto") ? "photo" : "explore";
+  ["explore","near","photo","listen"].forEach(k => document.getElementById("tab-" + k).setAttribute("aria-current", k === tab ? "page" : "false"));
   let m;
   if ((m = h.match(/^#\/animal\/(\d+)/))) return showAnimal(+m[1]);
   if (h.startsWith("#/escuchar")) return showListen();
+  if (h.startsWith("#/foto")) return showPhoto();
   if (h.startsWith("#/cerca")) return showNearby();
   m = h.match(/^#\/buscar\/(.+)/);
   showExplore(m ? decodeURIComponent(m[1]) : "");
@@ -897,6 +927,216 @@ async function loadNearRecent(seq){
         <span class="txt"><div class="t1">${esc(name)}</div><div class="t2" style="font-style:normal">${esc(fmtDate(o.observed_on))}${o.place_guess ? " · " + esc(o.place_guess) : ""}</div></span>${chev}</a>`;
     }).join("") || `<p class="status" style="padding:20px">Sin avistamientos recientes en esta zona.</p>`;
   } catch(e){ if (seq === N.seq && box) box.innerHTML = `<p class="status err" style="padding:20px">No se pudieron cargar los avistamientos.</p>`; }
+}
+
+/* ---------- Foto (reconocimiento con MobileNet, en el móvil) ---------- */
+const IMAGENET_ANIMALS = ["tench, Tinca tinca","goldfish, Carassius auratus","great white shark, white shark, man-eater, man-eating shark, Carcharodon carcharias","tiger shark, Galeocerdo cuvieri","hammerhead, hammerhead shark","electric ray, crampfish, numbfish, torpedo","stingray","cock","hen","ostrich, Struthio camelus","brambling, Fringilla montifringilla","goldfinch, Carduelis carduelis","house finch, linnet, Carpodacus mexicanus","junco, snowbird","indigo bunting, indigo finch, indigo bird, Passerina cyanea","robin, American robin, Turdus migratorius","bulbul","jay","magpie","chickadee","water ouzel, dipper","kite","bald eagle, American eagle, Haliaeetus leucocephalus","vulture","great grey owl, great gray owl, Strix nebulosa","European fire salamander, Salamandra salamandra","common newt, Triturus vulgaris","eft","spotted salamander, Ambystoma maculatum","axolotl, mud puppy, Ambystoma mexicanum","bullfrog, Rana catesbeiana","tree frog, tree-frog","tailed frog, bell toad, ribbed toad, tailed toad, Ascaphus trui","loggerhead, loggerhead turtle, Caretta caretta","leatherback turtle, leatherback, leathery turtle, Dermochelys coriacea","mud turtle","terrapin","box turtle, box tortoise","banded gecko","common iguana, iguana, Iguana iguana","American chameleon, anole, Anolis carolinensis","whiptail, whiptail lizard","agama","frilled lizard, Chlamydosaurus kingi","alligator lizard","Gila monster, Heloderma suspectum","green lizard, Lacerta viridis","African chameleon, Chamaeleo chamaeleon","Komodo dragon, Komodo lizard, dragon lizard, giant lizard, Varanus komodoensis","African crocodile, Nile crocodile, Crocodylus niloticus","American alligator, Alligator mississipiensis","triceratops","thunder snake, worm snake, Carphophis amoenus","ringneck snake, ring-necked snake, ring snake","hognose snake, puff adder, sand viper","green snake, grass snake","king snake, kingsnake","garter snake, grass snake","water snake","vine snake","night snake, Hypsiglena torquata","boa constrictor, Constrictor constrictor","rock python, rock snake, Python sebae","Indian cobra, Naja naja","green mamba","sea snake","horned viper, cerastes, sand viper, horned asp, Cerastes cornutus","diamondback, diamondback rattlesnake, Crotalus adamanteus","sidewinder, horned rattlesnake, Crotalus cerastes","trilobite","harvestman, daddy longlegs, Phalangium opilio","scorpion","black and gold garden spider, Argiope aurantia","barn spider, Araneus cavaticus","garden spider, Aranea diademata","black widow, Latrodectus mactans","tarantula","wolf spider, hunting spider","tick","centipede","black grouse","ptarmigan","ruffed grouse, partridge, Bonasa umbellus","prairie chicken, prairie grouse, prairie fowl","peacock","quail","partridge","African grey, African gray, Psittacus erithacus","macaw","sulphur-crested cockatoo, Kakatoe galerita, Cacatua galerita","lorikeet","coucal","bee eater","hornbill","hummingbird","jacamar","toucan","drake","red-breasted merganser, Mergus serrator","goose","black swan, Cygnus atratus","tusker","echidna, spiny anteater, anteater","platypus, duckbill, duckbilled platypus, duck-billed platypus, Ornithorhynchus anatinus","wallaby, brush kangaroo","koala, koala bear, kangaroo bear, native bear, Phascolarctos cinereus","wombat","jelly fish","sea anemone, anemone","brain coral","flatworm, platyhelminth","nematode, nematode worm, roundworm","conch","snail","slug","sea slug, nudibranch","chiton, coat-of-mail shell, sea cradle, polyplacophore","chambered nautilus, pearly nautilus, nautilus","Dungeness crab, Cancer magister","rock crab, Cancer irroratus","fiddler crab","king crab, Alaska crab, Alaskan king crab, Alaska king crab, Paralithodes camtschatica","American lobster, Northern lobster, Maine lobster, Homarus americanus","spiny lobster, langouste, rock lobster, crawfish, crayfish, sea crawfish","crayfish, crawfish, crawdad, crawdaddy","hermit crab","isopod","white stork, Ciconia ciconia","black stork, Ciconia nigra","spoonbill","flamingo","little blue heron, Egretta caerulea","American egret, great white heron, Egretta albus","bittern","crane","limpkin, Aramus pictus","European gallinule, Porphyrio porphyrio","American coot, marsh hen, mud hen, water hen, Fulica americana","bustard","ruddy turnstone, Arenaria interpres","red-backed sandpiper, dunlin, Erolia alpina","redshank, Tringa totanus","dowitcher","oystercatcher, oyster catcher","pelican","king penguin, Aptenodytes patagonica","albatross, mollymawk","grey whale, gray whale, devilfish, Eschrichtius gibbosus, Eschrichtius robustus","killer whale, killer, orca, grampus, sea wolf, Orcinus orca","dugong, Dugong dugon","sea lion","Chihuahua","Japanese spaniel","Maltese dog, Maltese terrier, Maltese","Pekinese, Pekingese, Peke","Shih-Tzu","Blenheim spaniel","papillon","toy terrier","Rhodesian ridgeback","Afghan hound, Afghan","basset, basset hound","beagle","bloodhound, sleuthhound","bluetick","black-and-tan coonhound","Walker hound, Walker foxhound","English foxhound","redbone","borzoi, Russian wolfhound","Irish wolfhound","Italian greyhound","whippet","Ibizan hound, Ibizan Podenco","Norwegian elkhound, elkhound","otterhound, otter hound","Saluki, gazelle hound","Scottish deerhound, deerhound","Weimaraner","Staffordshire bullterrier, Staffordshire bull terrier","American Staffordshire terrier, Staffordshire terrier, American pit bull terrier, pit bull terrier","Bedlington terrier","Border terrier","Kerry blue terrier","Irish terrier","Norfolk terrier","Norwich terrier","Yorkshire terrier","wire-haired fox terrier","Lakeland terrier","Sealyham terrier, Sealyham","Airedale, Airedale terrier","cairn, cairn terrier","Australian terrier","Dandie Dinmont, Dandie Dinmont terrier","Boston bull, Boston terrier","miniature schnauzer","giant schnauzer","standard schnauzer","Scotch terrier, Scottish terrier, Scottie","Tibetan terrier, chrysanthemum dog","silky terrier, Sydney silky","soft-coated wheaten terrier","West Highland white terrier","Lhasa, Lhasa apso","flat-coated retriever","curly-coated retriever","golden retriever","Labrador retriever","Chesapeake Bay retriever","German short-haired pointer","vizsla, Hungarian pointer","English setter","Irish setter, red setter","Gordon setter","Brittany spaniel","clumber, clumber spaniel","English springer, English springer spaniel","Welsh springer spaniel","cocker spaniel, English cocker spaniel, cocker","Sussex spaniel","Irish water spaniel","kuvasz","schipperke","groenendael","malinois","briard","kelpie","komondor","Old English sheepdog, bobtail","Shetland sheepdog, Shetland sheep dog, Shetland","collie","Border collie","Bouvier des Flandres, Bouviers des Flandres","Rottweiler","German shepherd, German shepherd dog, German police dog, alsatian","Doberman, Doberman pinscher","miniature pinscher","Greater Swiss Mountain dog","Bernese mountain dog","Appenzeller","EntleBucher","boxer","bull mastiff","Tibetan mastiff","French bulldog","Great Dane","Saint Bernard, St Bernard","Eskimo dog, husky","malamute, malemute, Alaskan malamute","Siberian husky","dalmatian, coach dog, carriage dog","affenpinscher, monkey pinscher, monkey dog","basenji","pug, pug-dog","Leonberg","Newfoundland, Newfoundland dog","Great Pyrenees","Samoyed, Samoyede","Pomeranian","chow, chow chow","keeshond","Brabancon griffon","Pembroke, Pembroke Welsh corgi","Cardigan, Cardigan Welsh corgi","toy poodle","miniature poodle","standard poodle","Mexican hairless","timber wolf, grey wolf, gray wolf, Canis lupus","white wolf, Arctic wolf, Canis lupus tundrarum","red wolf, maned wolf, Canis rufus, Canis niger","coyote, prairie wolf, brush wolf, Canis latrans","dingo, warrigal, warragal, Canis dingo","dhole, Cuon alpinus","African hunting dog, hyena dog, Cape hunting dog, Lycaon pictus","hyena, hyaena","red fox, Vulpes vulpes","kit fox, Vulpes macrotis","Arctic fox, white fox, Alopex lagopus","grey fox, gray fox, Urocyon cinereoargenteus","tabby, tabby cat","tiger cat","Persian cat","Siamese cat, Siamese","Egyptian cat","cougar, puma, catamount, mountain lion, painter, panther, Felis concolor","lynx, catamount","leopard, Panthera pardus","snow leopard, ounce, Panthera uncia","jaguar, panther, Panthera onca, Felis onca","lion, king of beasts, Panthera leo","tiger, Panthera tigris","cheetah, chetah, Acinonyx jubatus","brown bear, bruin, Ursus arctos","American black bear, black bear, Ursus americanus, Euarctos americanus","ice bear, polar bear, Ursus Maritimus, Thalarctos maritimus","sloth bear, Melursus ursinus, Ursus ursinus","mongoose","meerkat, mierkat","tiger beetle","ladybug, ladybeetle, lady beetle, ladybird, ladybird beetle","ground beetle, carabid beetle","long-horned beetle, longicorn, longicorn beetle","leaf beetle, chrysomelid","dung beetle","rhinoceros beetle","weevil","fly","bee","ant, emmet, pismire","grasshopper, hopper","cricket","walking stick, walkingstick, stick insect","cockroach, roach","mantis, mantid","cicada, cicala","leafhopper","lacewing, lacewing fly","dragonfly, darning needle, devil's darning needle, sewing needle, snake feeder, snake doctor, mosquito hawk, skeeter hawk","damselfly","admiral","ringlet, ringlet butterfly","monarch, monarch butterfly, milkweed butterfly, Danaus plexippus","cabbage butterfly","sulphur butterfly, sulfur butterfly","lycaenid, lycaenid butterfly","starfish, sea star","sea urchin","sea cucumber, holothurian","wood rabbit, cottontail, cottontail rabbit","hare","Angora, Angora rabbit","hamster","porcupine, hedgehog","fox squirrel, eastern fox squirrel, Sciurus niger","marmot","beaver","guinea pig, Cavia cobaya","sorrel","zebra","hog, pig, grunter, squealer, Sus scrofa","wild boar, boar, Sus scrofa","warthog","hippopotamus, hippo, river horse, Hippopotamus amphibius","ox","water buffalo, water ox, Asiatic buffalo, Bubalus bubalis","bison","ram, tup","bighorn, bighorn sheep, cimarron, Rocky Mountain bighorn, Rocky Mountain sheep, Ovis canadensis","ibex, Capra ibex","hartebeest","impala, Aepyceros melampus","gazelle","Arabian camel, dromedary, Camelus dromedarius","llama","weasel","mink","polecat, fitch, foulmart, foumart, Mustela putorius","black-footed ferret, ferret, Mustela nigripes","otter","skunk, polecat, wood pussy","badger","armadillo","three-toed sloth, ai, Bradypus tridactylus","orangutan, orang, orangutang, Pongo pygmaeus","gorilla, Gorilla gorilla","chimpanzee, chimp, Pan troglodytes","gibbon, Hylobates lar","siamang, Hylobates syndactylus, Symphalangus syndactylus","guenon, guenon monkey","patas, hussar monkey, Erythrocebus patas","baboon","macaque","langur","colobus, colobus monkey","proboscis monkey, Nasalis larvatus","marmoset","capuchin, ringtail, Cebus capucinus","howler monkey, howler","titi, titi monkey","spider monkey, Ateles geoffroyi","squirrel monkey, Saimiri sciureus","Madagascar cat, ring-tailed lemur, Lemur catta","indri, indris, Indri indri, Indri brevicaudatus","Indian elephant, Elephas maximus","African elephant, Loxodonta africana","lesser panda, red panda, panda, bear cat, cat bear, Ailurus fulgens","giant panda, panda, panda bear, coon bear, Ailuropoda melanoleuca","barracouta, snoek","eel","coho, cohoe, coho salmon, blue jack, silver salmon, Oncorhynchus kisutch","rock beauty, Holocanthus tricolor","anemone fish","sturgeon","gar, garfish, garpike, billfish, Lepisosteus osseus","lionfish","puffer, pufferfish, blowfish, globefish"];
+const DOG = [151, 268], CAT = [281, 285];
+const CAT_ES = { 281: ["Gato atigrado (tabby)", "Gato atigrado"], 282: ["Gato atigrado", "Gato atigrado"], 283: ["Persa", "Gato persa"], 284: ["Siamés", "Gato siamés"], 285: ["Mau egipcio", "Mau egipcio"] };
+const SCI_FIX = { "cock": "Gallus gallus domesticus", "hen": "Gallus gallus domesticus", "ox": "Bos taurus", "ram, tup": "Ovis aries", "sorrel": "Equus caballus", "zebra": "Equus quagga", "tusker": "Loxodonta africana", "Arctic fox, white fox, Alopex lagopus": "Vulpes lagopus", "Persian cat": "Felis catus" };
+const P = { model: null, loading: null, seq: 0 };
+const camIcon = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.6-2.4h6.8L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/></svg>`;
+const galIcon = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="m4 17 5-4.5 4 3.5 2.5-2 4.5 3.8"/></svg>`;
+
+function loadScript(src){
+  return new Promise((ok, ko) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => ko(new Error("script")); document.head.appendChild(s); });
+}
+function ensureMobilenet(){
+  if (P.model) return Promise.resolve(P.model);
+  if (!P.loading) P.loading = (async () => {
+    if (!window.tf) await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.14.0/dist/tf.min.js");
+    if (!window.mobilenet) await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js");
+    await tf.ready();
+    P.model = await mobilenet.load({ version: 2, alpha: 1.0 });
+    return P.model;
+  })().catch(e => { P.loading = null; throw e; });
+  return P.loading;
+}
+
+function showPhoto(){
+  window.onscroll = null;
+  document.title = "Foto · Fonoteca";
+  $view.innerHTML = `
+    <h1 class="large-title">Foto</h1>
+    <p class="subtitle">Haz o elige una foto y te digo qué animal es.</p>
+    <div class="photo-btns">
+      <label class="pbtn main">${camIcon}<span>Hacer foto</span><input type="file" accept="image/*" capture="environment" id="pCam" hidden></label>
+      <label class="pbtn">${galIcon}<span>Elegir de la galería</span><input type="file" accept="image/*" id="pGal" hidden></label>
+    </div>
+    <div id="pOut"><div class="hint"><b>Consejo</b>Que el animal se vea entero, bien iluminado y ocupando buena parte de la foto.</div></div>
+    <footer>Reconocimiento con MobileNet (Google), hecho en tu móvil: la foto no se envía a ningún sitio. Acierta bien con perros, gatos y animales conocidos; con fauna salvaje puede fallar, así que compara siempre con la ficha. La primera vez descarga el modelo (unos 14 MB).</footer>`;
+  ["pCam", "pGal"].forEach(id => document.getElementById(id).onchange = e => {
+    const f = e.target.files?.[0]; e.target.value = "";
+    if (f) analyzePhoto(f);
+  });
+}
+
+function loadImg(src){
+  return new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = ko; i.src = src; });
+}
+function cropCanvas(img, frac){
+  const w = img.naturalWidth, h = img.naturalHeight, side = Math.min(w, h) * frac;
+  const c = document.createElement("canvas"); c.width = c.height = 300;
+  c.getContext("2d").drawImage(img, (w - side) / 2, (h - side) / 2, side, side, 0, 0, 300, 300);
+  return c;
+}
+
+async function analyzePhoto(file){
+  const seq = ++P.seq, out = document.getElementById("pOut");
+  const url = URL.createObjectURL(file);
+  out.innerHTML = `<div class="ppreview"><img src="${url}" alt="Tu foto"></div><div id="pStat">${loading(P.model ? "Mirando la foto…" : "Preparando el reconocimiento (solo la primera vez)…")}</div><div id="pRes"></div>`;
+  try {
+    const [model, img] = await Promise.all([ensureMobilenet(), loadImg(url)]);
+    if (seq !== P.seq) return;
+    document.getElementById("pStat").innerHTML = loading("Mirando la foto…");
+    // Tres encuadres: entera, centro y centro cercano. Nos quedamos con la mejor puntuación de cada clase.
+    const full = document.createElement("canvas");
+    const k = Math.min(1, 640 / Math.max(img.naturalWidth, img.naturalHeight));
+    full.width = Math.round(img.naturalWidth * k); full.height = Math.round(img.naturalHeight * k);
+    full.getContext("2d").drawImage(img, 0, 0, full.width, full.height);
+    const runs = [];
+    for (const src of [full, cropCanvas(img, 1), cropCanvas(img, .7)]) runs.push(await model.classify(src, 10));
+    const best = {};
+    runs.flat().forEach(r => { best[r.className] = Math.max(best[r.className] || 0, r.probability); });
+    const preds = Object.entries(best).map(([name, p]) => ({ name, p, idx: IMAGENET_ANIMALS.indexOf(name) })).sort((a, b) => b.p - a.p);
+    if (seq !== P.seq) return;
+    await renderPhotoResult(preds, seq);
+  } catch(e){
+    if (seq !== P.seq) return;
+    const st = document.getElementById("pStat");
+    if (st) st.innerHTML = `<p class="status err">No se pudo analizar la foto. Revisa la conexión (la primera vez hay que descargar el modelo) y vuelve a intentarlo.</p>`;
+  }
+}
+
+const isDog = i => i >= DOG[0] && i <= DOG[1];
+const isCat = i => i >= CAT[0] && i <= CAT[1];
+
+async function renderPhotoResult(preds, seq){
+  const st = document.getElementById("pStat"), box = document.getElementById("pRes");
+  const animals = preds.filter(x => x.idx >= 0);
+  const topAny = preds[0];
+  if (!animals.length || animals[0].p < .08 || (topAny.idx < 0 && topAny.p > animals[0].p * 3)){
+    st.innerHTML = `<div class="hint"><b>No veo un animal claro</b>Prueba con otra foto donde el animal se vea más grande y nítido.</div>`;
+    return;
+  }
+  // Agrupamos: todas las razas de perro suman "perro"; igual con gatos.
+  const groups = [];
+  const add = (key, p, item) => { let g = groups.find(x => x.key === key); if (!g) groups.push(g = { key, p: 0, items: [] }); g.p += p; g.items.push(item); };
+  animals.forEach(a => add(isDog(a.idx) ? "dog" : isCat(a.idx) ? "cat" : a.name, a.p, a));
+  groups.sort((a, b) => b.p - a.p);
+  st.innerHTML = loading("Buscando su ficha…");
+  const resolved = await Promise.all(groups.slice(0, 4).map(g => resolveGroup(g).catch(() => null)));
+  if (seq !== P.seq) return;
+  const list = resolved.map((t, i) => t && { ...t, p: Math.min(groups[i].p, 1), g: groups[i] }).filter(Boolean);
+  if (!list.length){ st.innerHTML = `<p class="status err">Lo he reconocido, pero no encuentro su ficha. Prueba otra vez.</p>`; return; }
+  st.innerHTML = "";
+  const top = list[0], pct = Math.round(top.p * 100);
+  const verdict = pct >= 60 ? "Creo que es" : pct >= 30 ? "Puede que sea" : "No estoy seguro, quizá sea";
+  const name = cap(top.taxon.preferred_common_name) || top.taxon.name;
+  const img = top.taxon.default_photo?.medium_url;
+  box.innerHTML = `
+    <div class="pres">
+      <div class="pres-top">
+        ${img ? `<img src="${esc(img)}" alt="">` : `<span class="ph"></span>`}
+        <div class="txt"><div class="k">${verdict}</div><div class="n">${esc(name)}</div><div class="s">${esc(top.taxon.name)}</div></div>
+      </div>
+      <div class="conf"><div class="m"><i style="width:${pct}%"></i></div><span>${pct}%</span></div>
+      ${top.lineage ? `<div class="lin">${esc(top.lineage)}</div>` : ""}
+      <div id="pBreed"></div>
+      <a class="pbtn main wide" href="#/animal/${top.taxon.id}">Ver ficha completa: sonidos, mapa e información</a>
+    </div>
+    ${list.length > 1 ? `<div class="section-head"><h2>Otras posibilidades</h2></div>
+    <div class="group">${list.slice(1).map(o => `<a class="cell" href="#/animal/${o.taxon.id}">
+      ${o.taxon.default_photo?.square_url ? `<img src="${esc(o.taxon.default_photo.square_url)}" alt="" loading="lazy">` : `<span class="ph"></span>`}
+      <span class="txt"><div class="t1">${esc(cap(o.taxon.preferred_common_name) || o.taxon.name)}</div><div class="t2">${esc(o.taxon.name)}</div></span>
+      <span class="val">${Math.max(1, Math.round(o.p * 100))}%</span>${chev}</a>`).join("")}</div>` : ""}`;
+  if (top.g.key === "dog" || top.g.key === "cat") renderBreeds(top.g, seq);
+}
+
+async function resolveGroup(g){
+  let sci;
+  if (g.key === "dog") sci = "Canis familiaris";
+  else if (g.key === "cat") sci = "Felis catus";
+  else sci = SCI_FIX[g.key];
+  let taxon;
+  if (sci) taxon = await findTaxon([sci]);
+  else {
+    const parts = g.key.split(", ");
+    const sciParts = parts.filter(p => /^[A-Z][a-z]+( [a-z]+){1,2}$/.test(p) && p.split(" ").length >= 2);
+    taxon = await findTaxon([...sciParts, ...parts.filter(p => !sciParts.includes(p))]);
+  }
+  if (!taxon) return null;
+  const full = (await getJSON(`${API}/taxa/${taxon.id}?locale=es`)).results[0] || taxon;
+  const lineage = (full.ancestors || []).filter(a => ["class", "order", "family"].includes(a.rank)).map(a => cap(a.preferred_common_name) || a.name).join(" › ");
+  return { taxon: full, lineage };
+}
+async function findTaxon(terms){
+  for (const term of terms){
+    const d = await getJSON(`${API}/taxa/autocomplete?q=${encodeURIComponent(term)}&locale=es&per_page=6&is_active=true`);
+    const ok = d.results.filter(t => t.iconic_taxon_name && !["Plantae", "Fungi", "Chromista", "Protozoa"].includes(t.iconic_taxon_name));
+    const exact = ok.find(t => (t.matched_term || "").toLowerCase() === term.toLowerCase() || t.name.toLowerCase() === term.toLowerCase());
+    if (exact) return exact;
+    if (ok[0] && /^[A-Z][a-z]+ [a-z]+/.test(term)) return ok[0];
+  }
+  // Último intento: la primera palabra clave que dé un animal
+  for (const term of terms){
+    const d = await getJSON(`${API}/taxa/autocomplete?q=${encodeURIComponent(term)}&locale=es&per_page=3&is_active=true`);
+    const t = d.results.find(t => ["Mammalia", "Aves", "Reptilia", "Amphibia", "Actinopterygii", "Insecta", "Arachnida", "Mollusca", "Animalia"].includes(t.iconic_taxon_name));
+    if (t) return t;
+  }
+  return null;
+}
+
+async function wikiBreed(label, isCatKind, idx){
+  // Gatos: nombre en español directo. Perros: Wikipedia inglesa → enlace a la española.
+  let esTitle = null, display = null;
+  if (isCatKind){ [display, esTitle] = CAT_ES[idx] || [label, null]; }
+  else {
+    const base = label.split(", ")[0];
+    const ts = [base + " (dog breed)", base + " (dog)", base];
+    const d = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(ts.join("|"))}&prop=langlinks|pageprops&lllang=es&redirects=1&format=json&origin=*`);
+    const q = d.query || {}, norm = {}, red = {}, pages = {};
+    (q.normalized || []).forEach(x => norm[x.from] = x.to);
+    (q.redirects || []).forEach(x => red[x.from] = x.to);
+    Object.values(q.pages || {}).forEach(p => pages[p.title] = p);
+    for (const t of ts){
+      let t2 = norm[t] || t; t2 = red[t2] || t2;
+      const p = pages[t2];
+      if (p && !("missing" in p) && !(p.pageprops && "disambiguation" in p.pageprops)){ display = p.title.replace(/ \(dog( breed)?\)$/, ""); esTitle = p.langlinks?.[0]?.["*"] || null; break; }
+    }
+    if (!display) display = cap(base);
+    if (esTitle) display = esTitle.replace(/ \(perro\)$/i, "");
+  }
+  let extract = "";
+  if (esTitle){
+    try {
+      const e = await getJSON(`https://es.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&redirects=1&titles=${encodeURIComponent(esTitle)}&format=json&origin=*`);
+      extract = Object.values(e.query?.pages || {})[0]?.extract || "";
+    } catch(e){}
+  }
+  return { display: cap(display), extract, esTitle };
+}
+
+async function renderBreeds(g, seq){
+  const el = document.getElementById("pBreed");
+  if (!el) return;
+  const catKind = g.key === "cat";
+  const items = g.items.slice().sort((a, b) => b.p - a.p).slice(0, 3);
+  const total = items.reduce((s, x) => s + x.p, 0) || 1;
+  el.innerHTML = loading(catKind ? "Mirando el tipo de gato…" : "Mirando la raza…");
+  const info = await Promise.all(items.map(x => wikiBreed(x.name, catKind, x.idx).catch(() => ({ display: cap(x.name.split(", ")[0]), extract: "" }))));
+  if (seq !== P.seq || !document.getElementById("pBreed")) return;
+  const main = info[0], mp = Math.round(items[0].p / total * 100);
+  const short = main.extract ? main.extract.split("\n")[0].slice(0, 420) + (main.extract.length > 420 ? "…" : "") : "";
+  el.innerHTML = `
+    <div class="breed">
+      <div class="bk">${catKind ? "Raza o pelaje probable" : "Raza probable"}</div>
+      <div class="bn">${esc(main.display)} <span>${mp}%</span></div>
+      ${short ? `<p>${esc(short)}</p>` : ""}
+      ${main.esTitle ? `<a href="https://es.wikipedia.org/wiki/${encodeURIComponent(main.esTitle.replace(/ /g, "_"))}" target="_blank" rel="noopener">Leer más en Wikipedia</a>` : ""}
+      ${info.length > 1 ? `<div class="bo">También podría ser: ${info.slice(1).map((x, i) => `${esc(x.display)} (${Math.round(items[i + 1].p / total * 100)}%)`).join(", ")}</div>` : ""}
+      <div class="bo">Si es un cruce, puede mezclar rasgos de varias razas.</div>
+    </div>`;
 }
 
 if (!location.hash) history.replaceState(null, "", "#/");
