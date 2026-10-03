@@ -4,333 +4,429 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Fonoteca Animal</title>
-<meta name="description" content="Los sonidos de aves y mamíferos del mundo, con foto, mapa e información.">
-<meta name="theme-color" content="#17221C">
+<meta name="description" content="Escucha e identifica aves y mamíferos del mundo.">
+<meta name="theme-color" content="#EEF0E8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1310" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Fonoteca">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-180.png">
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,400&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
+/* ---------- Paleta natural ---------- */
 :root{
-  --paper:#E8EDE5; --card:#F6F8F4; --ink:#17221C; --muted:#56655C; --line:#C9D3C8;
-  --signal:#0B7F70; --signal-soft:#CFE7E0; --wave:#5FD3BC;
-  --serif:"Fraunces", Georgia, "Times New Roman", serif;
-  --sans:"Public Sans", -apple-system, "Helvetica Neue", Arial, sans-serif;
-  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+  --bg:#EEF0E8;          /* niebla de salvia */
+  --surface:#FFFFFF;
+  --surface-2:#F6F7F2;
+  --label:#1B211C;
+  --label-2:rgba(27,33,28,.62);
+  --label-3:rgba(27,33,28,.38);
+  --sep:rgba(27,33,28,.12);
+  --fill:rgba(118,128,112,.14);
+  --moss:#3E7150;        /* musgo */
+  --moss-deep:#2F5A3D;
+  --bark:#8A6A4F;        /* corteza */
+  --sand:#D9CBB0;        /* arena */
+  --sky:#5E8DB5;         /* cielo */
+  --glass:rgba(238,240,232,.72);
+  --shadow:0 1px 2px rgba(27,33,28,.06), 0 8px 24px rgba(27,33,28,.06);
+  --font:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", system-ui, sans-serif;
+  --font-round:ui-rounded, "SF Pro Rounded", -apple-system, system-ui, sans-serif;
+  --st:env(safe-area-inset-top,0px); --sb:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme: dark){
-  :root{ --paper:#121A15; --card:#1B2620; --ink:#E6EDE7; --muted:#9AAAA0; --line:#2C3A32;
-    --signal:#5FD3BC; --signal-soft:#21403A; }
+  :root{
+    --bg:#0E1310; --surface:#1A201C; --surface-2:#141915;
+    --label:#ECEFE8; --label-2:rgba(236,239,232,.62); --label-3:rgba(236,239,232,.36);
+    --sep:rgba(236,239,232,.12); --fill:rgba(160,175,160,.16);
+    --moss:#7FBF8E; --moss-deep:#5FA170; --bark:#C9A684; --sand:#5A4F3F; --sky:#8DB7DA;
+    --glass:rgba(14,19,16,.72);
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+  }
 }
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
-body{padding-bottom:calc(var(--safe-b) + 24px)}
-button{font:inherit;color:inherit}
-a{color:var(--signal)}
-:focus-visible{outline:3px solid var(--signal);outline-offset:2px;border-radius:6px}
-.wrap{max-width:720px;margin:0 auto;padding:0 18px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--label);font-family:var(--font);font-size:17px;line-height:1.35;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+/* Textura de papel natural, muy sutil */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .38 0 0 0 0 .3 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+@media (prefers-color-scheme: dark){ body::before{mix-blend-mode:screen;opacity:.25} }
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+a{color:var(--moss);text-decoration:none}
+:focus-visible{outline:2px solid var(--moss);outline-offset:2px;border-radius:10px}
+#view{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:0 16px calc(var(--sb) + 104px)}
 
-/* Barra superior con buscador */
-header.top{position:sticky;top:0;z-index:20;background:var(--ink);color:#E6EDE7;padding:calc(var(--safe-t) + 14px) 0 14px}
-@media (prefers-color-scheme: dark){ header.top{background:#0B110E} }
-.brand{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.brand svg{flex:none}
-.brand h1{font-family:var(--serif);font-weight:700;font-size:1.35rem;margin:0;letter-spacing:-.01em}
-.search{position:relative}
-.search input{width:100%;font:inherit;font-size:1.05rem;padding:13px 44px 13px 16px;border-radius:14px;border:0;background:#2A3830;color:#F1F5F1;-webkit-appearance:none}
-.search input::placeholder{color:#A9B8AE}
-.search .clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;color:#A9B8AE;width:36px;height:36px;font-size:1.3rem;cursor:pointer;display:none}
-.filters{display:flex;gap:8px;margin-top:12px;overflow-x:auto;scrollbar-width:none}
-.filters::-webkit-scrollbar{display:none}
-.chip{flex:none;border:1px solid #3B4B42;background:transparent;color:#C9D6CD;padding:6px 13px;border-radius:999px;font-size:.88rem;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--wave);border-color:var(--wave);color:#0F1A15;font-weight:600}
+/* ---------- Cabecera de pestaña (título grande) ---------- */
+.large-title{font-size:34px;font-weight:700;letter-spacing:.012em;line-height:1.1;margin:0;padding:calc(var(--st) + 22px) 4px 10px}
+.subtitle{color:var(--label-2);font-size:15px;margin:-4px 4px 14px}
+.sticky{position:sticky;top:0;z-index:30;margin:0 -16px;padding:calc(var(--st) + 8px) 16px 10px;background:var(--glass);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);transition:box-shadow .2s}
+.sticky.stuck{box-shadow:0 .5px 0 var(--sep)}
+.search{display:flex;align-items:center;gap:6px;background:var(--fill);border-radius:12px;height:38px;padding:0 10px;color:var(--label-2)}
+.search svg{flex:none}
+.search input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:17px;color:var(--label);outline:none;-webkit-appearance:none}
+.search input::placeholder{color:var(--label-3)}
+.search input::-webkit-search-cancel-button{display:none}
+.search .x{width:18px;height:18px;border-radius:50%;background:var(--label-3);color:var(--surface);font-size:12px;line-height:18px;text-align:center;display:none}
+.segmented{display:flex;background:var(--fill);border-radius:9px;padding:2px;margin-top:10px;position:relative}
+.segmented button{flex:1;height:30px;border-radius:7px;font-size:13px;font-weight:500;color:var(--label);position:relative;z-index:1}
+.segmented button[aria-pressed="true"]{background:var(--surface);box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04);font-weight:600}
+@media (prefers-color-scheme: dark){ .segmented button[aria-pressed="true"]{background:#4A524C} }
 
-/* Listas de animales */
-.section-title{font-family:var(--serif);font-weight:500;font-size:1.35rem;margin:26px 0 4px}
-.section-note{color:var(--muted);font-size:.92rem;margin:0 0 14px}
-.list{list-style:none;margin:0;padding:0}
-.row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer;text-decoration:none;color:inherit}
-.row img,.row .noimg{width:62px;height:62px;border-radius:12px;object-fit:cover;flex:none;background:var(--line)}
-.row .names{min-width:0;flex:1}
-.row .common{font-weight:600;font-size:1.02rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .sci{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:.95rem}
-.row .count{flex:none;text-align:right;color:var(--signal);font-weight:600;font-size:.9rem;line-height:1.2}
-.row .count small{display:block;color:var(--muted);font-weight:400;font-size:.75rem}
-.more{display:block;width:100%;margin:18px 0;padding:13px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:600;cursor:pointer}
-.status{color:var(--muted);padding:28px 0;text-align:center}
-.status.error{color:#B5452F}
+/* ---------- Secciones y listas agrupadas (estilo Ajustes) ---------- */
+.section-head{display:flex;justify-content:space-between;align-items:baseline;margin:26px 4px 8px}
+.section-head h2{font-size:22px;font-weight:700;margin:0;letter-spacing:.01em}
+.section-head button{color:var(--moss);font-size:15px}
+.footnote{color:var(--label-2);font-size:13px;margin:8px 16px 0}
+.group{background:var(--surface);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.cell{display:flex;align-items:center;gap:12px;padding:10px 14px;color:var(--label);position:relative;min-height:60px}
+.cell + .cell::before{content:"";position:absolute;top:0;right:0;left:76px;height:.5px;background:var(--sep)}
+.cell img,.cell .ph{width:50px;height:50px;border-radius:11px;object-fit:cover;flex:none;background:var(--fill)}
+.cell .txt{flex:1;min-width:0}
+.cell .t1{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell .t2{font-size:14px;color:var(--label-2);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell .val{color:var(--label-2);font-size:15px;flex:none;font-variant-numeric:tabular-nums}
+.chev{flex:none;color:var(--label-3)}
+.cell:active{background:var(--fill)}
 
-/* Ficha del animal */
-.back{display:inline-flex;align-items:center;gap:6px;background:none;border:0;color:var(--signal);font-weight:600;padding:14px 0 10px;cursor:pointer}
-.hero{border-radius:20px;overflow:hidden;background:var(--line);aspect-ratio:4/3;position:relative}
-.hero img{width:100%;height:100%;object-fit:cover;display:block}
-.hero .credit{position:absolute;left:0;right:0;bottom:0;font-size:.7rem;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.6));padding:18px 10px 6px}
-.thumbs{display:flex;gap:8px;overflow-x:auto;margin-top:8px;scrollbar-width:none}
+/* Tarjetas destacadas con foto */
+.shelf{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:16px;margin:0 -16px;padding:2px 16px 6px;scrollbar-width:none}
+.shelf::-webkit-scrollbar{display:none}
+.card{flex:none;width:72%;max-width:300px;aspect-ratio:4/5;border-radius:20px;overflow:hidden;position:relative;scroll-snap-align:start;background:var(--sand);box-shadow:var(--shadow);color:#fff}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.card .cap{position:absolute;inset:auto 0 0 0;padding:44px 16px 16px;background:linear-gradient(transparent,rgba(12,18,13,.78))}
+.card .k{font-size:13px;font-weight:600;opacity:.85}
+.card .n{font-size:24px;font-weight:700;line-height:1.1;margin-top:2px}
+.card .s{font-size:14px;font-style:italic;opacity:.85}
+
+.more{display:block;width:100%;margin:12px 0 0;padding:14px;border-radius:14px;background:var(--surface);color:var(--moss);font-weight:600;box-shadow:var(--shadow)}
+.status{color:var(--label-2);text-align:center;padding:40px 16px;font-size:15px}
+.status.err{color:#B4532F}
+.spinner{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--fill);border-top-color:var(--moss);animation:spin .8s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------- Ficha del animal ---------- */
+.detail-hero{position:relative;margin:0 -16px;height:min(62vh,520px);background:var(--sand);overflow:hidden}
+.detail-hero img{width:100%;height:100%;object-fit:cover;display:block}
+.detail-hero .shade{position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.25),transparent 30%,transparent 55%,rgba(10,16,11,.82))}
+.detail-hero .title{position:absolute;left:20px;right:20px;bottom:18px;color:#fff}
+.detail-hero h1{font-size:36px;font-weight:700;line-height:1.05;margin:0;letter-spacing:.01em}
+.detail-hero .sci{font-size:18px;font-style:italic;opacity:.9;margin-top:4px}
+.detail-hero .credit{position:absolute;right:10px;top:calc(var(--st) + 14px);font-size:10px;color:rgba(255,255,255,.75);max-width:55%;text-align:right}
+.navbtn{position:fixed;z-index:40;top:calc(var(--st) + 10px);left:max(14px, calc(50vw - 326px));width:38px;height:38px;border-radius:50%;
+  background:rgba(250,250,247,.72);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);display:grid;place-items:center;color:#1B211C;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.thumbs{display:flex;gap:8px;overflow-x:auto;padding:12px 0 2px;scrollbar-width:none}
 .thumbs::-webkit-scrollbar{display:none}
-.thumbs button{flex:none;border:2px solid transparent;padding:0;border-radius:10px;overflow:hidden;width:58px;height:58px;cursor:pointer;background:var(--line)}
-.thumbs button[aria-current="true"]{border-color:var(--signal)}
+.thumbs button{flex:none;width:54px;height:54px;border-radius:12px;overflow:hidden;opacity:.55;transition:opacity .2s}
+.thumbs button[aria-current="true"]{opacity:1;box-shadow:0 0 0 2px var(--moss)}
 .thumbs img{width:100%;height:100%;object-fit:cover;display:block}
-h2.name{font-family:var(--serif);font-weight:700;font-size:2.3rem;line-height:1.05;margin:18px 0 4px;letter-spacing:-.02em}
-.sciname{font-family:var(--serif);font-style:italic;font-size:1.2rem;color:var(--muted);margin:0}
-.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-radius:14px;overflow:hidden;margin:18px 0 6px}
-.facts div{background:var(--card);padding:10px 12px}
-.facts b{display:block;font-size:1.15rem}
-.facts span{font-size:.78rem;color:var(--muted)}
-.lineage{font-size:.88rem;color:var(--muted);margin:10px 0 0}
-h3.block{font-family:var(--serif);font-weight:500;font-size:1.5rem;margin:30px 0 4px}
-.block-note{color:var(--muted);font-size:.9rem;margin:0 0 12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border-radius:14px;box-shadow:var(--shadow);margin-top:14px}
+.stats div{padding:12px 10px;text-align:center}
+.stats div + div{border-left:.5px solid var(--sep)}
+.stats b{display:block;font-family:var(--font-round);font-size:20px;font-weight:700;color:var(--moss)}
+.stats span{font-size:12px;color:var(--label-2)}
+.lineage{color:var(--label-2);font-size:14px;margin:10px 4px 0}
 
-/* Grabaciones: el elemento protagonista */
-.rec{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;padding:12px;margin-bottom:10px;background:var(--card);border-radius:16px;border:1px solid var(--line)}
-.rec.playing{border-color:var(--signal);background:var(--signal-soft)}
-.play{width:52px;height:52px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);display:grid;place-items:center;cursor:pointer}
-.rec.playing .play{background:var(--signal);color:#fff}
-.play svg{width:20px;height:20px}
-.rec .meta{min-width:0}
-.rec .where{font-weight:600;font-size:.96rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rec .when{font-size:.82rem;color:var(--muted)}
-.bars{display:flex;align-items:center;gap:2px;height:26px;margin-top:6px;cursor:pointer}
-.bars i{flex:1;background:var(--line);border-radius:2px;min-width:2px}
-.bars i.on{background:var(--signal)}
-.rec .lic{grid-column:1/-1;font-size:.72rem;color:var(--muted);margin-top:-2px}
-.rec .note{grid-column:1/-1;font-size:.86rem;margin:0}
-.rec.failed .where::after{content:" · no se puede reproducir";color:#B5452F;font-weight:400}
-
-/* Mapa */
-#map{height:300px;border-radius:16px;overflow:hidden;border:1px solid var(--line);z-index:1}
-
-/* Texto de Wikipedia */
-.intro{font-size:1.02rem}
-.intro p,.sec p{margin:0 0 12px}
-details.sec{border-top:1px solid var(--line);padding:4px 0}
-details.sec:last-of-type{border-bottom:1px solid var(--line)}
-details.sec summary{cursor:pointer;font-weight:600;padding:12px 0;list-style:none;display:flex;justify-content:space-between}
+/* Grabaciones */
+.rec{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center;padding:12px 14px;position:relative}
+.rec + .rec::before{content:"";position:absolute;top:0;right:0;left:70px;height:.5px;background:var(--sep)}
+.play{width:44px;height:44px;border-radius:50%;background:var(--moss);color:#fff;display:grid;place-items:center}
+@media (prefers-color-scheme: dark){ .play{color:#0E1310} }
+.play svg{width:18px;height:18px}
+.rec .where{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec .when{font-size:13px;color:var(--label-2)}
+.wave{display:flex;align-items:center;gap:2px;height:22px;margin-top:6px}
+.wave i{flex:1;border-radius:2px;background:var(--fill);min-width:2px}
+.wave i.on{background:var(--moss)}
+.rec .lic{grid-column:2;font-size:11px;color:var(--label-3)}
+.rec .note{grid-column:2;font-size:14px;color:var(--label-2);margin:0}
+.rec.failed .when::after{content:" · no se puede reproducir";color:#B4532F}
+#map{height:280px;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);z-index:1}
+.prose{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);padding:16px 16px 4px;font-size:16px;line-height:1.5}
+.prose p{margin:0 0 12px}
+details.sec{border-top:.5px solid var(--sep)}
+details.sec summary{list-style:none;display:flex;justify-content:space-between;align-items:center;padding:14px 0;font-weight:600;cursor:pointer}
 details.sec summary::-webkit-details-marker{display:none}
-details.sec summary::after{content:"+";color:var(--signal);font-size:1.3rem;line-height:1}
-details.sec[open] summary::after{content:"–"}
-.sec h4{font-size:.95rem;margin:16px 0 6px}
-.source{font-size:.8rem;color:var(--muted);margin-top:14px}
-footer{color:var(--muted);font-size:.78rem;margin-top:36px}
-@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+details.sec summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--label-3);border-bottom:2px solid var(--label-3);transform:rotate(45deg);transition:transform .2s;margin-right:4px}
+details.sec[open] summary::after{transform:rotate(225deg)}
+.prose h4{font-size:15px;margin:14px 0 6px}
+.source{font-size:13px;color:var(--label-2);margin:10px 4px 0}
+
+/* ---------- Escuchar ---------- */
+.listen-stage{display:flex;flex-direction:column;align-items:center;padding:56px 0 6px}
+.orb{position:relative;width:200px;height:200px;display:grid;place-items:center}
+.orb .ring{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(62,113,80,.0) 45%,rgba(62,113,80,.18) 70%,rgba(62,113,80,0) 71%);transform:scale(var(--s,1));transition:transform .08s linear}
+.orb .ring.r2{inset:-22px;opacity:.6}
+.orb .ring.r3{inset:-44px;opacity:.3}
+.orb button{width:132px;height:132px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#5C9A6E,var(--moss-deep));color:#F3F1E7;display:grid;place-items:center;box-shadow:0 12px 30px rgba(47,90,61,.35),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .15s}
+.orb button:active{transform:scale(.96)}
+.orb button.on{background:radial-gradient(circle at 35% 30%,#C98F5E,#8A5A35)}
+.orb svg{width:46px;height:46px}
+.listen-status{margin:60px 16px 0;text-align:center;font-size:17px;font-weight:600}
+.listen-hint{margin:6px 24px 0;text-align:center;font-size:14px;color:var(--label-2)}
+.bar{height:6px;border-radius:3px;background:var(--fill);overflow:hidden;width:200px;margin:12px auto 0}
+.bar i{display:block;height:100%;background:var(--moss);width:0;transition:width .3s}
+.det{display:flex;align-items:center;gap:12px;padding:10px 14px;position:relative;min-height:70px}
+.det + .det::before{content:"";position:absolute;top:0;right:0;left:82px;height:.5px;background:var(--sep)}
+.det img,.det .ph{width:56px;height:56px;border-radius:12px;object-fit:cover;background:var(--fill);flex:none}
+.det .txt{flex:1;min-width:0}
+.det .t1{font-size:17px;font-weight:600}
+.det .t2{font-size:13px;color:var(--label-2);font-style:italic}
+.conf{display:flex;align-items:center;gap:8px;margin-top:5px}
+.conf .m{flex:1;height:4px;border-radius:2px;background:var(--fill);overflow:hidden}
+.conf .m i{display:block;height:100%;background:var(--moss)}
+.conf span{font-size:12px;color:var(--label-2);font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
+.det.fresh{animation:pop .45s ease}
+@keyframes pop{from{background:rgba(62,113,80,.18)}to{background:transparent}}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;gap:12px}
+.toggle-row .txt{font-size:16px}
+.toggle-row .sub{font-size:13px;color:var(--label-2)}
+.switch{position:relative;width:51px;height:31px;border-radius:16px;background:var(--fill);flex:none;transition:background .2s}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15);transition:transform .2s}
+.switch[aria-checked="true"]{background:#34A35A}
+.switch[aria-checked="true"]::after{transform:translateX(20px)}
+
+/* ---------- Barra de pestañas ---------- */
+.tabbar{position:fixed;z-index:50;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:0;padding:6px 0 calc(var(--sb) + 4px);
+  background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep)}
+.tabbar a{flex:1;max-width:200px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:500;color:var(--label-3);padding:4px 0}
+.tabbar a[aria-current="page"]{color:var(--moss)}
+.tabbar svg{width:26px;height:26px}
+footer{color:var(--label-3);font-size:12px;margin:28px 4px 0;line-height:1.4}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="wrap">
-    <div class="brand">
-      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><g fill="#5FD3BC"><rect x="3" y="11" width="3" height="8" rx="1.5"/><rect x="9" y="6" width="3" height="18" rx="1.5"/><rect x="15" y="2" width="3" height="26" rx="1.5"/><rect x="21" y="8" width="3" height="14" rx="1.5"/><rect x="27" y="12" width="3" height="6" rx="1.5"/></g></svg>
-      <h1>Fonoteca Animal</h1>
-    </div>
-    <div class="search">
-      <input id="q" type="search" placeholder="Busca un animal: lobo, búho, ruiseñor…" autocomplete="off" autocorrect="off" enterkeyhint="search" aria-label="Buscar animal">
-      <button class="clear" id="clear" aria-label="Borrar búsqueda">×</button>
-    </div>
-    <div class="filters" role="group" aria-label="Tipo de animal">
-      <button class="chip" data-group="Aves,Mammalia" aria-pressed="true">Aves y mamíferos</button>
-      <button class="chip" data-group="Aves" aria-pressed="false">Aves</button>
-      <button class="chip" data-group="Mammalia" aria-pressed="false">Mamíferos</button>
-    </div>
-  </div>
-</header>
+<main id="view"></main>
 
-<main class="wrap" id="main"></main>
+<nav class="tabbar" aria-label="Secciones">
+  <a href="#/" id="tab-explore">
+    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20c0-7 5-13 15-15 0 9-5 15-12 15"/><path d="M5 23c3-5 6-8 10-11"/></svg>
+    Explorar
+  </a>
+  <a href="#/escuchar" id="tab-listen">
+    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 12v4M8.5 8v12M13 4v20M17.5 9v10M22 6v16"/></svg>
+    Escuchar
+  </a>
+</nav>
 
 <script>
 const API = "https://api.inaturalist.org/v1";
 const SPAIN = 6774;
-const state = { group: "Aves,Mammalia", region: "es", homeCache: {} };
-const $main = document.getElementById("main");
-const $q = document.getElementById("q");
-const $clear = document.getElementById("clear");
-const audio = new Audio();
-audio.preload = "none";
-let current = null; // {el, url}
+const $view = document.getElementById("view");
+const S = { group: "Aves,Mammalia", region: "es", cache: {}, scroll: {} };
 
 /* ---------- utilidades ---------- */
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 const fmtN = n => (n ?? 0).toLocaleString("es-ES");
-async function getJSON(url){
-  const r = await fetch(url);
-  if (!r.ok) throw new Error("HTTP " + r.status);
-  return r.json();
-}
+async function getJSON(url){ const r = await fetch(url); if (!r.ok) throw new Error(r.status); return r.json(); }
 function fmtDate(d){
   if (!d) return "Fecha desconocida";
   const t = new Date(d + (d.length === 10 ? "T12:00:00" : ""));
   return isNaN(t) ? d : t.toLocaleDateString("es-ES", {day:"numeric", month:"long", year:"numeric"});
 }
-function licenseName(code){
-  if (!code) return "todos los derechos reservados";
-  return "licencia " + code.toUpperCase().replace("CC0","CC0 (dominio público)");
-}
-const groupOk = t => state.group.split(",").includes(t.iconic_taxon_name);
-const isLocal = () => state.region === "es";
+const lic = c => c ? c.toUpperCase().replace("CC0", "dominio público") : "todos los derechos reservados";
+const loading = t => `<div class="status"><div class="spinner"></div>${esc(t)}</div>`;
+const chev = `<svg class="chev" width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5 6.5 6.5l-5 5"/></svg>`;
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch(e){} };
 
 /* ---------- navegación ---------- */
-function go(hash){ if (location.hash !== hash) location.hash = hash; else route(); }
 window.addEventListener("hashchange", route);
 function route(){
   stopAudio();
-  const m = location.hash.match(/^#\/animal\/(\d+)/);
-  if (m) return showAnimal(+m[1]);
-  const s = location.hash.match(/^#\/buscar\/(.+)/);
-  if (s){ const term = decodeURIComponent(s[1]); if ($q.value !== term) $q.value = term; toggleClear(); return showSearch(term); }
-  $q.value = ""; toggleClear();
-  showHome();
+  const h = location.hash || "#/";
+  if (!h.startsWith("#/escuchar")) stopListening();
+  document.getElementById("tab-explore").setAttribute("aria-current", h.startsWith("#/escuchar") ? "false" : "page");
+  document.getElementById("tab-listen").setAttribute("aria-current", h.startsWith("#/escuchar") ? "page" : "false");
+  let m;
+  if ((m = h.match(/^#\/animal\/(\d+)/))) return showAnimal(+m[1]);
+  if (h.startsWith("#/escuchar")) return showListen();
+  m = h.match(/^#\/buscar\/(.+)/);
+  showExplore(m ? decodeURIComponent(m[1]) : "");
 }
 
-/* ---------- filtros ---------- */
-document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
-  document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", x === b));
-  state.group = b.dataset.group;
-  if (location.hash.startsWith("#/animal/")) go("#/");
-  else route();
-}));
+/* ---------- Explorar ---------- */
+function showExplore(term){
+  document.title = "Fonoteca Animal";
+  $view.innerHTML = `
+    <h1 class="large-title">Explorar</h1>
+    <div class="sticky" id="stick">
+      <label class="search">
+        <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="7.2" cy="7.2" r="5.6"/><path d="m11.4 11.4 4.1 4.1"/></svg>
+        <input id="q" type="search" placeholder="Busca un animal" value="${esc(term)}" autocomplete="off" autocorrect="off" enterkeyhint="search" aria-label="Buscar animal">
+        <button class="x" id="qx" aria-label="Borrar">✕</button>
+      </label>
+      <div class="segmented" role="group" aria-label="Tipo de animal">
+        ${[["Aves,Mammalia","Todos"],["Aves","Aves"],["Mammalia","Mamíferos"]].map(([g,l]) => `<button data-g="${g}" aria-pressed="${S.group===g}">${l}</button>`).join("")}
+      </div>
+    </div>
+    <div id="results"></div>`;
+  const q = document.getElementById("q"), qx = document.getElementById("qx");
+  const stick = document.getElementById("stick");
+  const onScroll = () => stick && stick.classList.toggle("stuck", window.scrollY > 60);
+  window.onscroll = onScroll;
+  qx.style.display = term ? "block" : "none";
+  let t;
+  q.addEventListener("input", () => {
+    qx.style.display = q.value ? "block" : "none";
+    clearTimeout(t);
+    t = setTimeout(() => {
+      const v = q.value.trim();
+      history.replaceState(null, "", v.length >= 2 ? "#/buscar/" + encodeURIComponent(v) : "#/");
+      v.length >= 2 ? renderSearch(v) : renderHome();
+    }, 320);
+  });
+  q.addEventListener("keydown", e => { if (e.key === "Enter") q.blur(); });
+  qx.addEventListener("click", e => { e.preventDefault(); q.value = ""; qx.style.display = "none"; history.replaceState(null, "", "#/"); renderHome(); q.focus(); });
+  document.querySelectorAll(".segmented button").forEach(b => b.onclick = () => {
+    S.group = b.dataset.g;
+    document.querySelectorAll(".segmented button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    q.value.trim().length >= 2 ? renderSearch(q.value.trim()) : renderHome();
+  });
+  term.length >= 2 ? renderSearch(term) : renderHome();
+}
 
-/* ---------- buscador ---------- */
-let timer;
-function toggleClear(){ $clear.style.display = $q.value ? "block" : "none"; }
-$q.addEventListener("input", () => {
-  toggleClear();
-  clearTimeout(timer);
-  const v = $q.value.trim();
-  timer = setTimeout(() => {
-    if (v.length < 2) { if (location.hash.startsWith("#/buscar")) history.replaceState(null, "", "#/"); showHome(); return; }
-    history.replaceState(null, "", "#/buscar/" + encodeURIComponent(v));
-    showSearch(v);
-  }, 320);
-});
-$q.addEventListener("keydown", e => { if (e.key === "Enter") $q.blur(); });
-$clear.addEventListener("click", () => { $q.value = ""; toggleClear(); go("#/"); $q.focus(); });
-
-function rowHTML(t, count){
+function cellHTML(t, val){
   const img = t.default_photo?.square_url;
-  const common = cap(t.preferred_common_name) || t.name;
-  return `<li><a class="row" href="#/animal/${t.id}">
-    ${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : `<span class="noimg"></span>`}
-    <span class="names"><span class="common">${esc(common)}</span><span class="sci">${esc(t.name)}</span></span>
-    ${count != null ? `<span class="count">${fmtN(count)}<small>sonidos</small></span>` : ""}
-  </a></li>`;
+  return `<a class="cell" href="#/animal/${t.id}">
+    ${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : `<span class="ph"></span>`}
+    <span class="txt"><div class="t1">${esc(cap(t.preferred_common_name) || t.name)}</div><div class="t2">${esc(t.name)}</div></span>
+    ${val != null ? `<span class="val">${esc(val)}</span>` : ""}${chev}</a>`;
+}
+function cardHTML(t, count){
+  const img = t.default_photo?.medium_url || t.default_photo?.square_url;
+  return `<a class="card" href="#/animal/${t.id}">
+    ${img ? `<img src="${esc(img.replace("medium", "large"))}" alt="" loading="lazy" onerror="this.src='${esc(img)}'">` : ""}
+    <div class="cap"><div class="k">${fmtN(count)} grabaciones</div><div class="n">${esc(cap(t.preferred_common_name) || t.name)}</div><div class="s">${esc(t.name)}</div></div></a>`;
+}
+
+let homeSeq = 0;
+async function renderHome(page = 1){
+  const box = document.getElementById("results");
+  if (!box) return;
+  const seq = page === 1 ? ++homeSeq : homeSeq;
+  const local = S.region === "es";
+  if (page === 1) box.innerHTML = loading("Cargando especies…");
+  const key = `${S.group}|${S.region}|${page}`;
+  try {
+    const d = S.cache[key] || (S.cache[key] = await getJSON(`${API}/observations/species_counts?iconic_taxa=${S.group}&sounds=true&verifiable=true&locale=es&per_page=30&page=${page}${local ? "&place_id=" + SPAIN : ""}`));
+    if (seq !== homeSeq || !document.getElementById("results")) return;
+    const r = d.results;
+    if (page === 1){
+      box.innerHTML = `
+        <div class="section-head"><h2>Los que más suenan</h2><button id="reg">${local ? "Ver mundo" : "Ver España"}</button></div>
+        <div class="shelf">${r.slice(0, 8).map(x => cardHTML(x.taxon, x.count)).join("")}</div>
+        <div class="section-head"><h2>${local ? "En España" : "En el mundo"}</h2></div>
+        <div class="group" id="homeList">${r.slice(8).map(x => cellHTML(x.taxon, fmtN(x.count))).join("")}</div>
+        <p class="footnote">Ordenados por número de grabaciones disponibles.</p>
+        <div id="homeMore"></div>`;
+      document.getElementById("reg").onclick = () => { S.region = local ? "world" : "es"; renderHome(); };
+    } else {
+      document.getElementById("homeList").insertAdjacentHTML("beforeend", r.map(x => cellHTML(x.taxon, fmtN(x.count))).join(""));
+    }
+    const more = document.getElementById("homeMore");
+    if (page * 30 < d.total_results){
+      more.innerHTML = `<button class="more">Ver más especies</button>`;
+      more.firstChild.onclick = () => { more.innerHTML = loading(""); renderHome(page + 1); };
+    } else more.innerHTML = "";
+  } catch(e){
+    if (seq === homeSeq) box.innerHTML = `<p class="status err">No se pudieron cargar las especies. Comprueba tu conexión.</p>`;
+  }
 }
 
 let searchSeq = 0;
-async function showSearch(term){
-  const seq = ++searchSeq;
-  $main.innerHTML = `<p class="status">Buscando “${esc(term)}”…</p>`;
+async function renderSearch(term){
+  const box = document.getElementById("results");
+  const seq = ++searchSeq; homeSeq++;
+  box.innerHTML = loading(`Buscando “${term}”…`);
   try {
     const d = await getJSON(`${API}/taxa/autocomplete?q=${encodeURIComponent(term)}&locale=es&per_page=30&is_active=true`);
     if (seq !== searchSeq) return;
-    const res = d.results.filter(groupOk);
-    if (!res.length){
-      $main.innerHTML = `<p class="status">No hay aves ni mamíferos que coincidan con “${esc(term)}”. Prueba con otro nombre o con el nombre científico.</p>`;
-      return;
-    }
-    $main.innerHTML = `<h2 class="section-title">Resultados</h2><ul class="list">${res.map(t => rowHTML(t)).join("")}</ul>`;
+    const res = d.results.filter(t => S.group.split(",").includes(t.iconic_taxon_name));
+    box.innerHTML = res.length
+      ? `<div class="section-head"><h2>Resultados</h2></div><div class="group">${res.map(t => cellHTML(t)).join("")}</div>`
+      : `<p class="status">No hay animales que coincidan con “${esc(term)}”. Prueba con otro nombre o con el científico.</p>`;
   } catch(e){
-    if (seq !== searchSeq) return;
-    $main.innerHTML = `<p class="status error">No se pudo buscar. Comprueba tu conexión y vuelve a intentarlo.</p>`;
+    if (seq === searchSeq) box.innerHTML = `<p class="status err">No se pudo buscar. Comprueba tu conexión.</p>`;
   }
 }
 
-/* ---------- inicio ---------- */
-async function showHome(page = 1){
-  const key = `${state.group}|${state.region}`;
-  if (page === 1){
-    $main.innerHTML = `
-      <h2 class="section-title">Los que más suenan</h2>
-      <p class="section-note">Especies con más grabaciones${isLocal() ? " en España" : " en el mundo"}.
-        <button class="chip" id="region" style="border-color:var(--line);color:var(--signal);margin-left:4px">${isLocal() ? "Ver todo el mundo" : "Ver solo España"}</button></p>
-      <ul class="list" id="homeList"></ul><div id="homeMore"><p class="status">Cargando…</p></div>`;
-    document.getElementById("region").onclick = () => { state.region = isLocal() ? "world" : "es"; showHome(); };
-  }
-  const list = document.getElementById("homeList"), more = document.getElementById("homeMore");
-  if (!list) return;
-  try {
-    let d = state.homeCache[key + "|" + page];
-    if (!d){
-      d = await getJSON(`${API}/observations/species_counts?iconic_taxa=${state.group}&sounds=true&verifiable=true&locale=es&per_page=30&page=${page}${isLocal() ? "&place_id=" + SPAIN : ""}`);
-      state.homeCache[key + "|" + page] = d;
-    }
-    if (!document.getElementById("homeList")) return;
-    list.insertAdjacentHTML("beforeend", d.results.map(r => rowHTML(r.taxon, r.count)).join(""));
-    if (page * 30 < d.total_results){
-      more.innerHTML = `<button class="more">Ver más especies</button>`;
-      more.firstChild.onclick = () => { more.innerHTML = `<p class="status">Cargando…</p>`; showHome(page + 1); };
-    } else more.innerHTML = "";
-  } catch(e){
-    more.innerHTML = `<p class="status error">No se pudieron cargar las especies. Comprueba tu conexión.</p>`;
-  }
-}
-
-/* ---------- ficha de un animal ---------- */
+/* ---------- Ficha ---------- */
 async function showAnimal(id){
+  window.onscroll = null;
   window.scrollTo(0, 0);
-  $main.innerHTML = `<p class="status">Cargando ficha…</p>`;
+  $view.innerHTML = loading("Cargando ficha…");
   let t;
   try { t = (await getJSON(`${API}/taxa/${id}?locale=es`)).results[0]; }
-  catch(e){ $main.innerHTML = `<button class="back" onclick="history.back()">‹ Volver</button><p class="status error">No se pudo cargar este animal. Comprueba tu conexión.</p>`; return; }
-
-  const common = cap(t.preferred_common_name) || t.name;
-  document.title = common + " · Fonoteca Animal";
+  catch(e){ $view.innerHTML = `<button class="navbtn" onclick="history.back()" aria-label="Volver">${backIcon}</button><p class="status err" style="padding-top:120px">No se pudo cargar este animal. Comprueba tu conexión.</p>`; return; }
+  const name = cap(t.preferred_common_name) || t.name;
+  document.title = name + " · Fonoteca";
   const photos = (t.taxon_photos || []).map(p => p.photo).filter(Boolean).slice(0, 10);
   if (!photos.length && t.default_photo) photos.push(t.default_photo);
   const big = p => p.large_url || p.medium_url || (p.url || "").replace("square", "large");
-  const lineage = (t.ancestors || []).filter(a => ["class","order","family"].includes(a.rank))
-    .map(a => cap(a.preferred_common_name) || a.name).join(" · ");
+  const lineage = (t.ancestors || []).filter(a => ["class","order","family"].includes(a.rank)).map(a => cap(a.preferred_common_name) || a.name).join(" › ");
   const cons = t.conservation_status;
 
-  $main.innerHTML = `
-    <button class="back" id="back">‹ Volver</button>
-    ${photos.length ? `<div class="hero"><img id="heroImg" src="${esc(big(photos[0]))}" alt="${esc(common)}"><div class="credit" id="heroCredit">${esc(photos[0].attribution || "")}</div></div>
-      ${photos.length > 1 ? `<div class="thumbs">${photos.map((p,i) => `<button data-i="${i}" aria-current="${i===0}" aria-label="Foto ${i+1}"><img src="${esc(p.square_url || p.url)}" alt="" loading="lazy"></button>`).join("")}</div>` : ""}` : ""}
-    <h2 class="name">${esc(common)}</h2>
-    <p class="sciname">${esc(t.name)}</p>
-    ${lineage ? `<p class="lineage">${esc(lineage)}</p>` : ""}
-    <div class="facts">
+  $view.innerHTML = `
+    <button class="navbtn" id="back" aria-label="Volver">${backIcon}</button>
+    <div class="detail-hero">
+      ${photos.length ? `<img id="heroImg" src="${esc(big(photos[0]))}" alt="${esc(name)}">` : ""}
+      <div class="shade"></div>
+      <div class="credit" id="heroCredit">${esc(photos[0]?.attribution || "")}</div>
+      <div class="title"><h1>${esc(name)}</h1><div class="sci">${esc(t.name)}</div></div>
+    </div>
+    ${photos.length > 1 ? `<div class="thumbs">${photos.map((p,i) => `<button data-i="${i}" aria-current="${i===0}" aria-label="Foto ${i+1}"><img src="${esc(p.square_url || p.url)}" alt="" loading="lazy"></button>`).join("")}</div>` : ""}
+    <div class="stats">
       <div><b id="nRec">…</b><span>grabaciones</span></div>
       <div><b>${fmtN(t.observations_count)}</b><span>avistamientos</span></div>
-      <div><b>${cons ? esc(cap(cons.status_name || cons.status)) : "—"}</b><span>conservación</span></div>
+      <div><b style="font-size:15px;line-height:1.6">${cons ? esc(cap(cons.status_name || cons.status)) : "—"}</b><span>conservación</span></div>
     </div>
+    ${lineage ? `<p class="lineage">${esc(lineage)}</p>` : ""}
 
-    <h3 class="block">Sonidos</h3>
-    <p class="block-note">Grabaciones reales hechas por naturalistas de todo el mundo, con el lugar y la fecha.</p>
-    <div id="recs"><p class="status">Cargando grabaciones…</p></div>
+    <div class="section-head"><h2>Sonidos</h2></div>
+    <div class="group" id="recs">${loading("Cargando grabaciones…")}</div>
+    <p class="footnote">Grabaciones reales de naturalistas de todo el mundo.</p>
+    <div id="moreRecsBox"></div>
 
-    <h3 class="block">Dónde vive</h3>
-    <p class="block-note">Cada cuadro marca una zona donde se ha visto o escuchado.</p>
+    <div class="section-head"><h2>Dónde vive</h2></div>
     <div id="map"></div>
+    <p class="footnote">Cada cuadro verde es una zona donde se ha visto o escuchado.</p>
 
-    <h3 class="block">Información</h3>
-    <div id="info"><p class="status">Cargando información…</p></div>
+    <div class="section-head"><h2>Información</h2></div>
+    <div id="info">${loading("Cargando información…")}</div>
+    <footer>Datos de iNaturalist y Wikipedia. Cada foto y grabación pertenece a su autor, indicado junto a ella.</footer>`;
 
-    <footer>Datos de iNaturalist y Wikipedia. Cada grabación y foto pertenece a su autor, indicado junto a ella.</footer>`;
-
-  document.getElementById("back").onclick = () => history.length > 1 ? history.back() : go("#/");
+  document.getElementById("back").onclick = () => history.length > 1 ? history.back() : (location.hash = "#/");
   document.querySelectorAll(".thumbs button").forEach(b => b.onclick = () => {
     const p = photos[+b.dataset.i];
     document.getElementById("heroImg").src = big(p);
     document.getElementById("heroCredit").textContent = p.attribution || "";
     document.querySelectorAll(".thumbs button").forEach(x => x.setAttribute("aria-current", x === b));
   });
-
   loadRecordings(t.id, 1);
   loadMap(t.id);
   loadInfo(t);
 }
+const backIcon = `<svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>`;
 
-/* ---------- grabaciones ---------- */
+/* ---------- Grabaciones ---------- */
 const PER = 20;
+const audio = new Audio(); audio.preload = "none";
+let current = null;
+const iconPlay = `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M6 3.8v12.4c0 .6.7 1 1.2.7l9.8-6.2c.5-.3.5-1 0-1.4L7.2 3.1C6.7 2.8 6 3.2 6 3.8z"/></svg>`;
+const iconPause = `<svg viewBox="0 0 20 20" fill="currentColor"><rect x="4.5" y="3" width="4" height="14" rx="1.2"/><rect x="11.5" y="3" width="4" height="14" rx="1.2"/></svg>`;
+function waveBars(seed){
+  let x = seed % 9973 || 7, out = "";
+  for (let i = 0; i < 36; i++){ x = (x * 9301 + 49297) % 233280; const h = 20 + Math.round((x / 233280) * 80 * Math.sin(Math.PI * (i + 2) / 40)); out += `<i style="height:${Math.max(14, h)}%"></i>`; }
+  return out;
+}
 async function loadRecordings(id, page){
-  const box = document.getElementById("recs");
+  const box = document.getElementById("recs"), moreBox = document.getElementById("moreRecsBox");
   if (!box) return;
   try {
     const d = await getJSON(`${API}/observations?taxon_id=${id}&sounds=true&verifiable=true&order_by=votes&per_page=${PER}&page=${page}&locale=es`);
@@ -338,107 +434,68 @@ async function loadRecordings(id, page){
     if (page === 1){
       document.getElementById("nRec").textContent = fmtN(d.total_results);
       box.innerHTML = "";
-      if (!d.total_results){ box.innerHTML = `<p class="status">Todavía no hay grabaciones de este animal.</p>`; return; }
+      if (!d.total_results){ box.outerHTML = `<p class="status" style="padding:20px">Todavía no hay grabaciones de este animal.</p>`; return; }
     }
-    document.getElementById("moreRecs")?.remove();
-    const items = [];
-    for (const o of d.results){
-      for (const s of (o.sounds || [])){
-        if (!s.file_url || s.hidden) continue;
-        items.push({o, s});
-      }
-    }
-    box.insertAdjacentHTML("beforeend", items.map(({o, s}) => {
-      const author = o.user?.name || o.user?.login || "Autor desconocido";
+    const html = [];
+    for (const o of d.results) for (const s of (o.sounds || [])){
+      if (!s.file_url || s.hidden) continue;
       const note = (o.description || "").replace(/<[^>]+>/g, "").trim();
-      return `<div class="rec" data-url="${esc(s.file_url)}">
-        <button class="play" aria-label="Reproducir grabación">${iconPlay}</button>
-        <div class="meta">
-          <div class="where">${esc(o.place_guess || "Lugar no indicado")}</div>
-          <div class="when">${esc(fmtDate(o.observed_on))}</div>
-          <div class="bars">${bars(s.id)}</div>
-        </div>
-        ${note ? `<p class="note">${esc(note.slice(0, 220))}${note.length > 220 ? "…" : ""}</p>` : ""}
-        <div class="lic">© ${esc(author)}, ${esc(licenseName(s.license_code))}</div>
-      </div>`;
-    }).join(""));
-    wireRecs(box);
-    if (page * PER < d.total_results){
-      box.insertAdjacentHTML("beforeend", `<button class="more" id="moreRecs">Cargar más grabaciones</button>`);
-      document.getElementById("moreRecs").onclick = e => { e.target.textContent = "Cargando…"; e.target.disabled = true; loadRecordings(id, page + 1); };
+      html.push(`<div class="rec" data-url="${esc(s.file_url)}">
+        <button class="play" aria-label="Reproducir">${iconPlay}</button>
+        <div><div class="where">${esc(o.place_guess || "Lugar no indicado")}</div><div class="when">${esc(fmtDate(o.observed_on))}</div><div class="wave">${waveBars(s.id)}</div></div>
+        ${note ? `<p class="note">${esc(note.slice(0, 200))}${note.length > 200 ? "…" : ""}</p>` : ""}
+        <div class="lic">© ${esc(o.user?.name || o.user?.login || "Autor desconocido")} · ${esc(lic(s.license_code))}</div>
+      </div>`);
     }
+    box.insertAdjacentHTML("beforeend", html.join(""));
+    wireRecs(box);
+    moreBox.innerHTML = page * PER < d.total_results ? `<button class="more">Cargar más grabaciones</button>` : "";
+    if (moreBox.firstChild) moreBox.firstChild.onclick = () => { moreBox.innerHTML = loading(""); loadRecordings(id, page + 1); };
   } catch(e){
-    box.innerHTML = `<p class="status error">No se pudieron cargar las grabaciones. Comprueba tu conexión.</p>`;
+    box.innerHTML = `<p class="status err" style="padding:20px">No se pudieron cargar las grabaciones.</p>`;
   }
-}
-
-const iconPlay = `<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5 3.5v13l11-6.5z"/></svg>`;
-const iconPause = `<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><rect x="4" y="3" width="4" height="14" rx="1"/><rect x="12" y="3" width="4" height="14" rx="1"/></svg>`;
-function bars(seed){
-  let x = seed % 9973 || 7, out = "";
-  for (let i = 0; i < 40; i++){ x = (x * 9301 + 49297) % 233280; const h = 18 + Math.round((x / 233280) * 82 * Math.sin(Math.PI * (i + 2) / 44)); out += `<i style="height:${Math.max(12, h)}%"></i>`; }
-  return out;
 }
 function wireRecs(box){
   box.querySelectorAll(".rec:not([data-w])").forEach(el => {
     el.dataset.w = 1;
-    el.querySelector(".play").onclick = () => toggle(el);
-    el.querySelector(".bars").onclick = e => {
-      const r = e.currentTarget.getBoundingClientRect();
-      const frac = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-      if (current?.el !== el) toggle(el, frac); else if (audio.duration) audio.currentTime = frac * audio.duration;
+    el.querySelector(".play").onclick = () => toggleRec(el);
+    el.querySelector(".wave").onclick = e => {
+      const r = e.currentTarget.getBoundingClientRect(), f = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+      if (current?.el !== el) toggleRec(el, f); else if (audio.duration) audio.currentTime = f * audio.duration;
     };
   });
 }
-function setRow(el, playing){
-  el.classList.toggle("playing", playing);
-  const b = el.querySelector(".play");
-  b.innerHTML = playing ? iconPause : iconPlay;
-  b.setAttribute("aria-label", playing ? "Pausar grabación" : "Reproducir grabación");
-}
-function paintBars(el, frac){
-  const bs = el.querySelectorAll(".bars i"), n = Math.round(frac * bs.length);
-  bs.forEach((b, i) => b.classList.toggle("on", i < n));
-}
-function toggle(el, startFrac){
-  if (current?.el === el){
-    if (audio.paused){ audio.play().catch(() => {}); setRow(el, true); }
-    else { audio.pause(); setRow(el, false); }
-    return;
-  }
+function setRow(el, on){ el.querySelector(".play").innerHTML = on ? iconPause : iconPlay; el.querySelector(".play").setAttribute("aria-label", on ? "Pausar" : "Reproducir"); }
+function paint(el, f){ const bs = el.querySelectorAll(".wave i"), n = Math.round(f * bs.length); bs.forEach((b, i) => b.classList.toggle("on", i < n)); }
+function toggleRec(el, f){
+  if (current?.el === el){ if (audio.paused){ audio.play().catch(()=>{}); setRow(el, true); } else { audio.pause(); setRow(el, false); } return; }
   stopAudio();
-  current = { el, frac: startFrac };
-  el.classList.remove("failed");
-  audio.src = el.dataset.url;
-  setRow(el, true);
-  audio.play().catch(() => {});
+  current = { el, f }; el.classList.remove("failed");
+  audio.src = el.dataset.url; setRow(el, true); audio.play().catch(()=>{});
 }
-function stopAudio(){
-  if (current){ setRow(current.el, false); paintBars(current.el, 0); }
-  audio.pause(); current = null;
-}
-audio.addEventListener("loadedmetadata", () => { if (current?.frac) audio.currentTime = current.frac * audio.duration; });
-audio.addEventListener("timeupdate", () => { if (current && audio.duration) paintBars(current.el, audio.currentTime / audio.duration); });
-audio.addEventListener("ended", () => { if (current){ setRow(current.el, false); paintBars(current.el, 0); current = null; } });
+function stopAudio(){ if (current){ setRow(current.el, false); paint(current.el, 0); } audio.pause(); current = null; }
+audio.addEventListener("loadedmetadata", () => { if (current?.f) audio.currentTime = current.f * audio.duration; });
+audio.addEventListener("timeupdate", () => { if (current && audio.duration) paint(current.el, audio.currentTime / audio.duration); });
+audio.addEventListener("ended", () => { if (current){ setRow(current.el, false); paint(current.el, 0); current = null; } });
 audio.addEventListener("error", () => { if (current){ current.el.classList.add("failed"); setRow(current.el, false); current = null; } });
 
-/* ---------- mapa ---------- */
+/* ---------- Mapa ---------- */
 let map;
 async function loadMap(id){
   const el = document.getElementById("map");
-  if (!el || !window.L) { if (el) el.innerHTML = `<p class="status">Mapa no disponible.</p>`; return; }
-  if (map){ map.remove(); map = null; }
-  map = L.map(el, { scrollWheelZoom: false, worldCopyJump: true }).setView([25, 0], 1);
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 12, attribution: "© OpenStreetMap" }).addTo(map);
-  L.tileLayer(`${API}/grid/{z}/{x}/{y}.png?taxon_id=${id}&verifiable=true&color=%230B7F70`, { maxZoom: 12, opacity: .85 }).addTo(map);
+  if (!el) return;
+  if (!window.L){ el.innerHTML = `<p class="status">Mapa no disponible.</p>`; return; }
+  if (map){ try { map.remove(); } catch(e){} map = null; }
+  map = L.map(el, { scrollWheelZoom: false, worldCopyJump: true, attributionControl: true }).setView([30, 0], 1);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", { maxZoom: 12, attribution: "© OpenStreetMap · © CARTO" }).addTo(map);
+  L.tileLayer(`${API}/grid/{z}/{x}/{y}.png?taxon_id=${id}&verifiable=true&color=%233E7150`, { maxZoom: 12, opacity: .85 }).addTo(map);
   try {
-    const d = await getJSON(`${API}/observations?taxon_id=${id}&verifiable=true&return_bounds=true&per_page=0`);
-    const b = d.total_bounds;
+    const b = (await getJSON(`${API}/observations?taxon_id=${id}&verifiable=true&return_bounds=true&per_page=0`)).total_bounds;
     if (b && map) map.fitBounds([[b.swlat, b.swlng], [b.nelat, b.nelng]], { padding: [10, 10], maxZoom: 6 });
   } catch(e){}
 }
 
-/* ---------- información (Wikipedia en español) ---------- */
+/* ---------- Información (Wikipedia en español) ---------- */
 const SKIP = /^(referencias|notas|bibliografía|enlaces externos|véase también|fuentes|lecturas adicionales|galería)/i;
 async function wikiES(title){
   const d = await getJSON(`https://es.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&exsectionformat=wiki&redirects=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
@@ -449,40 +506,198 @@ async function esTitleFromEn(enUrl){
   const title = decodeURIComponent((enUrl || "").split("/wiki/")[1] || "");
   if (!title) return null;
   const d = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&prop=langlinks&lllang=es&redirects=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
-  const p = Object.values(d.query?.pages || {})[0];
-  return p?.langlinks?.[0]?.["*"] || null;
+  return Object.values(d.query?.pages || {})[0]?.langlinks?.[0]?.["*"] || null;
 }
-function paras(text){
-  return text.split(/\n+/).map(s => s.trim()).filter(Boolean).map(s => `<p>${esc(s)}</p>`).join("");
-}
+const paras = text => text.split(/\n+/).map(s => s.trim()).filter(Boolean).map(s => `<p>${esc(s)}</p>`).join("");
 async function loadInfo(t){
-  const box = document.getElementById("info");
   let page = null;
-  try {
-    page = await wikiES(t.name);
-    if (!page){ const es = await esTitleFromEn(t.wikipedia_url); if (es) page = await wikiES(es); }
-  } catch(e){}
-  if (!document.getElementById("info")) return;
+  try { page = await wikiES(t.name); if (!page){ const es = await esTitleFromEn(t.wikipedia_url); if (es) page = await wikiES(es); } } catch(e){}
+  const box = document.getElementById("info");
+  if (!box) return;
   if (page){
     const parts = page.extract.split(/^==\s*([^=].*?)\s*==\s*$/m);
-    const intro = parts[0];
-    let html = `<div class="intro">${paras(intro)}</div>`;
+    let html = `<div class="prose">${paras(parts[0])}`;
     for (let i = 1; i < parts.length; i += 2){
       const title = parts[i], body = (parts[i+1] || "").trim();
       if (SKIP.test(title) || body.length < 40) continue;
-      const bodyHTML = body.split(/^===+\s*(.+?)\s*===+\s*$/m).map((chunk, j) => j % 2 ? `<h4>${esc(chunk)}</h4>` : paras(chunk)).join("");
+      const bodyHTML = body.split(/^===+\s*(.+?)\s*===+\s*$/m).map((c, j) => j % 2 ? `<h4>${esc(c)}</h4>` : paras(c)).join("");
       html += `<details class="sec"><summary>${esc(title)}</summary>${bodyHTML}</details>`;
     }
-    html += `<p class="source">Fuente: <a href="https://es.wikipedia.org/wiki/${encodeURIComponent(page.title.replace(/ /g, "_"))}" target="_blank" rel="noopener">Wikipedia, “${esc(page.title)}”</a></p>`;
+    html += `</div><p class="source">Fuente: <a href="https://es.wikipedia.org/wiki/${encodeURIComponent(page.title.replace(/ /g, "_"))}" target="_blank" rel="noopener">Wikipedia</a></p>`;
     box.innerHTML = html;
   } else if (t.wikipedia_summary){
-    const txt = t.wikipedia_summary.replace(/<[^>]+>/g, "");
-    box.innerHTML = `<div class="intro">${paras(txt)}</div>${t.wikipedia_url ? `<p class="source">Fuente: <a href="${esc(t.wikipedia_url)}" target="_blank" rel="noopener">Wikipedia</a></p>` : ""}`;
-  } else {
-    box.innerHTML = `<p class="status">No hay información escrita sobre este animal todavía.</p>`;
-  }
+    box.innerHTML = `<div class="prose">${paras(t.wikipedia_summary.replace(/<[^>]+>/g, ""))}</div>`;
+  } else box.innerHTML = `<p class="status">No hay información escrita sobre este animal todavía.</p>`;
 }
 
+/* ---------- Escuchar (BirdNET) ---------- */
+const SR = 48000, WIN = 144000;
+const L_ = { worker: null, ready: false, loading: false, on: false, ctx: null, stream: null, node: null, analyser: null,
+  ring: new Float32Array(WIN), w: 0, filled: 0, busy: false, timer: null, raf: null, found: new Map(), geoSent: false, taxa: {} };
+
+function showListen(){
+  window.onscroll = null;
+  document.title = "Escuchar · Fonoteca";
+  const useGeo = lsGet("geo") === "1";
+  $view.innerHTML = `
+    <h1 class="large-title">Escuchar</h1>
+    <p class="subtitle">Identifica las aves que suenan a tu alrededor.</p>
+    <div class="listen-stage">
+      <div class="orb">
+        <span class="ring r3"></span><span class="ring r2"></span><span class="ring"></span>
+        <button id="mic" aria-label="Empezar a escuchar">${micIcon}</button>
+      </div>
+      <div class="listen-status" id="lstat">Toca para escuchar</div>
+      <div class="listen-hint" id="lhint">Acerca el móvil al sonido y mantén silencio un momento.</div>
+      <div class="bar" id="lbar" hidden><i></i></div>
+    </div>
+    <div class="section-head"><h2>Detectados</h2><button id="clearDet">Borrar</button></div>
+    <div class="group" id="dets"></div>
+    <p class="footnote" id="detNote">Aquí aparecerán las aves que reconozca. Toca una para ver su ficha.</p>
+    <div class="section-head"><h2>Ajustes</h2></div>
+    <div class="group">
+      <div class="toggle-row"><div><div class="txt">Usar mi ubicación</div><div class="sub">Descarta aves que no viven en tu zona y acierta más.</div></div>
+        <button class="switch" id="geoSw" role="switch" aria-checked="${useGeo}" aria-label="Usar mi ubicación"></button></div>
+    </div>
+    <footer>Reconocimiento con BirdNET (Cornell Lab of Ornithology y TU Chemnitz), solo aves, para uso no comercial. Todo se procesa en tu móvil: el audio no se envía a ningún sitio. La primera vez descarga el modelo (unos 60 MB).</footer>`;
+  document.getElementById("mic").onclick = () => L_.on ? stopListening() : startListening();
+  document.getElementById("geoSw").onclick = e => {
+    const v = e.currentTarget.getAttribute("aria-checked") !== "true";
+    e.currentTarget.setAttribute("aria-checked", v); lsSet("geo", v ? "1" : "0");
+    if (v && L_.ready) sendGeo();
+  };
+  document.getElementById("clearDet").onclick = () => { L_.found.clear(); renderDets(); };
+  renderDets();
+}
+const micIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>`;
+const stopIcon = `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2.5"/></svg>`;
+function setStatus(a, b){ const s = document.getElementById("lstat"), h = document.getElementById("lhint"); if (s) s.textContent = a; if (h && b !== undefined) h.textContent = b; }
+function setBar(p){ const b = document.getElementById("lbar"); if (!b) return; b.hidden = p == null; if (p != null) b.firstElementChild.style.width = p + "%"; }
+
+function ensureWorker(){
+  return new Promise((resolve, reject) => {
+    if (L_.ready) return resolve();
+    if (!L_.worker){
+      L_.worker = new Worker("birdnet-worker.js");
+      L_.worker.onmessage = ({ data }) => {
+        if (data.message === "progress"){ setBar(data.progress); setStatus("Preparando el reconocimiento… " + data.progress + "%", "Solo la primera vez tarda un poco."); }
+        if (data.message === "ready"){ L_.ready = true; setBar(null); L_._res && L_._res(); }
+        if (data.message === "error"){ L_.worker.terminate(); L_.worker = null; L_._rej && L_._rej(data.error); }
+        if (data.message === "result"){ L_.busy = false; handleResults(data.results); }
+      };
+      L_.worker.onerror = () => { if (L_.worker){ L_.worker.terminate(); L_.worker = null; } L_._rej && L_._rej("load"); };
+    }
+    L_._res = resolve; L_._rej = reject;
+  });
+}
+async function startListening(){
+  const btn = document.getElementById("mic");
+  L_.on = true; btn.classList.add("on"); btn.innerHTML = stopIcon; btn.setAttribute("aria-label", "Dejar de escuchar");
+  try {
+    setStatus("Pidiendo permiso del micrófono…", "");
+    L_.stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+  } catch(e){ stopListening(); setStatus("Sin acceso al micrófono", "Actívalo en Ajustes › Safari › Micrófono (o en los ajustes de la app) y vuelve a intentarlo."); return; }
+  if (!L_.on) return;
+  try { setStatus("Preparando el reconocimiento…", "Solo la primera vez tarda un poco."); await ensureWorker(); }
+  catch(err){ stopListening(); setStatus("No se pudo preparar el reconocimiento", err === "webgl" ? "Tu iPhone necesita iOS 16.4 o posterior." : "Comprueba tu conexión e inténtalo de nuevo."); return; }
+  if (!L_.on) return;
+  if (lsGet("geo") === "1") sendGeo();
+  try {
+    L_.ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: SR });
+    if (L_.ctx.state === "suspended") await L_.ctx.resume();
+    const src = L_.ctx.createMediaStreamSource(L_.stream);
+    const hp = L_.ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 150;
+    L_.analyser = L_.ctx.createAnalyser(); L_.analyser.fftSize = 1024;
+    src.connect(hp); hp.connect(L_.analyser);
+    await L_.ctx.audioWorklet.addModule("audio-processor.js");
+    L_.node = new AudioWorkletNode(L_.ctx, "audio-processor");
+    const ratio = L_.ctx.sampleRate / SR;
+    L_.node.port.onmessage = ({ data }) => {
+      if (ratio === 1){ for (let i = 0; i < data.length; i++){ L_.ring[L_.w] = data[i]; L_.w = (L_.w + 1) % WIN; } L_.filled += data.length; }
+      else { const n = Math.floor(data.length / ratio); for (let i = 0; i < n; i++){ L_.ring[L_.w] = data[Math.floor(i * ratio)]; L_.w = (L_.w + 1) % WIN; } L_.filled += n; }
+    };
+    hp.connect(L_.node);
+    const mute = L_.ctx.createGain(); mute.gain.value = 0; L_.node.connect(mute); mute.connect(L_.ctx.destination);
+  } catch(e){ stopListening(); setStatus("No se pudo usar el audio", "Prueba a cerrar y abrir la app."); return; }
+  L_.filled = 0; L_.w = 0;
+  setStatus("Escuchando…", "Analizo el sonido cada segundo y medio.");
+  L_.timer = setInterval(tick, 1500);
+  animateOrb();
+}
+function tick(){
+  if (!L_.on || !L_.ready || L_.busy || L_.filled < WIN) return;
+  const pcm = new Float32Array(WIN);
+  pcm.set(L_.ring.subarray(L_.w)); pcm.set(L_.ring.subarray(0, L_.w), WIN - L_.w);
+  L_.busy = true;
+  L_.worker.postMessage({ message: "predict", pcm, threshold: 0.3 }, [pcm.buffer]);
+}
+function sendGeo(){
+  if (!navigator.geolocation || !L_.worker) return;
+  navigator.geolocation.getCurrentPosition(p => {
+    L_.worker.postMessage({ message: "geo", latitude: p.coords.latitude, longitude: p.coords.longitude });
+  }, () => {}, { maximumAge: 3600000, timeout: 10000 });
+}
+function stopListening(){
+  L_.on = false;
+  clearInterval(L_.timer); cancelAnimationFrame(L_.raf);
+  if (L_.stream){ L_.stream.getTracks().forEach(t => t.stop()); L_.stream = null; }
+  if (L_.node){ L_.node.port.onmessage = null; try { L_.node.disconnect(); } catch(e){} L_.node = null; }
+  if (L_.ctx){ L_.ctx.close().catch(()=>{}); L_.ctx = null; }
+  L_.busy = false;
+  const btn = document.getElementById("mic");
+  if (btn){ btn.classList.remove("on"); btn.innerHTML = micIcon; btn.setAttribute("aria-label", "Empezar a escuchar"); setStatus("Toca para escuchar", "Acerca el móvil al sonido y mantén silencio un momento."); setBar(null); }
+  document.querySelectorAll(".orb .ring").forEach(r => r.style.setProperty("--s", 1));
+}
+function animateOrb(){
+  const buf = new Uint8Array(L_.analyser.fftSize);
+  const rings = [...document.querySelectorAll(".orb .ring")];
+  const loop = () => {
+    if (!L_.on || !L_.analyser) return;
+    L_.analyser.getByteTimeDomainData(buf);
+    let sum = 0; for (let i = 0; i < buf.length; i++){ const v = (buf[i] - 128) / 128; sum += v * v; }
+    const lvl = Math.min(1, Math.sqrt(sum / buf.length) * 6);
+    rings.forEach((r, i) => r.style.setProperty("--s", (1 + lvl * (0.12 + i * 0.1)).toFixed(3)));
+    L_.raf = requestAnimationFrame(loop);
+  };
+  loop();
+}
+function handleResults(res){
+  if (!res.length) return;
+  const now = Date.now();
+  for (const r of res){
+    const prev = L_.found.get(r.sci);
+    L_.found.set(r.sci, { ...r, conf: Math.max(r.conf, prev?.conf || 0), last: now, fresh: true });
+  }
+  setStatus("Escuchando…", "Último: " + res[0].common);
+  renderDets();
+}
+async function taxonFor(sci){
+  if (L_.taxa[sci] !== undefined) return L_.taxa[sci];
+  try {
+    const d = await getJSON(`${API}/taxa?q=${encodeURIComponent(sci)}&rank=species&per_page=1&locale=es`);
+    const t = d.results.find(x => x.name.toLowerCase() === sci.toLowerCase()) || d.results[0] || null;
+    L_.taxa[sci] = t;
+  } catch(e){ return null; }
+  return L_.taxa[sci];
+}
+function renderDets(){
+  const box = document.getElementById("dets"), note = document.getElementById("detNote");
+  if (!box) return;
+  const list = [...L_.found.values()].sort((a, b) => b.last - a.last);
+  box.style.display = list.length ? "" : "none";
+  if (note) note.style.display = list.length ? "none" : "";
+  box.innerHTML = list.map(d => {
+    const t = L_.taxa[d.sci], img = t?.default_photo?.square_url, pct = Math.round(d.conf * 100);
+    return `<a class="det${d.fresh ? " fresh" : ""}" ${t ? `href="#/animal/${t.id}"` : ""} data-sci="${esc(d.sci)}">
+      ${img ? `<img src="${esc(img)}" alt="">` : `<span class="ph"></span>`}
+      <span class="txt"><div class="t1">${esc(cap(d.common))}</div><div class="t2">${esc(d.sci)}</div>
+        <div class="conf"><span class="m"><i style="width:${pct}%"></i></span><span>${pct}%</span></div></span>${chev}</a>`;
+  }).join("");
+  list.forEach(d => { d.fresh = false; });
+  list.filter(d => L_.taxa[d.sci] === undefined).forEach(d => taxonFor(d.sci).then(t => { if (t) renderDets(); }));
+}
+
+if (!location.hash) history.replaceState(null, "", "#/");
 route();
 </script>
 </body>

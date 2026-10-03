@@ -3,11 +3,14 @@
   "short_name": "Fonoteca",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#17221C",
-  "theme_color": "#17221C",
+  "background_color": "#2F5A3D",
+  "theme_color": "#2F5A3D",
   "lang": "es",
   "icons": [
-    {"src": "icon-180.png", "sizes": "180x180", "type": "image/png"},
-    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"}
+    {
+      "src": "icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
   ]
 }
