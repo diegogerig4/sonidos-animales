@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fonoteca Animal</title>
+<meta name="description" content="Los sonidos de aves y mamíferos del mundo, con foto, mapa e información.">
+<meta name="theme-color" content="#17221C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fonoteca">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,400&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+:root{
+  --paper:#E8EDE5; --card:#F6F8F4; --ink:#17221C; --muted:#56655C; --line:#C9D3C8;
+  --signal:#0B7F70; --signal-soft:#CFE7E0; --wave:#5FD3BC;
+  --serif:"Fraunces", Georgia, "Times New Roman", serif;
+  --sans:"Public Sans", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --paper:#121A15; --card:#1B2620; --ink:#E6EDE7; --muted:#9AAAA0; --line:#2C3A32;
+    --signal:#5FD3BC; --signal-soft:#21403A; }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+body{padding-bottom:calc(var(--safe-b) + 24px)}
+button{font:inherit;color:inherit}
+a{color:var(--signal)}
+:focus-visible{outline:3px solid var(--signal);outline-offset:2px;border-radius:6px}
+.wrap{max-width:720px;margin:0 auto;padding:0 18px}
+
+/* Barra superior con buscador */
+header.top{position:sticky;top:0;z-index:20;background:var(--ink);color:#E6EDE7;padding:calc(var(--safe-t) + 14px) 0 14px}
+@media (prefers-color-scheme: dark){ header.top{background:#0B110E} }
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.brand svg{flex:none}
+.brand h1{font-family:var(--serif);font-weight:700;font-size:1.35rem;margin:0;letter-spacing:-.01em}
+.search{position:relative}
+.search input{width:100%;font:inherit;font-size:1.05rem;padding:13px 44px 13px 16px;border-radius:14px;border:0;background:#2A3830;color:#F1F5F1;-webkit-appearance:none}
+.search input::placeholder{color:#A9B8AE}
+.search .clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;color:#A9B8AE;width:36px;height:36px;font-size:1.3rem;cursor:pointer;display:none}
+.filters{display:flex;gap:8px;margin-top:12px;overflow-x:auto;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid #3B4B42;background:transparent;color:#C9D6CD;padding:6px 13px;border-radius:999px;font-size:.88rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--wave);border-color:var(--wave);color:#0F1A15;font-weight:600}
+
+/* Listas de animales */
+.section-title{font-family:var(--serif);font-weight:500;font-size:1.35rem;margin:26px 0 4px}
+.section-note{color:var(--muted);font-size:.92rem;margin:0 0 14px}
+.list{list-style:none;margin:0;padding:0}
+.row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer;text-decoration:none;color:inherit}
+.row img,.row .noimg{width:62px;height:62px;border-radius:12px;object-fit:cover;flex:none;background:var(--line)}
+.row .names{min-width:0;flex:1}
+.row .common{font-weight:600;font-size:1.02rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .sci{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:.95rem}
+.row .count{flex:none;text-align:right;color:var(--signal);font-weight:600;font-size:.9rem;line-height:1.2}
+.row .count small{display:block;color:var(--muted);font-weight:400;font-size:.75rem}
+.more{display:block;width:100%;margin:18px 0;padding:13px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:600;cursor:pointer}
+.status{color:var(--muted);padding:28px 0;text-align:center}
+.status.error{color:#B5452F}
+
+/* Ficha del animal */
+.back{display:inline-flex;align-items:center;gap:6px;background:none;border:0;color:var(--signal);font-weight:600;padding:14px 0 10px;cursor:pointer}
+.hero{border-radius:20px;overflow:hidden;background:var(--line);aspect-ratio:4/3;position:relative}
+.hero img{width:100%;height:100%;object-fit:cover;display:block}
+.hero .credit{position:absolute;left:0;right:0;bottom:0;font-size:.7rem;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.6));padding:18px 10px 6px}
+.thumbs{display:flex;gap:8px;overflow-x:auto;margin-top:8px;scrollbar-width:none}
+.thumbs::-webkit-scrollbar{display:none}
+.thumbs button{flex:none;border:2px solid transparent;padding:0;border-radius:10px;overflow:hidden;width:58px;height:58px;cursor:pointer;background:var(--line)}
+.thumbs button[aria-current="true"]{border-color:var(--signal)}
+.thumbs img{width:100%;height:100%;object-fit:cover;display:block}
+h2.name{font-family:var(--serif);font-weight:700;font-size:2.3rem;line-height:1.05;margin:18px 0 4px;letter-spacing:-.02em}
+.sciname{font-family:var(--serif);font-style:italic;font-size:1.2rem;color:var(--muted);margin:0}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-radius:14px;overflow:hidden;margin:18px 0 6px}
+.facts div{background:var(--card);padding:10px 12px}
+.facts b{display:block;font-size:1.15rem}
+.facts span{font-size:.78rem;color:var(--muted)}
+.lineage{font-size:.88rem;color:var(--muted);margin:10px 0 0}
+h3.block{font-family:var(--serif);font-weight:500;font-size:1.5rem;margin:30px 0 4px}
+.block-note{color:var(--muted);font-size:.9rem;margin:0 0 12px}
+
+/* Grabaciones: el elemento protagonista */
+.rec{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;padding:12px;margin-bottom:10px;background:var(--card);border-radius:16px;border:1px solid var(--line)}
+.rec.playing{border-color:var(--signal);background:var(--signal-soft)}
+.play{width:52px;height:52px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);display:grid;place-items:center;cursor:pointer}
+.rec.playing .play{background:var(--signal);color:#fff}
+.play svg{width:20px;height:20px}
+.rec .meta{min-width:0}
+.rec .where{font-weight:600;font-size:.96rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec .when{font-size:.82rem;color:var(--muted)}
+.bars{display:flex;align-items:center;gap:2px;height:26px;margin-top:6px;cursor:pointer}
+.bars i{flex:1;background:var(--line);border-radius:2px;min-width:2px}
+.bars i.on{background:var(--signal)}
+.rec .lic{grid-column:1/-1;font-size:.72rem;color:var(--muted);margin-top:-2px}
+.rec .note{grid-column:1/-1;font-size:.86rem;margin:0}
+.rec.failed .where::after{content:" · no se puede reproducir";color:#B5452F;font-weight:400}
+
+/* Mapa */
+#map{height:300px;border-radius:16px;overflow:hidden;border:1px solid var(--line);z-index:1}
+
+/* Texto de Wikipedia */
+.intro{font-size:1.02rem}
+.intro p,.sec p{margin:0 0 12px}
+details.sec{border-top:1px solid var(--line);padding:4px 0}
+details.sec:last-of-type{border-bottom:1px solid var(--line)}
+details.sec summary{cursor:pointer;font-weight:600;padding:12px 0;list-style:none;display:flex;justify-content:space-between}
+details.sec summary::-webkit-details-marker{display:none}
+details.sec summary::after{content:"+";color:var(--signal);font-size:1.3rem;line-height:1}
+details.sec[open] summary::after{content:"–"}
+.sec h4{font-size:.95rem;margin:16px 0 6px}
+.source{font-size:.8rem;color:var(--muted);margin-top:14px}
+footer{color:var(--muted);font-size:.78rem;margin-top:36px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><g fill="#5FD3BC"><rect x="3" y="11" width="3" height="8" rx="1.5"/><rect x="9" y="6" width="3" height="18" rx="1.5"/><rect x="15" y="2" width="3" height="26" rx="1.5"/><rect x="21" y="8" width="3" height="14" rx="1.5"/><rect x="27" y="12" width="3" height="6" rx="1.5"/></g></svg>
+      <h1>Fonoteca Animal</h1>
+    </div>
+    <div class="search">
+      <input id="q" type="search" placeholder="Busca un animal: lobo, búho, ruiseñor…" autocomplete="off" autocorrect="off" enterkeyhint="search" aria-label="Buscar animal">
+      <button class="clear" id="clear" aria-label="Borrar búsqueda">×</button>
+    </div>
+    <div class="filters" role="group" aria-label="Tipo de animal">
+      <button class="chip" data-group="Aves,Mammalia" aria-pressed="true">Aves y mamíferos</button>
+      <button class="chip" data-group="Aves" aria-pressed="false">Aves</button>
+      <button class="chip" data-group="Mammalia" aria-pressed="false">Mamíferos</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main"></main>
+
+<script>
+const API = "https://api.inaturalist.org/v1";
+const SPAIN = 6774;
+const state = { group: "Aves,Mammalia", region: "es", homeCache: {} };
+const $main = document.getElementById("main");
+const $q = document.getElementById("q");
+const $clear = document.getElementById("clear");
+const audio = new Audio();
+audio.preload = "none";
+let current = null; // {el, url}
+
+/* ---------- utilidades ---------- */
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+const fmtN = n => (n ?? 0).toLocaleString("es-ES");
+async function getJSON(url){
+  const r = await fetch(url);
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.json();
+}
+function fmtDate(d){
+  if (!d) return "Fecha desconocida";
+  const t = new Date(d + (d.length === 10 ? "T12:00:00" : ""));
+  return isNaN(t) ? d : t.toLocaleDateString("es-ES", {day:"numeric", month:"long", year:"numeric"});
+}
+function licenseName(code){
+  if (!code) return "todos los derechos reservados";
+  return "licencia " + code.toUpperCase().replace("CC0","CC0 (dominio público)");
+}
+const groupOk = t => state.group.split(",").includes(t.iconic_taxon_name);
+const isLocal = () => state.region === "es";
+
+/* ---------- navegación ---------- */
+function go(hash){ if (location.hash !== hash) location.hash = hash; else route(); }
+window.addEventListener("hashchange", route);
+function route(){
+  stopAudio();
+  const m = location.hash.match(/^#\/animal\/(\d+)/);
+  if (m) return showAnimal(+m[1]);
+  const s = location.hash.match(/^#\/buscar\/(.+)/);
+  if (s){ const term = decodeURIComponent(s[1]); if ($q.value !== term) $q.value = term; toggleClear(); return showSearch(term); }
+  $q.value = ""; toggleClear();
+  showHome();
+}
+
+/* ---------- filtros ---------- */
+document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", x === b));
+  state.group = b.dataset.group;
+  if (location.hash.startsWith("#/animal/")) go("#/");
+  else route();
+}));
+
+/* ---------- buscador ---------- */
+let timer;
+function toggleClear(){ $clear.style.display = $q.value ? "block" : "none"; }
+$q.addEventListener("input", () => {
+  toggleClear();
+  clearTimeout(timer);
+  const v = $q.value.trim();
+  timer = setTimeout(() => {
+    if (v.length < 2) { if (location.hash.startsWith("#/buscar")) history.replaceState(null, "", "#/"); showHome(); return; }
+    history.replaceState(null, "", "#/buscar/" + encodeURIComponent(v));
+    showSearch(v);
+  }, 320);
+});
+$q.addEventListener("keydown", e => { if (e.key === "Enter") $q.blur(); });
+$clear.addEventListener("click", () => { $q.value = ""; toggleClear(); go("#/"); $q.focus(); });
+
+function rowHTML(t, count){
+  const img = t.default_photo?.square_url;
+  const common = cap(t.preferred_common_name) || t.name;
+  return `<li><a class="row" href="#/animal/${t.id}">
+    ${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : `<span class="noimg"></span>`}
+    <span class="names"><span class="common">${esc(common)}</span><span class="sci">${esc(t.name)}</span></span>
+    ${count != null ? `<span class="count">${fmtN(count)}<small>sonidos</small></span>` : ""}
+  </a></li>`;
+}
+
+let searchSeq = 0;
+async function showSearch(term){
+  const seq = ++searchSeq;
+  $main.innerHTML = `<p class="status">Buscando “${esc(term)}”…</p>`;
+  try {
+    const d = await getJSON(`${API}/taxa/autocomplete?q=${encodeURIComponent(term)}&locale=es&per_page=30&is_active=true`);
+    if (seq !== searchSeq) return;
+    const res = d.results.filter(groupOk);
+    if (!res.length){
+      $main.innerHTML = `<p class="status">No hay aves ni mamíferos que coincidan con “${esc(term)}”. Prueba con otro nombre o con el nombre científico.</p>`;
+      return;
+    }
+    $main.innerHTML = `<h2 class="section-title">Resultados</h2><ul class="list">${res.map(t => rowHTML(t)).join("")}</ul>`;
+  } catch(e){
+    if (seq !== searchSeq) return;
+    $main.innerHTML = `<p class="status error">No se pudo buscar. Comprueba tu conexión y vuelve a intentarlo.</p>`;
+  }
+}
+
+/* ---------- inicio ---------- */
+async function showHome(page = 1){
+  const key = `${state.group}|${state.region}`;
+  if (page === 1){
+    $main.innerHTML = `
+      <h2 class="section-title">Los que más suenan</h2>
+      <p class="section-note">Especies con más grabaciones${isLocal() ? " en España" : " en el mundo"}.
+        <button class="chip" id="region" style="border-color:var(--line);color:var(--signal);margin-left:4px">${isLocal() ? "Ver todo el mundo" : "Ver solo España"}</button></p>
+      <ul class="list" id="homeList"></ul><div id="homeMore"><p class="status">Cargando…</p></div>`;
+    document.getElementById("region").onclick = () => { state.region = isLocal() ? "world" : "es"; showHome(); };
+  }
+  const list = document.getElementById("homeList"), more = document.getElementById("homeMore");
+  if (!list) return;
+  try {
+    let d = state.homeCache[key + "|" + page];
+    if (!d){
+      d = await getJSON(`${API}/observations/species_counts?iconic_taxa=${state.group}&sounds=true&verifiable=true&locale=es&per_page=30&page=${page}${isLocal() ? "&place_id=" + SPAIN : ""}`);
+      state.homeCache[key + "|" + page] = d;
+    }
+    if (!document.getElementById("homeList")) return;
+    list.insertAdjacentHTML("beforeend", d.results.map(r => rowHTML(r.taxon, r.count)).join(""));
+    if (page * 30 < d.total_results){
+      more.innerHTML = `<button class="more">Ver más especies</button>`;
+      more.firstChild.onclick = () => { more.innerHTML = `<p class="status">Cargando…</p>`; showHome(page + 1); };
+    } else more.innerHTML = "";
+  } catch(e){
+    more.innerHTML = `<p class="status error">No se pudieron cargar las especies. Comprueba tu conexión.</p>`;
+  }
+}
+
+/* ---------- ficha de un animal ---------- */
+async function showAnimal(id){
+  window.scrollTo(0, 0);
+  $main.innerHTML = `<p class="status">Cargando ficha…</p>`;
+  let t;
+  try { t = (await getJSON(`${API}/taxa/${id}?locale=es`)).results[0]; }
+  catch(e){ $main.innerHTML = `<button class="back" onclick="history.back()">‹ Volver</button><p class="status error">No se pudo cargar este animal. Comprueba tu conexión.</p>`; return; }
+
+  const common = cap(t.preferred_common_name) || t.name;
+  document.title = common + " · Fonoteca Animal";
+  const photos = (t.taxon_photos || []).map(p => p.photo).filter(Boolean).slice(0, 10);
+  if (!photos.length && t.default_photo) photos.push(t.default_photo);
+  const big = p => p.large_url || p.medium_url || (p.url || "").replace("square", "large");
+  const lineage = (t.ancestors || []).filter(a => ["class","order","family"].includes(a.rank))
+    .map(a => cap(a.preferred_common_name) || a.name).join(" · ");
+  const cons = t.conservation_status;
+
+  $main.innerHTML = `
+    <button class="back" id="back">‹ Volver</button>
+    ${photos.length ? `<div class="hero"><img id="heroImg" src="${esc(big(photos[0]))}" alt="${esc(common)}"><div class="credit" id="heroCredit">${esc(photos[0].attribution || "")}</div></div>
+      ${photos.length > 1 ? `<div class="thumbs">${photos.map((p,i) => `<button data-i="${i}" aria-current="${i===0}" aria-label="Foto ${i+1}"><img src="${esc(p.square_url || p.url)}" alt="" loading="lazy"></button>`).join("")}</div>` : ""}` : ""}
+    <h2 class="name">${esc(common)}</h2>
+    <p class="sciname">${esc(t.name)}</p>
+    ${lineage ? `<p class="lineage">${esc(lineage)}</p>` : ""}
+    <div class="facts">
+      <div><b id="nRec">…</b><span>grabaciones</span></div>
+      <div><b>${fmtN(t.observations_count)}</b><span>avistamientos</span></div>
+      <div><b>${cons ? esc(cap(cons.status_name || cons.status)) : "—"}</b><span>conservación</span></div>
+    </div>
+
+    <h3 class="block">Sonidos</h3>
+    <p class="block-note">Grabaciones reales hechas por naturalistas de todo el mundo, con el lugar y la fecha.</p>
+    <div id="recs"><p class="status">Cargando grabaciones…</p></div>
+
+    <h3 class="block">Dónde vive</h3>
+    <p class="block-note">Cada cuadro marca una zona donde se ha visto o escuchado.</p>
+    <div id="map"></div>
+
+    <h3 class="block">Información</h3>
+    <div id="info"><p class="status">Cargando información…</p></div>
+
+    <footer>Datos de iNaturalist y Wikipedia. Cada grabación y foto pertenece a su autor, indicado junto a ella.</footer>`;
+
+  document.getElementById("back").onclick = () => history.length > 1 ? history.back() : go("#/");
+  document.querySelectorAll(".thumbs button").forEach(b => b.onclick = () => {
+    const p = photos[+b.dataset.i];
+    document.getElementById("heroImg").src = big(p);
+    document.getElementById("heroCredit").textContent = p.attribution || "";
+    document.querySelectorAll(".thumbs button").forEach(x => x.setAttribute("aria-current", x === b));
+  });
+
+  loadRecordings(t.id, 1);
+  loadMap(t.id);
+  loadInfo(t);
+}
+
+/* ---------- grabaciones ---------- */
+const PER = 20;
+async function loadRecordings(id, page){
+  const box = document.getElementById("recs");
+  if (!box) return;
+  try {
+    const d = await getJSON(`${API}/observations?taxon_id=${id}&sounds=true&verifiable=true&order_by=votes&per_page=${PER}&page=${page}&locale=es`);
+    if (!document.getElementById("recs")) return;
+    if (page === 1){
+      document.getElementById("nRec").textContent = fmtN(d.total_results);
+      box.innerHTML = "";
+      if (!d.total_results){ box.innerHTML = `<p class="status">Todavía no hay grabaciones de este animal.</p>`; return; }
+    }
+    document.getElementById("moreRecs")?.remove();
+    const items = [];
+    for (const o of d.results){
+      for (const s of (o.sounds || [])){
+        if (!s.file_url || s.hidden) continue;
+        items.push({o, s});
+      }
+    }
+    box.insertAdjacentHTML("beforeend", items.map(({o, s}) => {
+      const author = o.user?.name || o.user?.login || "Autor desconocido";
+      const note = (o.description || "").replace(/<[^>]+>/g, "").trim();
+      return `<div class="rec" data-url="${esc(s.file_url)}">
+        <button class="play" aria-label="Reproducir grabación">${iconPlay}</button>
+        <div class="meta">
+          <div class="where">${esc(o.place_guess || "Lugar no indicado")}</div>
+          <div class="when">${esc(fmtDate(o.observed_on))}</div>
+          <div class="bars">${bars(s.id)}</div>
+        </div>
+        ${note ? `<p class="note">${esc(note.slice(0, 220))}${note.length > 220 ? "…" : ""}</p>` : ""}
+        <div class="lic">© ${esc(author)}, ${esc(licenseName(s.license_code))}</div>
+      </div>`;
+    }).join(""));
+    wireRecs(box);
+    if (page * PER < d.total_results){
+      box.insertAdjacentHTML("beforeend", `<button class="more" id="moreRecs">Cargar más grabaciones</button>`);
+      document.getElementById("moreRecs").onclick = e => { e.target.textContent = "Cargando…"; e.target.disabled = true; loadRecordings(id, page + 1); };
+    }
+  } catch(e){
+    box.innerHTML = `<p class="status error">No se pudieron cargar las grabaciones. Comprueba tu conexión.</p>`;
+  }
+}
+
+const iconPlay = `<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5 3.5v13l11-6.5z"/></svg>`;
+const iconPause = `<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><rect x="4" y="3" width="4" height="14" rx="1"/><rect x="12" y="3" width="4" height="14" rx="1"/></svg>`;
+function bars(seed){
+  let x = seed % 9973 || 7, out = "";
+  for (let i = 0; i < 40; i++){ x = (x * 9301 + 49297) % 233280; const h = 18 + Math.round((x / 233280) * 82 * Math.sin(Math.PI * (i + 2) / 44)); out += `<i style="height:${Math.max(12, h)}%"></i>`; }
+  return out;
+}
+function wireRecs(box){
+  box.querySelectorAll(".rec:not([data-w])").forEach(el => {
+    el.dataset.w = 1;
+    el.querySelector(".play").onclick = () => toggle(el);
+    el.querySelector(".bars").onclick = e => {
+      const r = e.currentTarget.getBoundingClientRect();
+      const frac = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+      if (current?.el !== el) toggle(el, frac); else if (audio.duration) audio.currentTime = frac * audio.duration;
+    };
+  });
+}
+function setRow(el, playing){
+  el.classList.toggle("playing", playing);
+  const b = el.querySelector(".play");
+  b.innerHTML = playing ? iconPause : iconPlay;
+  b.setAttribute("aria-label", playing ? "Pausar grabación" : "Reproducir grabación");
+}
+function paintBars(el, frac){
+  const bs = el.querySelectorAll(".bars i"), n = Math.round(frac * bs.length);
+  bs.forEach((b, i) => b.classList.toggle("on", i < n));
+}
+function toggle(el, startFrac){
+  if (current?.el === el){
+    if (audio.paused){ audio.play().catch(() => {}); setRow(el, true); }
+    else { audio.pause(); setRow(el, false); }
+    return;
+  }
+  stopAudio();
+  current = { el, frac: startFrac };
+  el.classList.remove("failed");
+  audio.src = el.dataset.url;
+  setRow(el, true);
+  audio.play().catch(() => {});
+}
+function stopAudio(){
+  if (current){ setRow(current.el, false); paintBars(current.el, 0); }
+  audio.pause(); current = null;
+}
+audio.addEventListener("loadedmetadata", () => { if (current?.frac) audio.currentTime = current.frac * audio.duration; });
+audio.addEventListener("timeupdate", () => { if (current && audio.duration) paintBars(current.el, audio.currentTime / audio.duration); });
+audio.addEventListener("ended", () => { if (current){ setRow(current.el, false); paintBars(current.el, 0); current = null; } });
+audio.addEventListener("error", () => { if (current){ current.el.classList.add("failed"); setRow(current.el, false); current = null; } });
+
+/* ---------- mapa ---------- */
+let map;
+async function loadMap(id){
+  const el = document.getElementById("map");
+  if (!el || !window.L) { if (el) el.innerHTML = `<p class="status">Mapa no disponible.</p>`; return; }
+  if (map){ map.remove(); map = null; }
+  map = L.map(el, { scrollWheelZoom: false, worldCopyJump: true }).setView([25, 0], 1);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 12, attribution: "© OpenStreetMap" }).addTo(map);
+  L.tileLayer(`${API}/grid/{z}/{x}/{y}.png?taxon_id=${id}&verifiable=true&color=%230B7F70`, { maxZoom: 12, opacity: .85 }).addTo(map);
+  try {
+    const d = await getJSON(`${API}/observations?taxon_id=${id}&verifiable=true&return_bounds=true&per_page=0`);
+    const b = d.total_bounds;
+    if (b && map) map.fitBounds([[b.swlat, b.swlng], [b.nelat, b.nelng]], { padding: [10, 10], maxZoom: 6 });
+  } catch(e){}
+}
+
+/* ---------- información (Wikipedia en español) ---------- */
+const SKIP = /^(referencias|notas|bibliografía|enlaces externos|véase también|fuentes|lecturas adicionales|galería)/i;
+async function wikiES(title){
+  const d = await getJSON(`https://es.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&exsectionformat=wiki&redirects=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
+  const p = Object.values(d.query?.pages || {})[0];
+  return (p && !("missing" in p) && p.extract) ? p : null;
+}
+async function esTitleFromEn(enUrl){
+  const title = decodeURIComponent((enUrl || "").split("/wiki/")[1] || "");
+  if (!title) return null;
+  const d = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&prop=langlinks&lllang=es&redirects=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
+  const p = Object.values(d.query?.pages || {})[0];
+  return p?.langlinks?.[0]?.["*"] || null;
+}
+function paras(text){
+  return text.split(/\n+/).map(s => s.trim()).filter(Boolean).map(s => `<p>${esc(s)}</p>`).join("");
+}
+async function loadInfo(t){
+  const box = document.getElementById("info");
+  let page = null;
+  try {
+    page = await wikiES(t.name);
+    if (!page){ const es = await esTitleFromEn(t.wikipedia_url); if (es) page = await wikiES(es); }
+  } catch(e){}
+  if (!document.getElementById("info")) return;
+  if (page){
+    const parts = page.extract.split(/^==\s*([^=].*?)\s*==\s*$/m);
+    const intro = parts[0];
+    let html = `<div class="intro">${paras(intro)}</div>`;
+    for (let i = 1; i < parts.length; i += 2){
+      const title = parts[i], body = (parts[i+1] || "").trim();
+      if (SKIP.test(title) || body.length < 40) continue;
+      const bodyHTML = body.split(/^===+\s*(.+?)\s*===+\s*$/m).map((chunk, j) => j % 2 ? `<h4>${esc(chunk)}</h4>` : paras(chunk)).join("");
+      html += `<details class="sec"><summary>${esc(title)}</summary>${bodyHTML}</details>`;
+    }
+    html += `<p class="source">Fuente: <a href="https://es.wikipedia.org/wiki/${encodeURIComponent(page.title.replace(/ /g, "_"))}" target="_blank" rel="noopener">Wikipedia, “${esc(page.title)}”</a></p>`;
+    box.innerHTML = html;
+  } else if (t.wikipedia_summary){
+    const txt = t.wikipedia_summary.replace(/<[^>]+>/g, "");
+    box.innerHTML = `<div class="intro">${paras(txt)}</div>${t.wikipedia_url ? `<p class="source">Fuente: <a href="${esc(t.wikipedia_url)}" target="_blank" rel="noopener">Wikipedia</a></p>` : ""}`;
+  } else {
+    box.innerHTML = `<p class="status">No hay información escrita sobre este animal todavía.</p>`;
+  }
+}
+
+route();
+</script>
+</body>
+</html>
