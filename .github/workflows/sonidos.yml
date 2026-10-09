@@ -1,10 +1,6 @@
 name: Preparar la app de Olivia
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - "tools/**"
-      - ".github/workflows/sonidos.yml"
 permissions:
   contents: write
   pages: write
