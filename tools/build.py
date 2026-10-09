@@ -9,6 +9,16 @@ if os.path.exists('tools/data.json'):
 else:
     data = json.loads(re.search(r'const ANIMALS = (\[.*?\]);\n', open('index.html', encoding='utf-8').read()).group(1))
 photos = json.load(open('tools/photos.json', encoding='utf-8'))
+# Autores de las fotos, guardados durante la revision a mano (rama "revision").
+AUTH = {}
+try:
+    repo = os.environ.get('GITHUB_REPOSITORY', 'diegogerig4/sonidos-animales')
+    cand = requests.get(f'https://raw.githubusercontent.com/{repo}/revision/review/candidates.json', headers=H, timeout=60).json()
+    for lst in cand.values():
+        for c in lst:
+            AUTH[str(c['id'])] = (c.get('by') or '').replace('\n', ' ').strip()
+except Exception as e:
+    print('sin lista de autores', e)
 os.makedirs('img/t', exist_ok=True)
 out = []
 for a in data:
@@ -17,12 +27,7 @@ for a in data:
         print('fuera:', a['k']); continue
     pid, ext = p.split('.')
     url = f"https://inaturalist-open-data.s3.amazonaws.com/photos/{pid}/large.{ext}"
-    by = ''
-    try:
-        by = requests.get(f"https://api.inaturalist.org/v1/photos/{pid}", headers=H, timeout=30).json()['results'][0].get('attribution', '')
-    except Exception as e:
-        print('sin autor', a['k'], e)
-    time.sleep(1)
+    by = AUTH.get(pid) or 'iNaturalist'
     r = requests.get(url, headers=H, timeout=60); r.raise_for_status()
     im = Image.open(io.BytesIO(r.content)).convert('RGB')
     big = im.copy(); big.thumbnail((1000, 1000), Image.LANCZOS)
@@ -30,9 +35,9 @@ for a in data:
     th = im.copy(); th.thumbnail((480, 360), Image.LANCZOS)
     th.save(f"img/t/{a['k']}.jpg", quality=74, optimize=True, progressive=True)
     v = hashlib.md5(r.content).hexdigest()[:8]
-    a = dict(a, photo=f"img/{a['k']}.jpg?v={v}", thumb=f"img/t/{a['k']}.jpg?v={v}", photo_by=by.replace('\n', ' ').strip() or 'iNaturalist', photo_src=url)
+    a = dict(a, photo=f"img/{a['k']}.jpg?v={v}", thumb=f"img/t/{a['k']}.jpg?v={v}", photo_by=by, photo_src=url)
     out.append(a)
-    print(a['k'], big.size, os.path.getsize(f"img/{a['k']}.jpg") // 1024, 'KB', flush=True)
+    print(a['k'], big.size, os.path.getsize(f"img/{a['k']}.jpg") // 1024, 'KB', by[:40], flush=True)
 used = {f"{a['k']}.jpg" for a in out}
 for d in ('img', 'img/t'):
     for f in os.listdir(d):
