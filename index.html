@@ -2,1143 +2,570 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Fonoteca Animal</title>
-<meta name="description" content="Escucha e identifica aves y mamíferos del mundo.">
-<meta name="theme-color" content="#EEF0E8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0E1310" media="(prefers-color-scheme: dark)">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Fonoteca">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="Olivia">
+<meta name="theme-color" content="#FFF4E0">
 <link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="apple-touch-icon" href="icon-olivia-180.png">
+<title>Los animales de Olivia</title>
 <style>
-/* ---------- Paleta natural ---------- */
 :root{
-  --bg:#EEF0E8;          /* niebla de salvia */
-  --surface:#FFFFFF;
-  --surface-2:#F6F7F2;
-  --label:#1B211C;
-  --label-2:rgba(27,33,28,.62);
-  --label-3:rgba(27,33,28,.38);
-  --sep:rgba(27,33,28,.12);
-  --fill:rgba(118,128,112,.14);
-  --moss:#3E7150;        /* musgo */
-  --moss-deep:#2F5A3D;
-  --bark:#8A6A4F;        /* corteza */
-  --sand:#D9CBB0;        /* arena */
-  --sky:#5E8DB5;         /* cielo */
-  --glass:rgba(238,240,232,.72);
-  --shadow:0 1px 2px rgba(27,33,28,.06), 0 8px 24px rgba(27,33,28,.06);
-  --font:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", system-ui, sans-serif;
-  --font-round:ui-rounded, "SF Pro Rounded", -apple-system, system-ui, sans-serif;
-  --st:env(safe-area-inset-top,0px); --sb:env(safe-area-inset-bottom,0px);
-}
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#0E1310; --surface:#1A201C; --surface-2:#141915;
-    --label:#ECEFE8; --label-2:rgba(236,239,232,.62); --label-3:rgba(236,239,232,.36);
-    --sep:rgba(236,239,232,.12); --fill:rgba(160,175,160,.16);
-    --moss:#7FBF8E; --moss-deep:#5FA170; --bark:#C9A684; --sand:#5A4F3F; --sky:#8DB7DA;
-    --glass:rgba(14,19,16,.72);
-    --shadow:0 1px 2px rgba(0,0,0,.3);
-  }
+  --bg:#FFF4E0; --ink:#3A2716; --ink2:#8C7258; --card:#FFFFFF;
+  --shadow:0 8px 22px rgba(110,70,20,.16);
+  --st:env(safe-area-inset-top); --sb:env(safe-area-inset-bottom);
+  --casa:#FFB23F; --granja:#F27A5E; --selva:#6DBE5B; --bosque:#3F9466; --mar:#3FA2DA; --pajaros:#A777D9; --todos:#F2C230; --mas:#E9699C;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--label);font-family:var(--font);font-size:17px;line-height:1.35;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
-/* Textura de papel natural, muy sutil */
-body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;mix-blend-mode:multiply;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .38 0 0 0 0 .3 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
-@media (prefers-color-scheme: dark){ body::before{mix-blend-mode:screen;opacity:.25} }
-button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
-a{color:var(--moss);text-decoration:none}
-:focus-visible{outline:2px solid var(--moss);outline-offset:2px;border-radius:10px}
-#view{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:0 16px calc(var(--sb) + 104px)}
-
-/* ---------- Cabecera de pestaña (título grande) ---------- */
-.large-title{font-size:34px;font-weight:700;letter-spacing:.012em;line-height:1.1;margin:0;padding:calc(var(--st) + 22px) 4px 10px}
-.subtitle{color:var(--label-2);font-size:15px;margin:-4px 4px 14px}
-.sticky{position:sticky;top:0;z-index:30;margin:0 -16px;padding:calc(var(--st) + 8px) 16px 10px;background:var(--glass);
-  -webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);transition:box-shadow .2s}
-.sticky.stuck{box-shadow:0 .5px 0 var(--sep)}
-.search{display:flex;align-items:center;gap:6px;background:var(--fill);border-radius:12px;height:38px;padding:0 10px;color:var(--label-2)}
-.search svg{flex:none}
-.search input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:17px;color:var(--label);outline:none;-webkit-appearance:none}
-.search input::placeholder{color:var(--label-3)}
-.search input::-webkit-search-cancel-button{display:none}
-.search .x{width:18px;height:18px;border-radius:50%;background:var(--label-3);color:var(--surface);font-size:12px;line-height:18px;text-align:center;display:none}
-.segmented{display:flex;background:var(--fill);border-radius:9px;padding:2px;margin-top:10px;position:relative}
-.segmented button{flex:1;height:30px;border-radius:7px;font-size:13px;font-weight:500;color:var(--label);position:relative;z-index:1}
-.segmented button[aria-pressed="true"]{background:var(--surface);box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04);font-weight:600}
-@media (prefers-color-scheme: dark){ .segmented button[aria-pressed="true"]{background:#4A524C} }
-
-/* ---------- Secciones y listas agrupadas (estilo Ajustes) ---------- */
-.section-head{display:flex;justify-content:space-between;align-items:baseline;margin:26px 4px 8px}
-.section-head h2{font-size:22px;font-weight:700;margin:0;letter-spacing:.01em}
-.section-head button{color:var(--moss);font-size:15px}
-.footnote{color:var(--label-2);font-size:13px;margin:8px 16px 0}
-.group{background:var(--surface);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
-.cell{display:flex;align-items:center;gap:12px;padding:10px 14px;color:var(--label);position:relative;min-height:60px}
-.cell + .cell::before{content:"";position:absolute;top:0;right:0;left:76px;height:.5px;background:var(--sep)}
-.cell img,.cell .ph{width:50px;height:50px;border-radius:11px;object-fit:cover;flex:none;background:var(--fill)}
-.cell .txt{flex:1;min-width:0}
-.cell .t1{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cell .t2{font-size:14px;color:var(--label-2);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cell .val{color:var(--label-2);font-size:15px;flex:none;font-variant-numeric:tabular-nums}
-.chev{flex:none;color:var(--label-3)}
-.cell:active{background:var(--fill)}
-
-/* Tarjetas destacadas con foto */
-.shelf{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:16px;margin:0 -16px;padding:2px 16px 6px;scrollbar-width:none}
-.shelf::-webkit-scrollbar{display:none}
-.card{flex:none;width:72%;max-width:300px;aspect-ratio:4/5;border-radius:20px;overflow:hidden;position:relative;scroll-snap-align:start;background:var(--sand);box-shadow:var(--shadow);color:#fff}
-.card img{width:100%;height:100%;object-fit:cover;display:block}
-.card .cap{position:absolute;inset:auto 0 0 0;padding:44px 16px 16px;background:linear-gradient(transparent,rgba(12,18,13,.78))}
-.card .k{font-size:13px;font-weight:600;opacity:.85}
-.card .n{font-size:24px;font-weight:700;line-height:1.1;margin-top:2px}
-.card .s{font-size:14px;font-style:italic;opacity:.85}
-
-.more{display:block;width:100%;margin:12px 0 0;padding:14px;border-radius:14px;background:var(--surface);color:var(--moss);font-weight:600;box-shadow:var(--shadow)}
-.status{color:var(--label-2);text-align:center;padding:40px 16px;font-size:15px}
-.status.err{color:#B4532F}
-.spinner{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--fill);border-top-color:var(--moss);animation:spin .8s linear infinite;margin:0 auto 10px}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ---------- Ficha del animal ---------- */
-.detail-hero{position:relative;margin:0 -16px;height:min(62vh,520px);background:var(--sand);overflow:hidden}
-.detail-hero img{width:100%;height:100%;object-fit:cover;display:block}
-.detail-hero .shade{position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.25),transparent 30%,transparent 55%,rgba(10,16,11,.82))}
-.detail-hero .title{position:absolute;left:20px;right:20px;bottom:18px;color:#fff}
-.detail-hero h1{font-size:36px;font-weight:700;line-height:1.05;margin:0;letter-spacing:.01em}
-.detail-hero .sci{font-size:18px;font-style:italic;opacity:.9;margin-top:4px}
-.detail-hero .credit{position:absolute;right:10px;top:calc(var(--st) + 14px);font-size:10px;color:rgba(255,255,255,.75);max-width:55%;text-align:right}
-.navbtn{position:fixed;z-index:40;top:calc(var(--st) + 10px);left:max(14px, calc(50vw - 326px));width:38px;height:38px;border-radius:50%;
-  background:rgba(250,250,247,.72);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);display:grid;place-items:center;color:#1B211C;box-shadow:0 2px 10px rgba(0,0,0,.15)}
-.thumbs{display:flex;gap:8px;overflow-x:auto;padding:12px 0 2px;scrollbar-width:none}
-.thumbs::-webkit-scrollbar{display:none}
-.thumbs button{flex:none;width:54px;height:54px;border-radius:12px;overflow:hidden;opacity:.55;transition:opacity .2s}
-.thumbs button[aria-current="true"]{opacity:1;box-shadow:0 0 0 2px var(--moss)}
-.thumbs img{width:100%;height:100%;object-fit:cover;display:block}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border-radius:14px;box-shadow:var(--shadow);margin-top:14px}
-.stats div{padding:12px 10px;text-align:center}
-.stats div + div{border-left:.5px solid var(--sep)}
-.stats b{display:block;font-family:var(--font-round);font-size:20px;font-weight:700;color:var(--moss)}
-.stats span{font-size:12px;color:var(--label-2)}
-.lineage{color:var(--label-2);font-size:14px;margin:10px 4px 0}
-
-/* Grabaciones */
-.rec{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center;padding:12px 14px;position:relative}
-.rec + .rec::before{content:"";position:absolute;top:0;right:0;left:70px;height:.5px;background:var(--sep)}
-.play{width:44px;height:44px;border-radius:50%;background:var(--moss);color:#fff;display:grid;place-items:center}
-@media (prefers-color-scheme: dark){ .play{color:#0E1310} }
-.play svg{width:18px;height:18px}
-.rec .where{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rec .when{font-size:13px;color:var(--label-2)}
-.wave{display:flex;align-items:center;gap:2px;height:22px;margin-top:6px}
-.wave i{flex:1;border-radius:2px;background:var(--fill);min-width:2px}
-.wave i.on{background:var(--moss)}
-.rec .lic{grid-column:2;font-size:11px;color:var(--label-3)}
-.rec .note{grid-column:2;font-size:14px;color:var(--label-2);margin:0}
-.rec.failed .when::after{content:" · no se puede reproducir";color:#B4532F}
-#map{height:280px;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);z-index:1}
-.prose{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);padding:16px 16px 4px;font-size:16px;line-height:1.5}
-.prose p{margin:0 0 12px}
-details.sec{border-top:.5px solid var(--sep)}
-details.sec summary{list-style:none;display:flex;justify-content:space-between;align-items:center;padding:14px 0;font-weight:600;cursor:pointer}
-details.sec summary::-webkit-details-marker{display:none}
-details.sec summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--label-3);border-bottom:2px solid var(--label-3);transform:rotate(45deg);transition:transform .2s;margin-right:4px}
-details.sec[open] summary::after{transform:rotate(225deg)}
-.prose h4{font-size:15px;margin:14px 0 6px}
-.source{font-size:13px;color:var(--label-2);margin:10px 4px 0}
-
-/* ---------- Escuchar ---------- */
-.listen-stage{display:flex;flex-direction:column;align-items:center;padding:56px 0 6px}
-.orb{position:relative;width:200px;height:200px;display:grid;place-items:center}
-.orb .ring{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(62,113,80,.0) 45%,rgba(62,113,80,.18) 70%,rgba(62,113,80,0) 71%);transform:scale(var(--s,1));transition:transform .08s linear}
-.orb .ring.r2{inset:-22px;opacity:.6}
-.orb .ring.r3{inset:-44px;opacity:.3}
-.orb button{width:132px;height:132px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#5C9A6E,var(--moss-deep));color:#F3F1E7;display:grid;place-items:center;box-shadow:0 12px 30px rgba(47,90,61,.35),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .15s}
-.orb button:active{transform:scale(.96)}
-.orb button.on{background:radial-gradient(circle at 35% 30%,#C98F5E,#8A5A35)}
-.orb svg{width:46px;height:46px}
-.listen-status{margin:60px 16px 0;text-align:center;font-size:17px;font-weight:600}
-.listen-hint{margin:6px 24px 0;text-align:center;font-size:14px;color:var(--label-2)}
-.bar{height:6px;border-radius:3px;background:var(--fill);overflow:hidden;width:200px;margin:12px auto 0}
-.bar i{display:block;height:100%;background:var(--moss);width:0;transition:width .3s}
-.det{display:flex;align-items:center;gap:12px;padding:10px 14px;position:relative;min-height:70px}
-.det + .det::before{content:"";position:absolute;top:0;right:0;left:82px;height:.5px;background:var(--sep)}
-.det img,.det .ph{width:56px;height:56px;border-radius:12px;object-fit:cover;background:var(--fill);flex:none}
-.det .txt{flex:1;min-width:0}
-.det .t1{font-size:17px;font-weight:600}
-.det .t2{font-size:13px;color:var(--label-2);font-style:italic}
-.conf{display:flex;align-items:center;gap:8px;margin-top:5px}
-.conf .m{flex:1;height:4px;border-radius:2px;background:var(--fill);overflow:hidden}
-.conf .m i{display:block;height:100%;background:var(--moss)}
-.conf span{font-size:12px;color:var(--label-2);font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
-.det.fresh{animation:pop .45s ease}
-@keyframes pop{from{background:rgba(62,113,80,.18)}to{background:transparent}}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;gap:12px}
-.toggle-row .txt{font-size:16px}
-.toggle-row .sub{font-size:13px;color:var(--label-2)}
-.switch{position:relative;width:51px;height:31px;border-radius:16px;background:var(--fill);flex:none;transition:background .2s}
+html,body{margin:0;background:var(--bg);color:var(--ink);overscroll-behavior:none}
+body{font-family:ui-rounded,"SF Pro Rounded",-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;
+  background-image:radial-gradient(circle at 12% 8%,rgba(255,178,63,.20) 0 120px,transparent 121px),radial-gradient(circle at 92% 30%,rgba(63,162,218,.14) 0 90px,transparent 91px);background-attachment:fixed}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+img{-webkit-user-drag:none}
+#app{max-width:1100px;margin:0 auto;padding:0 16px calc(var(--sb) + 28px)}
+.top{display:flex;align-items:flex-start;justify-content:space-between;padding:calc(var(--st) + 18px) 4px 6px}
+.top h1{margin:0;font-size:34px;line-height:1.05;font-weight:800;letter-spacing:-.01em}
+.top h1 span{color:var(--mas)}
+.lock{position:relative;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--ink2);opacity:.55;flex:none}
+.lock svg.ring{position:absolute;inset:0;width:44px;height:44px;transform:rotate(-90deg)}
+.lock svg.ring circle{fill:none;stroke:var(--mas);stroke-width:4;stroke-dasharray:126;stroke-dashoffset:126;stroke-linecap:round}
+.lock.hold svg.ring circle{transition:stroke-dashoffset 1.4s linear;stroke-dashoffset:0}
+.cats{display:flex;gap:14px;overflow-x:auto;padding:14px 4px 10px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat{flex:none;display:flex;flex-direction:column;align-items:center;gap:6px;width:84px}
+.cat .b{width:78px;height:78px;border-radius:50%;background:var(--c);padding:5px;box-shadow:var(--shadow);transition:transform .15s}
+.cat .b img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;border:3px solid rgba(255,255,255,.9)}
+.cat span{font-size:15px;font-weight:700}
+.cat[aria-pressed="true"] .b{transform:scale(1.1);box-shadow:0 0 0 4px #fff,0 0 0 8px var(--c),var(--shadow)}
+.game-btn{display:flex;align-items:center;gap:14px;width:100%;margin:8px 0 18px;padding:14px 18px;border-radius:26px;background:linear-gradient(135deg,#FFCF4A,#FF9F43);color:#4A2A00;font-size:22px;font-weight:800;box-shadow:var(--shadow)}
+.game-btn .ic{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.7);display:grid;place-items:center;font-size:30px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media (min-width:640px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:960px){.grid{grid-template-columns:repeat(4,1fr)}}
+.card{position:relative;display:block;border-radius:26px;overflow:hidden;background:var(--card);box-shadow:var(--shadow);aspect-ratio:1/1.12;transition:transform .12s}
+.card:active{transform:scale(.96)}
+.card img{width:100%;height:100%;object-fit:cover;display:block;background:#F1E4CC}
+.card span{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 10px;text-align:center;font-size:22px;font-weight:800;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.45);background:linear-gradient(transparent,rgba(0,0,0,.55))}
+.card::before{content:"";position:absolute;inset:0;border:5px solid var(--c,transparent);border-radius:26px;pointer-events:none;z-index:1}
+.stage{position:fixed;inset:0;background:#000;z-index:20;overflow:hidden}
+.stage .hero{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.3,1.6,.5,1)}
+.stage.playing .hero{transform:scale(1.04)}
+.stage .shade{position:absolute;inset:auto 0 0 0;height:42%;background:linear-gradient(transparent,rgba(0,0,0,.65));pointer-events:none}
+.roundbtn{position:absolute;width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.92);color:var(--ink);display:grid;place-items:center;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:3}
+.roundbtn:active{transform:scale(.92)}
+.roundbtn svg{width:32px;height:32px}
+.home{top:calc(var(--st) + 14px);left:14px}
+.addbtn{top:calc(var(--st) + 20px);right:14px;position:absolute;z-index:3;background:rgba(255,255,255,.92);border-radius:22px;padding:10px 16px;font-weight:700;font-size:15px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.bottom{position:absolute;left:0;right:0;bottom:calc(var(--sb) + 18px);display:flex;align-items:center;justify-content:space-between;padding:0 14px;z-index:3;gap:8px}
+.bottom .prev,.bottom .next{position:static;width:76px;height:76px}
+.bottom .prev svg,.bottom .next svg{width:38px;height:38px}
+.bigname{flex:1;text-align:center;color:#fff;font-size:44px;font-weight:800;line-height:1.05;text-shadow:0 3px 12px rgba(0,0,0,.5)}
+.waves{position:absolute;left:50%;top:46%;width:10px;height:10px;z-index:2;pointer-events:none}
+.waves i{position:absolute;left:-90px;top:-90px;width:180px;height:180px;border-radius:50%;border:6px solid rgba(255,255,255,.85);opacity:0}
+.stage.playing .waves i{animation:wave 1.6s ease-out infinite}
+.stage.playing .waves i:nth-child(2){animation-delay:.53s}
+.stage.playing .waves i:nth-child(3){animation-delay:1.06s}
+@keyframes wave{from{transform:scale(.3);opacity:.9}to{transform:scale(1.9);opacity:0}}
+.tapme{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:96px;height:96px;border-radius:50%;background:rgba(255,255,255,.88);display:grid;place-items:center;z-index:2;box-shadow:0 8px 24px rgba(0,0,0,.3);transition:opacity .3s,transform .3s;pointer-events:none}
+.tapme svg{width:46px;height:46px;color:var(--ink)}
+.stage.playing .tapme,.stage.started .tapme{opacity:0;transform:translate(-50%,-50%) scale(.6)}
+.toast{position:absolute;left:50%;top:calc(var(--st) + 90px);transform:translateX(-50%);background:rgba(255,255,255,.95);color:var(--ink);padding:10px 16px;border-radius:16px;font-size:15px;font-weight:600;z-index:4;max-width:86%;text-align:center}
+.game{position:fixed;inset:0;background:var(--bg);z-index:20;display:flex;flex-direction:column;padding:calc(var(--st) + 14px) 16px calc(var(--sb) + 16px)}
+.game .home{position:static;flex:none}
+.ghead{display:flex;align-items:center;gap:12px}
+.question{flex:1;font-size:28px;font-weight:800;line-height:1.1}
+.question b{color:var(--granja)}
+.again{width:64px;height:64px;border-radius:50%;background:#fff;box-shadow:var(--shadow);display:grid;place-items:center;flex:none}
+.again svg{width:30px;height:30px}
+.choices{flex:1;display:grid;gap:14px;margin-top:16px;grid-template-columns:1fr}
+.choices.n3{grid-template-rows:repeat(3,1fr)}
+.choices.n2{grid-template-rows:repeat(2,1fr)}
+@media (orientation:landscape){.choices{grid-template-columns:repeat(var(--n),1fr);grid-template-rows:1fr!important}}
+.choice{position:relative;border-radius:30px;overflow:hidden;box-shadow:var(--shadow);background:#F1E4CC;min-height:0;transition:transform .15s,opacity .3s}
+.choice img{width:100%;height:100%;object-fit:cover;display:block}
+.choice.ok{box-shadow:0 0 0 8px #5BC85B,var(--shadow);transform:scale(1.02)}
+.choice.no{animation:nope .45s}
+.choice.dim{opacity:.35}
+@keyframes nope{20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.stars{position:fixed;inset:0;pointer-events:none;z-index:30;overflow:hidden}
+.stars i{position:absolute;width:16px;height:16px;border-radius:4px;top:-20px;animation:fall 1.6s ease-in forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.parents{padding-top:calc(var(--st) + 10px)}
+.ph{display:flex;align-items:center;justify-content:space-between;margin:10px 0 6px}
+.ph h1{font-size:28px;margin:0;font-weight:800}
+.pill{background:#fff;border-radius:20px;padding:10px 16px;font-weight:700;box-shadow:var(--shadow);color:var(--ink)}
+.sec{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2);font-weight:700;margin:22px 6px 8px}
+.box{background:#fff;border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.search{display:flex;align-items:center;gap:10px;background:#fff;border-radius:18px;padding:12px 14px;box-shadow:var(--shadow)}
+.search input{flex:1;border:0;outline:0;font:inherit;font-size:18px;background:none;color:var(--ink);-webkit-user-select:text;user-select:text}
+.row{display:flex;align-items:center;gap:12px;padding:10px 14px;width:100%;text-align:left;position:relative;min-height:64px}
+.row + .row{border-top:1px solid #F3E8D6}
+.row img,.row .ph0{width:56px;height:56px;border-radius:14px;object-fit:cover;background:#F1E4CC;flex:none}
+.row .t{flex:1;min-width:0}
+.row .t1{font-size:17px;font-weight:700}
+.row .t2{font-size:13px;color:var(--ink2);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .x{width:40px;height:40px;border-radius:50%;background:#F7EEDF;font-size:18px;color:var(--ink2);flex:none}
+.opt{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;gap:12px}
+.opt + .opt{border-top:1px solid #F3E8D6}
+.opt .s{font-size:13px;color:var(--ink2)}
+.switch{position:relative;width:51px;height:31px;border-radius:16px;background:#E6DCCB;flex:none;transition:background .2s}
 .switch::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15);transition:transform .2s}
-.switch[aria-checked="true"]{background:#34A35A}
+.switch[aria-checked="true"]{background:#45B35F}
 .switch[aria-checked="true"]::after{transform:translateX(20px)}
-
-/* ---------- Cerca de ti ---------- */
-.loc-head{display:flex;align-items:center;gap:10px;margin:24px 4px 12px}
-.loc-head .pin{width:36px;height:36px;border-radius:50%;background:var(--moss);color:#fff;display:grid;place-items:center;flex:none}
-@media (prefers-color-scheme: dark){ .loc-head .pin{color:#0E1310} }
-.loc-head .t1{font-size:20px;font-weight:700;line-height:1.15}
-.loc-head .t2{font-size:13px;color:var(--label-2)}
-.bigmap{height:min(52vh,420px);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);z-index:1;margin-top:10px}
-.cell.action{color:var(--moss);font-weight:600;width:100%;text-align:left;min-height:50px}
-.cell.action svg{flex:none}
-.hint{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);padding:22px 18px;margin-top:22px;text-align:center;color:var(--label-2);font-size:15px}
-.hint b{display:block;color:var(--label);font-size:17px;margin-bottom:4px}
-.seg-label{font-size:13px;color:var(--label-2);margin:14px 4px -4px}
-
-
-/* ---------- Foto ---------- */
-.photo-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
-.pbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px 10px;border-radius:16px;background:var(--surface);color:var(--moss);font-weight:600;font-size:15px;box-shadow:var(--shadow);cursor:pointer;text-align:center}
-.pbtn.main{background:radial-gradient(circle at 35% 30%,#5C9A6E,var(--moss-deep));color:#F3F1E7}
-.pbtn.wide{flex-direction:row;margin-top:14px;padding:14px;font-size:15px}
-.pbtn:active{transform:scale(.98)}
-.ppreview{margin-top:18px;border-radius:18px;overflow:hidden;box-shadow:var(--shadow);background:var(--fill)}
-.ppreview img{display:block;width:100%;max-height:52vh;object-fit:cover}
-.pres{background:var(--surface);border-radius:16px;box-shadow:var(--shadow);padding:14px;margin-top:14px}
-.pres-top{display:flex;gap:12px;align-items:center}
-.pres-top img,.pres-top .ph{width:72px;height:72px;border-radius:14px;object-fit:cover;background:var(--fill);flex:none}
-.pres-top .k{font-size:13px;color:var(--label-2)}
-.pres-top .n{font-size:22px;font-weight:700;line-height:1.15}
-.pres-top .s{font-size:14px;color:var(--label-2);font-style:italic}
-.pres .conf{margin-top:12px}
-.pres .lin{font-size:13px;color:var(--label-2);margin-top:8px}
-.breed{margin-top:14px;padding-top:12px;border-top:.5px solid var(--sep)}
-.breed .bk{font-size:13px;color:var(--label-2)}
-.breed .bn{font-size:19px;font-weight:700;margin-top:2px}
-.breed .bn span{font-size:14px;font-weight:600;color:var(--moss)}
-.breed p{font-size:15px;line-height:1.45;margin:8px 0 4px}
-.breed a{color:var(--moss);font-size:14px;font-weight:600}
-.breed .bo{font-size:13px;color:var(--label-2);margin-top:8px}
-
-/* ---------- Barra de pestañas ---------- */
-.tabbar{position:fixed;z-index:50;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:0;padding:6px 0 calc(var(--sb) + 4px);
-  background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep)}
-.tabbar a{flex:1;max-width:200px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:500;color:var(--label-3);padding:4px 0}
-.tabbar a[aria-current="page"]{color:var(--moss)}
-.tabbar svg{width:26px;height:26px}
-footer{color:var(--label-3);font-size:12px;margin:28px 4px 0;line-height:1.4}
+.seg{display:flex;background:#F2E8D8;border-radius:12px;padding:3px}
+.seg button{padding:7px 16px;border-radius:9px;font-weight:700;color:var(--ink2)}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.status{color:var(--ink2);text-align:center;padding:24px 16px;font-size:15px}
+.spinner{width:28px;height:28px;border-radius:50%;border:3px solid #EADBC2;border-top-color:var(--granja);animation:spin .8s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.credits{font-size:13px;color:var(--ink2);line-height:1.45;padding:12px 16px}
+.credits a{color:var(--ink2)}
+.credits p{margin:0 0 8px}
+details summary{list-style:none;padding:14px 16px;font-weight:700;cursor:pointer}
+details summary::-webkit-details-marker{display:none}
+.note{font-size:14px;color:var(--ink2);margin:8px 6px 0;line-height:1.4}
+.bar{height:8px;border-radius:4px;background:#F2E8D8;overflow:hidden;margin:0 16px 14px}
+.bar i{display:block;height:100%;width:0;background:var(--selva);transition:width .2s}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<main id="view"></main>
-
-<nav class="tabbar" aria-label="Secciones">
-  <a href="#/" id="tab-explore">
-    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20c0-7 5-13 15-15 0 9-5 15-12 15"/><path d="M5 23c3-5 6-8 10-11"/></svg>
-    Explorar
-  </a>
-  <a href="#/cerca" id="tab-near">
-    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 25s8-7.2 8-13.5a8 8 0 0 0-16 0C6 17.8 14 25 14 25z"/><circle cx="14" cy="11.5" r="3"/></svg>
-    Cerca
-  </a>
-  <a href="#/foto" id="tab-photo">
-    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9.5h3.5l1.8-2.8h7.4l1.8 2.8H23a1 1 0 0 1 1 1V21a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V10.5a1 1 0 0 1 1-1z"/><circle cx="14" cy="15.3" r="4"/></svg>
-    Foto
-  </a>
-  <a href="#/escuchar" id="tab-listen">
-    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 12v4M8.5 8v12M13 4v20M17.5 9v10M22 6v16"/></svg>
-    Escuchar
-  </a>
-</nav>
-
+<main id="app"></main>
+<div class="stars" id="stars"></div>
 <script>
+/* Los animales de Olivia. Fotos reales (iNaturalist) y sonidos reales (iNaturalist y Wikimedia Commons). */
+const ANIMALS = [{"k": "perro", "name": "el perro", "cat": "casa", "sci": "Canis familiaris", "id": 47144, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/307568930/large.jpg", "photo_by": "(c) Alec Karcz, some rights reserved (CC BY-NC), uploaded by Alec Karcz", "clips": [{"file": "perro1.mp3", "src": "iNaturalist", "by": "Arturo", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/105525669"}, {"file": "perro2.mp3", "src": "iNaturalist", "by": "Matt Clancy", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/265798125"}]}, {"k": "gato", "name": "el gato", "cat": "casa", "sci": "Felis catus", "id": 118552, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/129658776/large.jpg", "photo_by": "(c) Von.grzanka, some rights reserved (CC BY-SA)", "clips": [{"file": "gato1.mp3", "src": "iNaturalist", "by": "Misha Zitser", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/307429196"}, {"file": "gato2.mp3", "src": "iNaturalist", "by": "Benjamin Hamann", "lic": "c", "page": "https://www.inaturalist.org/observations/112512547"}]}, {"k": "vaca", "name": "la vaca", "cat": "granja", "sci": "Bos taurus", "id": 74113, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/408007934/large.jpeg", "photo_by": "(c) jwillardz, some rights reserved (CC BY-NC)", "clips": [{"file": "vaca1.mp3", "src": "iNaturalist", "by": "parker_ensminger", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/152306081"}]}, {"k": "oveja", "name": "la oveja", "cat": "granja", "sci": "Ovis aries", "id": 121578, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/632127459/large.jpg", "photo_by": "(c) Christopher Stephens, some rights reserved (CC BY-SA), uploaded by Christopher Stephens", "clips": [{"file": "oveja1.mp3", "src": "iNaturalist", "by": "Dewald du Plessis", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/186529905"}, {"file": "oveja2.mp3", "src": "iNaturalist", "by": "trupp_friedrichshain", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/376473380"}]}, {"k": "cabra", "name": "la cabra", "cat": "granja", "sci": "Capra hircus", "id": 123070, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/6035700/large.jpeg", "photo_by": "(c) Jakob Fahr, some rights reserved (CC BY-NC), uploaded by Jakob Fahr", "clips": [{"file": "cabra1.mp3", "src": "iNaturalist", "by": "Enrique Flores García", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/137365451"}, {"file": "cabra2.mp3", "src": "iNaturalist", "by": "laelene", "lic": "c", "page": "https://www.inaturalist.org/observations/385141114"}]}, {"k": "cerdo", "name": "el cerdo", "cat": "granja", "sci": "Sus scrofa domesticus", "id": 324492, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/267631414/large.jpeg", "photo_by": "\nSteven Lek, no known copyright restrictions (public domain)", "clips": [{"file": "cerdo1.mp3", "src": "iNaturalist", "by": "Stefano De Vivo", "lic": "c", "page": "https://www.inaturalist.org/observations/111543983"}, {"file": "cerdo2.mp3", "src": "iNaturalist", "by": "Ginna Abigail Fajardo Galarza", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/83828599"}]}, {"k": "caballo", "name": "el caballo", "cat": "granja", "sci": "Equus caballus", "id": 209233, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/23672580/large.jpeg", "photo_by": "(c) copper, some rights reserved (CC BY-NC), uploaded by copper", "clips": [{"file": "caballo1.mp3", "src": "iNaturalist", "by": "José Gabriel Sodré", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/259818438"}, {"file": "caballo2.mp3", "src": "iNaturalist", "by": "Moses J. Michelsohn", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/293494863"}]}, {"k": "burro", "name": "el burro", "cat": "granja", "sci": "Equus asinus", "id": 148030, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/140505310/large.jpg", "photo_by": "(c) Justyn Stahl, some rights reserved (CC BY-NC), uploaded by Justyn Stahl", "clips": [{"file": "burro1.mp3", "src": "iNaturalist", "by": "Christine Hass", "lic": "c", "page": "https://www.inaturalist.org/observations/164865332"}, {"file": "burro2.mp3", "src": "iNaturalist", "by": "Darvin DeShazer", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/315247248"}]}, {"k": "gallina", "name": "la gallina", "cat": "granja", "sci": "Gallus gallus domesticus", "id": 505478, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/339115169/large.jpg", "photo_by": "(c) Sequoia Janirella Wrens, some rights reserved (CC BY-NC)", "clips": [{"file": "gallina1.mp3", "src": "iNaturalist", "by": "Hong Wenyang", "lic": "c", "page": "https://www.inaturalist.org/observations/68864423"}, {"file": "gallina2.mp3", "src": "iNaturalist", "by": "José Gabriel Sodré", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/338637383"}]}, {"k": "gallo", "name": "el gallo", "cat": "granja", "sci": "Gallus gallus domesticus", "id": 505478, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/277353770/large.jpeg", "photo_by": "(c) Adam, some rights reserved (CC BY-NC)", "clips": [{"file": "gallo1.mp3", "src": "iNaturalist", "by": "Rudy", "lic": "c", "page": "https://www.inaturalist.org/observations/229716415"}, {"file": "gallo2.mp3", "src": "iNaturalist", "by": "Hong Wenyang", "lic": "c", "page": "https://www.inaturalist.org/observations/68864423"}]}, {"k": "pato", "name": "el pato", "cat": "granja", "sci": "Anas platyrhynchos", "id": 6930, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/95268822/large.jpg", "photo_by": "(c) anonymous, some rights reserved (CC BY-SA)", "clips": [{"file": "pato1.mp3", "src": "iNaturalist", "by": "KJ Armstrong", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/200361702"}, {"file": "pato2.mp3", "src": "iNaturalist", "by": "S. Stanfield", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/126764015"}]}, {"k": "pavo", "name": "el pavo", "cat": "granja", "sci": "Meleagris gallopavo", "id": 906, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/31353610/large.jpg", "photo_by": "(c) Matt K, some rights reserved (CC BY-NC), uploaded by Matt K", "clips": [{"file": "pavo1.mp3", "src": "iNaturalist", "by": "Stephen B. Brown", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/188436756"}, {"file": "pavo2.mp3", "src": "iNaturalist", "by": "djweyer", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/261570734"}]}, {"k": "ganso", "name": "el ganso", "cat": "granja", "sci": "Anser anser", "id": 7018, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/61334030/large.jpg", "photo_by": "(c) Frans Vandewalle, some rights reserved (CC BY-NC)", "clips": [{"file": "ganso1.mp3", "src": "iNaturalist", "by": "rokcestnik", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/39091643"}, {"file": "ganso2.mp3", "src": "iNaturalist", "by": "Chia⚡aka Cory Chiappone", "lic": "c", "page": "https://www.inaturalist.org/observations/343790633"}]}, {"k": "pavoreal", "name": "el pavo real", "cat": "granja", "sci": "Pavo cristatus", "id": 1204, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/165318600/large.jpg", "photo_by": "(c) Cloudtail the Snow Leopard, some rights reserved (CC BY-NC-ND)", "clips": [{"file": "pavoreal1.mp3", "src": "iNaturalist", "by": "José Gabriel Sodré", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/317627123"}, {"file": "pavoreal2.mp3", "src": "iNaturalist", "by": "Patrick James", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/246143106"}]}, {"k": "leon", "name": "el león", "cat": "selva", "sci": "Panthera leo", "id": 41964, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/9225318/large.jpg", "photo_by": "(c) seasav, some rights reserved (CC BY-NC-ND), uploaded by seasav", "clips": [{"file": "leon1.mp3", "src": "iNaturalist", "by": "congonaturalist", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/79675247"}, {"file": "leon2.mp3", "src": "iNaturalist", "by": "Marc Anderson", "lic": "c", "page": "https://www.inaturalist.org/observations/330954247"}]}, {"k": "tigre", "name": "el tigre", "cat": "selva", "sci": "Panthera tigris", "id": 41967, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/13207883/large.jpg", "photo_by": "(c) omveerchoudhary, some rights reserved (CC BY-NC)", "clips": [{"file": "tigre1.mp3", "src": "iNaturalist", "by": "cool_nature", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/365087442"}, {"file": "tigre2.mp3", "src": "iNaturalist", "by": "Marc Anderson", "lic": "c", "page": "https://www.inaturalist.org/observations/330954409"}]}, {"k": "elefante", "name": "el elefante", "cat": "selva", "sci": "Loxodonta africana", "id": 43694, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/93674728/large.jpg", "photo_by": "(c) dhfischer, some rights reserved (CC BY), uploaded by dhfischer", "clips": [{"file": "elefante1.mp3", "src": "iNaturalist", "by": "Tuoichen", "lic": "cc-by", "page": "https://www.inaturalist.org/observations/48825579"}, {"file": "elefante2.mp3", "src": "iNaturalist", "by": "nojinat", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/176524398"}]}, {"k": "gorila", "name": "el gorila", "cat": "selva", "sci": "Gorilla gorilla", "id": 43580, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/282241201/large.jpg", "photo_by": "(c) simben, some rights reserved (CC BY-NC-ND), uploaded by simben", "clips": [{"file": "gorila1.mp3", "src": "iNaturalist", "by": "bureaubenjamin", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/78206692"}, {"file": "gorila2.mp3", "src": "iNaturalist", "by": "bureaubenjamin", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/142666254"}]}, {"k": "chimpance", "name": "el chimpancé", "cat": "selva", "sci": "Pan troglodytes", "id": 43577, "photo": "https://static.inaturalist.org/photos/184174969/large.jpeg", "photo_by": "(c) Amos Pampy Hardecker, all rights reserved, uploaded by Amos Pampy Hardecker", "clips": [{"file": "chimpance1.mp3", "src": "iNaturalist", "by": "mlanguy", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/164041581"}, {"file": "chimpance2.mp3", "src": "iNaturalist", "by": "Elliot Greiner", "lic": "cc-by", "page": "https://www.inaturalist.org/observations/250108651"}]}, {"k": "monoaullador", "name": "el mono aullador", "cat": "selva", "sci": "Alouatta palliata", "id": 43436, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/187746639/large.jpeg", "photo_by": "(c) Cephas, some rights reserved (CC BY-SA)", "clips": [{"file": "monoaullador1.mp3", "src": "iNaturalist", "by": "Edgar Antonio Ortega Lozada", "lic": "c", "page": "https://www.inaturalist.org/observations/196306013"}, {"file": "monoaullador2.mp3", "src": "iNaturalist", "by": "Neil Moulton", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/265478500"}]}, {"k": "cebra", "name": "la cebra", "cat": "selva", "sci": "Equus quagga", "id": 43335, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/335469754/large.jpg", "photo_by": "(c) simben, some rights reserved (CC BY-NC-ND), uploaded by simben", "clips": [{"file": "cebra1.mp3", "src": "iNaturalist", "by": "Marc Anderson", "lic": "c", "page": "https://www.inaturalist.org/observations/333835399"}]}, {"k": "hipopotamo", "name": "el hipopótamo", "cat": "selva", "sci": "Hippopotamus amphibius", "id": 42149, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/13896177/large.jpg", "photo_by": "(c) Mathias D'haen, some rights reserved (CC BY-NC), uploaded by Mathias D'haen", "clips": [{"file": "hipopotamo1.mp3", "src": "iNaturalist", "by": "Marc Anderson", "lic": "c", "page": "https://www.inaturalist.org/observations/333692610"}, {"file": "hipopotamo2.mp3", "src": "iNaturalist", "by": "Evan Trotzuk", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/32901099"}]}, {"k": "hiena", "name": "la hiena", "cat": "selva", "sci": "Crocuta crocuta", "id": 41886, "photo": "https://static.inaturalist.org/photos/15526597/large.jpg", "photo_by": "(c) mary-hunter, all rights reserved, uploaded by mary-hunter", "clips": [{"file": "hiena1.mp3", "src": "iNaturalist", "by": "Ayco Tack", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/340993093"}, {"file": "hiena2.mp3", "src": "iNaturalist", "by": "Jérémy Calvo", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/317555719"}]}, {"k": "loro", "name": "el loro", "cat": "selva", "sci": "Ara macao", "id": 19022, "photo": "https://static.inaturalist.org/photos/67503679/large.jpg", "photo_by": "(c) Andrew Whitworth, all rights reserved, uploaded by Andrew Whitworth", "clips": [{"file": "loro1.mp3", "src": "iNaturalist", "by": "providenceplus", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/244314368"}, {"file": "loro2.mp3", "src": "iNaturalist", "by": "providenceplus", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/244314367"}]}, {"k": "tucan", "name": "el tucán", "cat": "selva", "sci": "Ramphastos sulfuratus", "id": 18796, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/2964195/large.jpg", "photo_by": "(c) Greg Lasley, some rights reserved (CC BY-NC), uploaded by Greg Lasley", "clips": [{"file": "tucan1.mp3", "src": "iNaturalist", "by": "vichepatata", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/209009331"}, {"file": "tucan2.mp3", "src": "iNaturalist", "by": "Aldina Franco", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/109597223"}]}, {"k": "caiman", "name": "el caimán", "cat": "selva", "sci": "Alligator mississippiensis", "id": 26159, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/446571555/large.jpg", "photo_by": "(c) sandiwheeler, some rights reserved (CC BY-NC), uploaded by sandiwheeler", "clips": [{"file": "caiman1.mp3", "src": "iNaturalist", "by": "William Wise Photography", "lic": "c", "page": "https://www.inaturalist.org/observations/45193295"}, {"file": "caiman2.mp3", "src": "iNaturalist", "by": "Paul Marvin", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/306053866"}]}, {"k": "leopardo", "name": "el leopardo", "cat": "selva", "sci": "Panthera pardus", "id": 41963, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/8666580/large.jpeg", "photo_by": "(c) janaohrner, some rights reserved (CC BY-NC), uploaded by janaohrner", "clips": [{"file": "leopardo1.mp3", "src": "iNaturalist", "by": "Marc Anderson", "lic": "c", "page": "https://www.inaturalist.org/observations/330954245"}, {"file": "leopardo2.mp3", "src": "iNaturalist", "by": "mob-critters", "lic": "c", "page": "https://www.inaturalist.org/observations/200133057"}]}, {"k": "jaguar", "name": "el jaguar", "cat": "selva", "sci": "Panthera onca", "id": 41970, "photo": "https://static.inaturalist.org/photos/51015966/large.jpg", "photo_by": "(c) rdwilcox51, all rights reserved, uploaded by rdwilcox51", "clips": [{"file": "jaguar1.mp3", "src": "iNaturalist", "by": "James AZ", "lic": "c", "page": "https://www.inaturalist.org/observations/170150228"}]}, {"k": "rinoceronte", "name": "el rinoceronte", "cat": "selva", "sci": "Ceratotherium simum", "id": 43348, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/57287523/large.jpg", "photo_by": "(c) janaohrner, some rights reserved (CC BY-NC), uploaded by janaohrner", "clips": [{"file": "rinoceronte1.mp3", "src": "iNaturalist", "by": "Cristal Llanos", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/276252059"}, {"file": "rinoceronte2.mp3", "src": "iNaturalist", "by": "Marc Anderson", "lic": "c", "page": "https://www.inaturalist.org/observations/333835400"}]}, {"k": "suricata", "name": "la suricata", "cat": "selva", "sci": "Suricata suricatta", "id": 41943, "photo": "https://static.inaturalist.org/photos/288911228/large.jpg", "photo_by": "(c) Mark Sikking, all rights reserved, uploaded by Mark Sikking", "clips": [{"file": "suricata1.mp3", "src": "iNaturalist", "by": "Hua Wan", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/265381326"}, {"file": "suricata2.mp3", "src": "iNaturalist", "by": "彭啟賢", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/190485568"}]}, {"k": "lobo", "name": "el lobo", "cat": "bosque", "sci": "Canis lupus", "id": 42048, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/43410580/large.jpg", "photo_by": "(c) Brian Starzomski, some rights reserved (CC BY-NC), uploaded by Brian Starzomski", "clips": [{"file": "lobo1.mp3", "src": "iNaturalist", "by": "DaveWilsonImages", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/214653320"}]}, {"k": "oso", "name": "el oso", "cat": "bosque", "sci": "Ursus arctos", "id": 41641, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/1491897/large.jpg", "photo_by": "(c) Donna Pomeroy, some rights reserved (CC BY-NC), uploaded by Donna Pomeroy", "clips": [{"file": "oso1.mp3", "src": "iNaturalist", "by": "Joanne Siderius", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/190810862"}, {"file": "oso2.mp3", "src": "iNaturalist", "by": "Nicoleta", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/263682724"}]}, {"k": "zorro", "name": "el zorro", "cat": "bosque", "sci": "Vulpes vulpes", "id": 42069, "photo": "https://static.inaturalist.org/photos/265916780/large.jpg", "photo_by": "(c) Pierre Noel, all rights reserved, uploaded by Pierre Noel", "clips": [{"file": "zorro1.mp3", "src": "iNaturalist", "by": "Ghostomelon", "lic": "cc-by", "page": "https://www.inaturalist.org/observations/263952120"}, {"file": "zorro2.mp3", "src": "iNaturalist", "by": "Alvaro Jaramillo", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/62693559"}]}, {"k": "ciervo", "name": "el ciervo", "cat": "bosque", "sci": "Cervus elaphus", "id": 204113, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/25186445/large.jpg", "photo_by": "(c) Jon J. Laysell, some rights reserved (CC BY-NC), uploaded by Jon J. Laysell", "clips": [{"file": "ciervo1.mp3", "src": "iNaturalist", "by": "Лавріненко Катерина", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/319561873"}, {"file": "ciervo2.mp3", "src": "iNaturalist", "by": "Andrew Skotnicki", "lic": "cc-by", "page": "https://www.inaturalist.org/observations/138361274"}]}, {"k": "jabali", "name": "el jabalí", "cat": "bosque", "sci": "Sus scrofa", "id": 42134, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/414500081/large.jpg", "photo_by": "(c) Nathalie Hausser, some rights reserved (CC BY-NC-ND)", "clips": [{"file": "jabali1.mp3", "src": "iNaturalist", "by": "Jérémy Calvo", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/324944756"}, {"file": "jabali2.mp3", "src": "iNaturalist", "by": "Anne Parsons", "lic": "cc0", "page": "https://www.inaturalist.org/observations/118517713"}]}, {"k": "buho", "name": "el búho", "cat": "bosque", "sci": "Bubo bubo", "id": 20059, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/1840610/large.jpg", "photo_by": "(c) Paul Cools, some rights reserved (CC BY-NC), uploaded by Paul Cools", "clips": [{"file": "buho1.mp3", "src": "iNaturalist", "by": "carnifex", "lic": "cc-by", "page": "https://www.inaturalist.org/observations/311567747"}, {"file": "buho2.mp3", "src": "iNaturalist", "by": "Tobias Gratzer", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/204465232"}]}, {"k": "carpintero", "name": "el pájaro carpintero", "cat": "bosque", "sci": "Picus sharpei", "id": 144242, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/3247637/large.jpg", "photo_by": "(c) Agustín Povedano, some rights reserved (CC BY-NC-SA)", "clips": [{"file": "carpintero1.mp3", "src": "iNaturalist", "by": "William Hull", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/71357060"}, {"file": "carpintero2.mp3", "src": "iNaturalist", "by": "lzos", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/217728934"}]}, {"k": "cuco", "name": "el cuco", "cat": "bosque", "sci": "Cuculus canorus", "id": 1907, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/380547488/large.jpg", "photo_by": "(c) Oleg, some rights reserved (CC BY-NC), uploaded by Oleg", "clips": [{"file": "cuco1.mp3", "src": "iNaturalist", "by": "Bodo Sonnenburg", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/180402413"}, {"file": "cuco2.mp3", "src": "iNaturalist", "by": "Jessee J. Smith", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/246527738"}]}, {"k": "ardilla", "name": "la ardilla", "cat": "bosque", "sci": "Sciurus vulgaris", "id": 46001, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/462357539/large.jpg", "photo_by": "(c) Rhododendrites, some rights reserved (CC BY-SA)", "clips": [{"file": "ardilla1.mp3", "src": "iNaturalist", "by": "Stefan", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/355197794"}, {"file": "ardilla2.mp3", "src": "iNaturalist", "by": "jf609", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/261024555"}]}, {"k": "rana", "name": "la rana", "cat": "bosque", "sci": "Pelophylax perezi", "id": 1319812, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/408629615/large.jpg", "photo_by": "(c) Erland Refling Nielsen, some rights reserved (CC BY-NC)", "clips": [{"file": "rana1.mp3", "src": "iNaturalist", "by": "Eduardo Ramirez Esteban", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/157054291"}, {"file": "rana2.mp3", "src": "iNaturalist", "by": "David Carrera", "lic": "cc-by-nc-nd", "page": "https://www.inaturalist.org/observations/163918799"}]}, {"k": "grillo", "name": "el grillo", "cat": "bosque", "sci": "Gryllus campestris", "id": 71248, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/157317382/large.jpg", "photo_by": "(c) Ryszard, some rights reserved (CC BY-NC)", "clips": [{"file": "grillo1.mp3", "src": "iNaturalist", "by": "Frank Fritzlar", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/304282015"}, {"file": "grillo2.mp3", "src": "iNaturalist", "by": "Brenda Black", "lic": "cc-by", "page": "https://www.inaturalist.org/observations/363115396"}]}, {"k": "cigarra", "name": "la cigarra", "cat": "bosque", "sci": "Lyristes plebejus", "id": 361905, "photo": "https://static.inaturalist.org/photos/351231745/large.jpg", "photo_by": "(c) jasius, all rights reserved, uploaded by jasius", "clips": [{"file": "cigarra1.mp3", "src": "iNaturalist", "by": "kartonka", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/300093394"}, {"file": "cigarra2.mp3", "src": "iNaturalist", "by": "Kerem Alp Özcan", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/305492523"}]}, {"k": "abeja", "name": "la abeja", "cat": "bosque", "sci": "Apis mellifera", "id": 47219, "photo": "https://static.inaturalist.org/photos/2369526/large.jpg", "photo_by": "(c) Georges-Alexandre Cotnoir, all rights reserved, uploaded by Georges-Alexandre Cotnoir", "clips": [{"file": "abeja1.mp3", "src": "iNaturalist", "by": "Will Sweet", "lic": "c", "page": "https://www.inaturalist.org/observations/96227385"}, {"file": "abeja2.mp3", "src": "iNaturalist", "by": "E. A.", "lic": "cc-by", "page": "https://www.inaturalist.org/observations/260507173"}]}, {"k": "koala", "name": "el koala", "cat": "bosque", "sci": "Phascolarctos cinereus", "id": 42983, "photo": "https://static.inaturalist.org/photos/425371537/large.jpeg", "photo_by": "(c) samzhang, all rights reserved", "clips": [{"file": "koala1.mp3", "src": "iNaturalist", "by": "Jo Track", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/261574399"}, {"file": "koala2.mp3", "src": "iNaturalist", "by": "anniesn", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/101279873"}]}, {"k": "ballena", "name": "la ballena", "cat": "mar", "sci": "Megaptera novaeangliae", "id": 41566, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/255461843/large.jpg", "photo_by": "(c) Wayne and Pam Osborn, some rights reserved (CC BY-NC), uploaded by Wayne and Pam Osborn", "clips": [{"file": "ballena1.mp3", "src": "iNaturalist", "by": "brock", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/106464886"}, {"file": "ballena2.mp3", "src": "iNaturalist", "by": "Dan Schofield", "lic": "cc-by", "page": "https://www.inaturalist.org/observations/108757163"}]}, {"k": "delfin", "name": "el delfín", "cat": "mar", "sci": "Delphinus delphis", "id": 41526, "photo": "https://static.inaturalist.org/photos/135085970/large.jpeg", "photo_by": "(c) Leo, all rights reserved, uploaded by Leo", "clips": [{"file": "delfin1.mp3", "src": "iNaturalist", "by": "annahd", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/377050648"}]}, {"k": "leonmarino", "name": "el león marino", "cat": "mar", "sci": "Zalophus californianus", "id": 41740, "photo": "https://static.inaturalist.org/photos/11888923/large.png", "photo_by": "(c) Jennifer Digdigan, all rights reserved, uploaded by Jennifer Digdigan", "clips": [{"file": "leonmarino1.mp3", "src": "iNaturalist", "by": "wgrace022", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/199108586"}]}, {"k": "pinguino", "name": "el pingüino", "cat": "mar", "sci": "Spheniscus demersus", "id": 3813, "photo": "https://static.inaturalist.org/photos/79056615/large.jpg", "photo_by": "(c) Don-Jean Leandri-Breton, all rights reserved, uploaded by Don-Jean Leandri-Breton", "clips": [{"file": "pinguino1.mp3", "src": "iNaturalist", "by": "Ryan van Huyssteen", "lic": "cc-by", "page": "https://www.inaturalist.org/observations/378392423"}, {"file": "pinguino2.mp3", "src": "iNaturalist", "by": "gatocatto", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/365758106"}]}, {"k": "gaviota", "name": "la gaviota", "cat": "mar", "sci": "Larus michahellis", "id": 59202, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/12831/large.jpg", "photo_by": "(c) JÃ¶rg Hempel, some rights reserved (CC BY-SA), uploaded by JÃ¶rg Hempel", "clips": [{"file": "gaviota1.mp3", "src": "iNaturalist", "by": "Ana Teresa Almeida", "lic": "c", "page": "https://www.inaturalist.org/observations/236483524"}]}, {"k": "nutria", "name": "la nutria", "cat": "mar", "sci": "Lutra lutra", "id": 41850, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/100389336/large.jpg", "photo_by": "(c) Tomi Tirkkonen, some rights reserved (CC BY-NC-SA)", "clips": [{"file": "nutria1.mp3", "src": "iNaturalist", "by": "gotemn", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/366306267"}, {"file": "nutria2.mp3", "src": "iNaturalist", "by": "Nelson Conceição", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/22201670"}]}, {"k": "gorrion", "name": "el gorrión", "cat": "pajaros", "sci": "Passer domesticus", "id": 13858, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/4608133/large.jpg", "photo_by": "(c) Ximo Galarza, some rights reserved (CC BY-NC-SA)", "clips": [{"file": "gorrion1.mp3", "src": "iNaturalist", "by": "Sam E", "lic": "cc-by", "page": "https://www.inaturalist.org/observations/294598634"}, {"file": "gorrion2.mp3", "src": "iNaturalist", "by": "butterfly546", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/69148355"}]}, {"k": "petirrojo", "name": "el petirrojo", "cat": "pajaros", "sci": "Erithacus rubecula", "id": 13094, "photo": "https://static.inaturalist.org/photos/331946615/large.jpeg", "photo_by": "(c) Jakob W., all rights reserved, uploaded by Jakob W.", "clips": [{"file": "petirrojo1.mp3", "src": "iNaturalist", "by": "janettocornetto", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/134750112"}, {"file": "petirrojo2.mp3", "src": "iNaturalist", "by": "Fiona Gillespie", "lic": "c", "page": "https://www.inaturalist.org/observations/260983353"}]}, {"k": "mirlo", "name": "el mirlo", "cat": "pajaros", "sci": "Turdus merula", "id": 12716, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/356885346/large.jpg", "photo_by": "(c) Luiz Lapa, some rights reserved (CC BY)", "clips": [{"file": "mirlo1.mp3", "src": "iNaturalist", "by": "anne172guides", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/45170863"}, {"file": "mirlo2.mp3", "src": "iNaturalist", "by": "Xabier Mikel", "lic": "c", "page": "https://www.inaturalist.org/observations/82897868"}]}, {"k": "cuervo", "name": "el cuervo", "cat": "pajaros", "sci": "Corvus corax", "id": 8010, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/54389687/large.jpg", "photo_by": "(c) arbyreed, some rights reserved (CC BY-NC-SA)", "clips": [{"file": "cuervo1.mp3", "src": "iNaturalist", "by": "siznax", "lic": "cc0", "page": "https://www.inaturalist.org/observations/15337150"}, {"file": "cuervo2.mp3", "src": "iNaturalist", "by": "Brian Magurn", "lic": "cc-by", "page": "https://www.inaturalist.org/observations/320048288"}]}, {"k": "paloma", "name": "la paloma", "cat": "pajaros", "sci": "Columba livia", "id": 3017, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/466776975/large.jpg", "photo_by": "(c) Birds of Gilgit-Baltistan, some rights reserved (CC BY-SA)", "clips": [{"file": "paloma1.mp3", "src": "iNaturalist", "by": "SVP", "lic": "c", "page": "https://www.inaturalist.org/observations/252552057"}, {"file": "paloma2.mp3", "src": "iNaturalist", "by": "Maria Fernanda", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/241880869"}]}, {"k": "canario", "name": "el canario", "cat": "pajaros", "sci": "Serinus canaria", "id": 9246, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/12383875/large.jpg", "photo_by": "(c) Juan Emilio, some rights reserved (CC BY-SA)", "clips": [{"file": "canario1.mp3", "src": "iNaturalist", "by": "bornabrezak", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/363051551"}, {"file": "canario2.mp3", "src": "iNaturalist", "by": "Donald Davesne", "lic": "cc-by", "page": "https://www.inaturalist.org/observations/148684081"}]}, {"k": "ciguena", "name": "la cigüeña", "cat": "pajaros", "sci": "Ciconia ciconia", "id": 4733, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/269104502/large.jpg", "photo_by": "(c) xulescu_g, some rights reserved (CC BY-SA)", "clips": [{"file": "ciguena1.mp3", "src": "iNaturalist", "by": "roby", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/226244705"}, {"file": "ciguena2.mp3", "src": "iNaturalist", "by": "Valerio", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/109861750"}]}, {"k": "golondrina", "name": "la golondrina", "cat": "pajaros", "sci": "Hirundo rustica", "id": 11901, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/122469139/large.jpg", "photo_by": "(c) Ad Konings, some rights reserved (CC BY-NC), uploaded by Ad Konings", "clips": [{"file": "golondrina1.mp3", "src": "iNaturalist", "by": "Phil Kahler", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/92060784"}, {"file": "golondrina2.mp3", "src": "iNaturalist", "by": "Kelly Tolentino", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/361482262"}]}, {"k": "aguila", "name": "el águila", "cat": "pajaros", "sci": "Aquila chrysaetos", "id": 5074, "photo": "https://static.inaturalist.org/photos/168362446/large.jpg", "photo_by": "(c) Carlos N. G. Bocos, all rights reserved, uploaded by Carlos N. G. Bocos", "clips": [{"file": "aguila1.mp3", "src": "iNaturalist", "by": "LJ Moore-McClelland", "lic": "cc-by", "page": "https://www.inaturalist.org/observations/132349138"}, {"file": "aguila2.mp3", "src": "iNaturalist", "by": "Aline Patricia Horikawa", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/364611736"}]}, {"k": "flamenco", "name": "el flamenco", "cat": "pajaros", "sci": "Phoenicopterus roseus", "id": 73222, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/187242272/large.jpg", "photo_by": "(c) cog2022, some rights reserved (CC BY-NC)", "clips": [{"file": "flamenco1.mp3", "src": "iNaturalist", "by": "morisha", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/90376849"}, {"file": "flamenco2.mp3", "src": "iNaturalist", "by": "Mateusz Bronikowski", "lic": "cc-by", "page": "https://www.inaturalist.org/observations/328920336"}]}, {"k": "cucaburra", "name": "el cucaburra", "cat": "pajaros", "sci": "Dacelo novaeguineae", "id": 2413, "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/533737970/large.jpg", "photo_by": "(c) Elliot Blythman, some rights reserved (CC BY-NC), uploaded by Elliot Blythman", "clips": [{"file": "cucaburra1.mp3", "src": "iNaturalist", "by": "Belinda J Raymond", "lic": "c", "page": "https://www.inaturalist.org/observations/122726970"}, {"file": "cucaburra2.mp3", "src": "iNaturalist", "by": "jen_w1", "lic": "cc-by-nc", "page": "https://www.inaturalist.org/observations/92875719"}]}];
+const CATS = [
+  { k: "todos", name: "Todos", c: "var(--todos)" },
+  { k: "casa", name: "Casa", c: "var(--casa)" },
+  { k: "granja", name: "Granja", c: "var(--granja)" },
+  { k: "selva", name: "Selva", c: "var(--selva)" },
+  { k: "bosque", name: "Bosque", c: "var(--bosque)" },
+  { k: "mar", name: "Mar", c: "var(--mar)" },
+  { k: "pajaros", name: "Pájaros", c: "var(--pajaros)" },
+  { k: "mas", name: "Más", c: "var(--mas)" }
+];
+const CAT_ICON = { todos: "leon", casa: "perro", granja: "vaca", selva: "elefante", bosque: "zorro", mar: "ballena", pajaros: "petirrojo" };
 const API = "https://api.inaturalist.org/v1";
-const SPAIN = 6774;
-const $view = document.getElementById("view");
-const S = { group: "Aves,Mammalia", region: "es", cache: {}, scroll: {} };
-
-/* ---------- utilidades ---------- */
-const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ANIMAL_GROUPS = ["Mammalia","Aves","Reptilia","Amphibia","Actinopterygii","Insecta","Arachnida","Mollusca","Animalia"];
+const $app = document.getElementById("app");
+const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ESC[c]);
 const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-const fmtN = n => (n ?? 0).toLocaleString("es-ES");
-async function getJSON(url){ const r = await fetch(url); if (!r.ok) throw new Error(r.status); return r.json(); }
-function fmtDate(d){
-  if (!d) return "Fecha desconocida";
-  const t = new Date(d + (d.length === 10 ? "T12:00:00" : ""));
-  return isNaN(t) ? d : t.toLocaleDateString("es-ES", {day:"numeric", month:"long", year:"numeric"});
-}
-const lic = c => c ? c.toUpperCase().replace("CC0", "dominio público") : "todos los derechos reservados";
-const loading = t => `<div class="status"><div class="spinner"></div>${esc(t)}</div>`;
-const chev = `<svg class="chev" width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5 6.5 6.5l-5 5"/></svg>`;
+const noun = n => n.replace(/^(el|la|los|las) /i, "");
 const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch(e){} };
+async function getJSON(u){ const r = await fetch(u); if (!r.ok) throw new Error(r.status); return r.json(); }
+const loading = t => `<div class="status"><div class="spinner"></div>${esc(t)}</div>`;
+const SET = { voice: lsGet("voice") !== "0", opts: +(lsGet("opts") || 2), cat: lsGet("cat") || "todos" };
+let EXTRA = []; try { EXTRA = JSON.parse(lsGet("extra") || "[]"); } catch(e){}
+const byKey = k => ANIMALS.find(a => a.k === k) || EXTRA.find(a => a.k === k);
+const ICON = {
+  home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/></svg>`,
+  prev: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>`,
+  next: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>`,
+  ear: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9v6h4l5 4V5L9 9H5z"/><path d="M17.5 8.5a5 5 0 0 1 0 7M20 6a8.5 8.5 0 0 1 0 12"/></svg>`,
+  gear: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>`,
+  search: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="6"/><path d="m13 13 5 5"/></svg>`
+};
 
-/* ---------- navegación ---------- */
+/* ---------- sonido y voz ---------- */
+const AU = new Audio(); AU.preload = "auto"; AU.setAttribute("playsinline", "");
+const SILENT = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
+let unlocked = false, speechOk = false;
+function unlock(){
+  if (!unlocked && AU.paused){ AU.src = SILENT; AU.play().then(() => { unlocked = true; }).catch(() => {}); }
+  if (!speechOk){ try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); speechOk = true; } catch(e){} }
+}
+document.addEventListener("touchend", unlock, { passive: true });
+document.addEventListener("click", unlock);
+document.addEventListener("gesturestart", e => e.preventDefault());
+document.addEventListener("dblclick", e => e.preventDefault());
+let VOICE = null;
+function pickVoice(){
+  if (!window.speechSynthesis) return;
+  const vs = speechSynthesis.getVoices();
+  VOICE = vs.find(v => v.lang === "es-ES" && /m[oó]nica|marisol|paulina|elvira|helena/i.test(v.name))
+       || vs.find(v => v.lang === "es-ES") || vs.find(v => (v.lang || "").startsWith("es")) || null;
+}
+if (window.speechSynthesis){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function say(text){
+  return new Promise(res => {
+    if (!SET.voice || !window.speechSynthesis) return res();
+    let done = false; const fin = () => { if (!done){ done = true; res(); } };
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "es-ES"; if (VOICE) u.voice = VOICE; u.rate = .85; u.pitch = 1.12;
+      u.onend = fin; u.onerror = fin;
+      speechSynthesis.speak(u);
+    } catch(e){ fin(); }
+    setTimeout(fin, 900 + text.length * 110);
+  });
+}
+const blobCache = {};
+function srcFor(url){
+  if (!url.startsWith("sounds/")) return Promise.resolve(url);
+  if (!blobCache[url]) blobCache[url] = fetch(url).then(r => r.blob()).then(b => URL.createObjectURL(b)).catch(() => url);
+  return blobCache[url];
+}
+function fade(){ let v = 1; const t = setInterval(() => { v -= .2; if (v <= 0){ clearInterval(t); AU.pause(); AU.volume = 1; } else AU.volume = v; }, 80); }
+function playURL(url, maxSec){
+  return new Promise(async res => {
+    let done = false, timer;
+    const fin = () => { if (done) return; done = true; clearTimeout(timer); AU.onended = AU.onerror = null; res(); };
+    try {
+      AU.pause(); AU.volume = 1; AU.src = await srcFor(url);
+      AU.onended = fin; AU.onerror = fin;
+      await AU.play();
+      timer = setTimeout(() => { fade(); setTimeout(fin, 450); }, (maxSec || 12) * 1000);
+    } catch(e){ fin(); }
+  });
+}
+let TOK = 0;
+function stopAll(){ TOK++; try { speechSynthesis.cancel(); } catch(e){} AU.pause(); AU.volume = 1; }
+const clipIdx = {};
+function soundsOf(a){ return a.clips ? a.clips.map(c => "sounds/" + c.file) : (a.sounds || []); }
+async function playAnimal(a){
+  const list = soundsOf(a);
+  if (!list.length) return false;
+  const i = clipIdx[a.k] = ((clipIdx[a.k] ?? -1) + 1) % list.length;
+  await playURL(list[i], a.clips ? 12 : 8);
+  return true;
+}
+
+/* ---------- navegacion ---------- */
 window.addEventListener("hashchange", route);
 function route(){
-  stopAudio();
+  stopAll();
   const h = location.hash || "#/";
-  if (!h.startsWith("#/escuchar")) stopListening();
-  const tab = h.startsWith("#/escuchar") ? "listen" : h.startsWith("#/cerca") ? "near" : h.startsWith("#/foto") ? "photo" : "explore";
-  ["explore","near","photo","listen"].forEach(k => document.getElementById("tab-" + k).setAttribute("aria-current", k === tab ? "page" : "false"));
-  let m;
-  if ((m = h.match(/^#\/animal\/(\d+)/))) return showAnimal(+m[1]);
-  if (h.startsWith("#/escuchar")) return showListen();
-  if (h.startsWith("#/foto")) return showPhoto();
-  if (h.startsWith("#/cerca")) return showNearby();
-  m = h.match(/^#\/buscar\/(.+)/);
-  showExplore(m ? decodeURIComponent(m[1]) : "");
+  if (h.startsWith("#/a/")) return showAnimal(decodeURIComponent(h.slice(4)));
+  if (h.startsWith("#/t/")) return showTaxon(parseInt(h.slice(4), 10));
+  if (h.startsWith("#/juego")) return showGame();
+  if (h.startsWith("#/padres")) return showParents();
+  showHome();
+}
+function listFor(cat){
+  if (cat === "mas") return EXTRA;
+  if (cat === "todos") return ANIMALS.concat(EXTRA);
+  return ANIMALS.filter(a => a.cat === cat);
 }
 
-/* ---------- Explorar ---------- */
-function showExplore(term){
-  document.title = "Fonoteca Animal";
-  $view.innerHTML = `
-    <h1 class="large-title">Explorar</h1>
-    <div class="sticky" id="stick">
-      <label class="search">
-        <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="7.2" cy="7.2" r="5.6"/><path d="m11.4 11.4 4.1 4.1"/></svg>
-        <input id="q" type="search" placeholder="Busca un animal" value="${esc(term)}" autocomplete="off" autocorrect="off" enterkeyhint="search" aria-label="Buscar animal">
-        <button class="x" id="qx" aria-label="Borrar">✕</button>
-      </label>
-      <div class="segmented" role="group" aria-label="Tipo de animal">
-        ${[["Aves,Mammalia","Todos"],["Aves","Aves"],["Mammalia","Mamíferos"]].map(([g,l]) => `<button data-g="${g}" aria-pressed="${S.group===g}">${l}</button>`).join("")}
-      </div>
-    </div>
-    <div id="results"></div>`;
-  const q = document.getElementById("q"), qx = document.getElementById("qx");
-  const stick = document.getElementById("stick");
-  const onScroll = () => stick && stick.classList.toggle("stuck", window.scrollY > 60);
-  window.onscroll = onScroll;
-  qx.style.display = term ? "block" : "none";
-  let t;
-  q.addEventListener("input", () => {
-    qx.style.display = q.value ? "block" : "none";
-    clearTimeout(t);
-    t = setTimeout(() => {
-      const v = q.value.trim();
-      history.replaceState(null, "", v.length >= 2 ? "#/buscar/" + encodeURIComponent(v) : "#/");
-      v.length >= 2 ? renderSearch(v) : renderHome();
-    }, 320);
+/* ---------- Inicio ---------- */
+function showHome(){
+  document.title = "Los animales de Olivia";
+  const cats = CATS.filter(c => c.k !== "mas" || EXTRA.length);
+  if (!cats.find(c => c.k === SET.cat)) SET.cat = "todos";
+  $app.innerHTML = `
+    <header class="top">
+      <h1>Los animales<br>de <span>Olivia</span></h1>
+      <button class="lock" id="lock" aria-label="Zona de papá y mamá (mantén pulsado)"><svg class="ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20"/></svg>${ICON.gear}</button>
+    </header>
+    <div class="cats" id="cats">${cats.map(c => {
+      const a = c.k === "mas" ? EXTRA[0] : byKey(CAT_ICON[c.k]);
+      return `<button class="cat" data-k="${c.k}" style="--c:${c.c}" aria-pressed="${c.k === SET.cat}"><div class="b">${a ? `<img src="${esc(a.photo)}" alt="">` : ""}</div><span>${c.name}</span></button>`;
+    }).join("")}</div>
+    <button class="game-btn" id="gameBtn"><span class="ic">🎈</span>¿Dónde está?</button>
+    <div class="grid" id="grid"></div>`;
+  renderGrid();
+  document.querySelectorAll(".cat").forEach(b => b.onclick = () => {
+    SET.cat = b.dataset.k; lsSet("cat", SET.cat);
+    document.querySelectorAll(".cat").forEach(x => x.setAttribute("aria-pressed", x === b));
+    renderGrid();
+    const c = CATS.find(c => c.k === SET.cat); say(c.k === "todos" ? "Todos los animales" : c.name);
   });
-  q.addEventListener("keydown", e => { if (e.key === "Enter") q.blur(); });
-  qx.addEventListener("click", e => { e.preventDefault(); q.value = ""; qx.style.display = "none"; history.replaceState(null, "", "#/"); renderHome(); q.focus(); });
-  document.querySelectorAll(".segmented button").forEach(b => b.onclick = () => {
-    S.group = b.dataset.g;
-    document.querySelectorAll(".segmented button").forEach(x => x.setAttribute("aria-pressed", x === b));
-    q.value.trim().length >= 2 ? renderSearch(q.value.trim()) : renderHome();
-  });
-  term.length >= 2 ? renderSearch(term) : renderHome();
+  document.getElementById("gameBtn").onclick = () => location.hash = "#/juego";
+  holdToOpen(document.getElementById("lock"), () => location.hash = "#/padres");
+  const sc = sessionStorage.getItem("homeY"); if (sc) setTimeout(() => window.scrollTo(0, +sc), 0);
 }
-
-function cellHTML(t, val){
-  const img = t.default_photo?.square_url;
-  return `<a class="cell" href="#/animal/${t.id}">
-    ${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : `<span class="ph"></span>`}
-    <span class="txt"><div class="t1">${esc(cap(t.preferred_common_name) || t.name)}</div><div class="t2">${esc(t.name)}</div></span>
-    ${val != null ? `<span class="val">${esc(val)}</span>` : ""}${chev}</a>`;
-}
-function cardHTML(t, count){
-  const img = t.default_photo?.medium_url || t.default_photo?.square_url;
-  return `<a class="card" href="#/animal/${t.id}">
-    ${img ? `<img src="${esc(img.replace("medium", "large"))}" alt="" loading="lazy" onerror="this.src='${esc(img)}'">` : ""}
-    <div class="cap"><div class="k">${fmtN(count)} grabaciones</div><div class="n">${esc(cap(t.preferred_common_name) || t.name)}</div><div class="s">${esc(t.name)}</div></div></a>`;
-}
-
-let homeSeq = 0;
-async function renderHome(page = 1){
-  const box = document.getElementById("results");
-  if (!box) return;
-  const seq = page === 1 ? ++homeSeq : homeSeq;
-  const local = S.region === "es";
-  if (page === 1) box.innerHTML = loading("Cargando especies…");
-  const key = `${S.group}|${S.region}|${page}`;
-  try {
-    const d = S.cache[key] || (S.cache[key] = await getJSON(`${API}/observations/species_counts?iconic_taxa=${S.group}&sounds=true&verifiable=true&locale=es&per_page=30&page=${page}${local ? "&place_id=" + SPAIN : ""}`));
-    if (seq !== homeSeq || !document.getElementById("results")) return;
-    const r = d.results;
-    if (page === 1){
-      box.innerHTML = `
-        <div class="section-head"><h2>Los que más suenan</h2><button id="reg">${local ? "Ver mundo" : "Ver España"}</button></div>
-        <div class="shelf">${r.slice(0, 8).map(x => cardHTML(x.taxon, x.count)).join("")}</div>
-        <div class="section-head"><h2>${local ? "En España" : "En el mundo"}</h2></div>
-        <div class="group" id="homeList">${r.slice(8).map(x => cellHTML(x.taxon, fmtN(x.count))).join("")}</div>
-        <p class="footnote">Ordenados por número de grabaciones disponibles.</p>
-        <div id="homeMore"></div>`;
-      document.getElementById("reg").onclick = () => { S.region = local ? "world" : "es"; renderHome(); };
-    } else {
-      document.getElementById("homeList").insertAdjacentHTML("beforeend", r.map(x => cellHTML(x.taxon, fmtN(x.count))).join(""));
-    }
-    const more = document.getElementById("homeMore");
-    if (page * 30 < d.total_results){
-      more.innerHTML = `<button class="more">Ver más especies</button>`;
-      more.firstChild.onclick = () => { more.innerHTML = loading(""); renderHome(page + 1); };
-    } else more.innerHTML = "";
-  } catch(e){
-    if (seq === homeSeq) box.innerHTML = `<p class="status err">No se pudieron cargar las especies. Comprueba tu conexión.</p>`;
-  }
-}
-
-let searchSeq = 0;
-async function renderSearch(term){
-  const box = document.getElementById("results");
-  const seq = ++searchSeq; homeSeq++;
-  box.innerHTML = loading(`Buscando “${term}”…`);
-  try {
-    const d = await getJSON(`${API}/taxa/autocomplete?q=${encodeURIComponent(term)}&locale=es&per_page=30&is_active=true`);
-    if (seq !== searchSeq) return;
-    const res = d.results.filter(t => S.group.split(",").includes(t.iconic_taxon_name));
-    box.innerHTML = res.length
-      ? `<div class="section-head"><h2>Resultados</h2></div><div class="group">${res.map(t => cellHTML(t)).join("")}</div>`
-      : `<p class="status">No hay animales que coincidan con “${esc(term)}”. Prueba con otro nombre o con el científico.</p>`;
-  } catch(e){
-    if (seq === searchSeq) box.innerHTML = `<p class="status err">No se pudo buscar. Comprueba tu conexión.</p>`;
-  }
-}
-
-/* ---------- Ficha ---------- */
-async function showAnimal(id){
-  window.onscroll = null;
-  window.scrollTo(0, 0);
-  $view.innerHTML = loading("Cargando ficha…");
-  let t;
-  try { t = (await getJSON(`${API}/taxa/${id}?locale=es`)).results[0]; }
-  catch(e){ $view.innerHTML = `<button class="navbtn" onclick="history.back()" aria-label="Volver">${backIcon}</button><p class="status err" style="padding-top:120px">No se pudo cargar este animal. Comprueba tu conexión.</p>`; return; }
-  const name = cap(t.preferred_common_name) || t.name;
-  document.title = name + " · Fonoteca";
-  const photos = (t.taxon_photos || []).map(p => p.photo).filter(Boolean).slice(0, 10);
-  if (!photos.length && t.default_photo) photos.push(t.default_photo);
-  const big = p => p.large_url || p.medium_url || (p.url || "").replace("square", "large");
-  const lineage = (t.ancestors || []).filter(a => ["class","order","family"].includes(a.rank)).map(a => cap(a.preferred_common_name) || a.name).join(" › ");
-  const cons = t.conservation_status;
-
-  $view.innerHTML = `
-    <button class="navbtn" id="back" aria-label="Volver">${backIcon}</button>
-    <div class="detail-hero">
-      ${photos.length ? `<img id="heroImg" src="${esc(big(photos[0]))}" alt="${esc(name)}">` : ""}
-      <div class="shade"></div>
-      <div class="credit" id="heroCredit">${esc(photos[0]?.attribution || "")}</div>
-      <div class="title"><h1>${esc(name)}</h1><div class="sci">${esc(t.name)}</div></div>
-    </div>
-    ${photos.length > 1 ? `<div class="thumbs">${photos.map((p,i) => `<button data-i="${i}" aria-current="${i===0}" aria-label="Foto ${i+1}"><img src="${esc(p.square_url || p.url)}" alt="" loading="lazy"></button>`).join("")}</div>` : ""}
-    <div class="stats">
-      <div><b id="nRec">…</b><span>grabaciones</span></div>
-      <div><b>${fmtN(t.observations_count)}</b><span>avistamientos</span></div>
-      <div><b style="font-size:15px;line-height:1.6">${cons ? esc(cap(cons.status_name || cons.status)) : "—"}</b><span>conservación</span></div>
-    </div>
-    ${lineage ? `<p class="lineage">${esc(lineage)}</p>` : ""}
-
-    <div class="section-head"><h2>Sonidos</h2></div>
-    <div class="group" id="recs">${loading("Cargando grabaciones…")}</div>
-    <p class="footnote">Grabaciones reales de naturalistas de todo el mundo.</p>
-    <div id="moreRecsBox"></div>
-
-    <div class="section-head"><h2>Dónde vive</h2></div>
-    <div id="map"></div>
-    <p class="footnote">Cada cuadro verde es una zona donde se ha visto o escuchado.</p>
-
-    <div class="section-head"><h2>Información</h2></div>
-    <div id="info">${loading("Cargando información…")}</div>
-    <footer>Datos de iNaturalist y Wikipedia. Cada foto y grabación pertenece a su autor, indicado junto a ella.</footer>`;
-
-  document.getElementById("back").onclick = () => history.length > 1 ? history.back() : (location.hash = "#/");
-  document.querySelectorAll(".thumbs button").forEach(b => b.onclick = () => {
-    const p = photos[+b.dataset.i];
-    document.getElementById("heroImg").src = big(p);
-    document.getElementById("heroCredit").textContent = p.attribution || "";
-    document.querySelectorAll(".thumbs button").forEach(x => x.setAttribute("aria-current", x === b));
-  });
-  loadRecordings(t.id, 1);
-  loadMap(t.id);
-  loadInfo(t);
-}
-const backIcon = `<svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>`;
-
-/* ---------- Grabaciones ---------- */
-const PER = 20;
-const audio = new Audio(); audio.preload = "none";
-let current = null;
-const iconPlay = `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M6 3.8v12.4c0 .6.7 1 1.2.7l9.8-6.2c.5-.3.5-1 0-1.4L7.2 3.1C6.7 2.8 6 3.2 6 3.8z"/></svg>`;
-const iconPause = `<svg viewBox="0 0 20 20" fill="currentColor"><rect x="4.5" y="3" width="4" height="14" rx="1.2"/><rect x="11.5" y="3" width="4" height="14" rx="1.2"/></svg>`;
-function waveBars(seed){
-  let x = seed % 9973 || 7, out = "";
-  for (let i = 0; i < 36; i++){ x = (x * 9301 + 49297) % 233280; const h = 20 + Math.round((x / 233280) * 80 * Math.sin(Math.PI * (i + 2) / 40)); out += `<i style="height:${Math.max(14, h)}%"></i>`; }
-  return out;
-}
-async function loadRecordings(id, page){
-  const box = document.getElementById("recs"), moreBox = document.getElementById("moreRecsBox");
-  if (!box) return;
-  try {
-    const d = await getJSON(`${API}/observations?taxon_id=${id}&sounds=true&verifiable=true&order_by=votes&per_page=${PER}&page=${page}&locale=es`);
-    if (!document.getElementById("recs")) return;
-    if (page === 1){
-      document.getElementById("nRec").textContent = fmtN(d.total_results);
-      box.innerHTML = "";
-      if (!d.total_results){ box.outerHTML = `<p class="status" style="padding:20px">Todavía no hay grabaciones de este animal.</p>`; return; }
-    }
-    const html = [];
-    for (const o of d.results) for (const s of (o.sounds || [])){
-      if (!s.file_url || s.hidden) continue;
-      const note = (o.description || "").replace(/<[^>]+>/g, "").trim();
-      html.push(`<div class="rec" data-url="${esc(s.file_url)}">
-        <button class="play" aria-label="Reproducir">${iconPlay}</button>
-        <div><div class="where">${esc(o.place_guess || "Lugar no indicado")}</div><div class="when">${esc(fmtDate(o.observed_on))}</div><div class="wave">${waveBars(s.id)}</div></div>
-        ${note ? `<p class="note">${esc(note.slice(0, 200))}${note.length > 200 ? "…" : ""}</p>` : ""}
-        <div class="lic">© ${esc(o.user?.name || o.user?.login || "Autor desconocido")} · ${esc(lic(s.license_code))}</div>
-      </div>`);
-    }
-    box.insertAdjacentHTML("beforeend", html.join(""));
-    wireRecs(box);
-    moreBox.innerHTML = page * PER < d.total_results ? `<button class="more">Cargar más grabaciones</button>` : "";
-    if (moreBox.firstChild) moreBox.firstChild.onclick = () => { moreBox.innerHTML = loading(""); loadRecordings(id, page + 1); };
-  } catch(e){
-    box.innerHTML = `<p class="status err" style="padding:20px">No se pudieron cargar las grabaciones.</p>`;
-  }
-}
-function wireRecs(box){
-  box.querySelectorAll(".rec:not([data-w])").forEach(el => {
-    el.dataset.w = 1;
-    el.querySelector(".play").onclick = () => toggleRec(el);
-    el.querySelector(".wave").onclick = e => {
-      const r = e.currentTarget.getBoundingClientRect(), f = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-      if (current?.el !== el) toggleRec(el, f); else if (audio.duration) audio.currentTime = f * audio.duration;
-    };
-  });
-}
-function setRow(el, on){ el.querySelector(".play").innerHTML = on ? iconPause : iconPlay; el.querySelector(".play").setAttribute("aria-label", on ? "Pausar" : "Reproducir"); }
-function paint(el, f){ const bs = el.querySelectorAll(".wave i"), n = Math.round(f * bs.length); bs.forEach((b, i) => b.classList.toggle("on", i < n)); }
-function toggleRec(el, f){
-  if (current?.el === el){ if (audio.paused){ audio.play().catch(()=>{}); setRow(el, true); } else { audio.pause(); setRow(el, false); } return; }
-  stopAudio();
-  current = { el, f }; el.classList.remove("failed");
-  audio.src = el.dataset.url; setRow(el, true); audio.play().catch(()=>{});
-}
-function stopAudio(){ if (current){ setRow(current.el, false); paint(current.el, 0); } audio.pause(); current = null; }
-audio.addEventListener("loadedmetadata", () => { if (current?.f) audio.currentTime = current.f * audio.duration; });
-audio.addEventListener("timeupdate", () => { if (current && audio.duration) paint(current.el, audio.currentTime / audio.duration); });
-audio.addEventListener("ended", () => { if (current){ setRow(current.el, false); paint(current.el, 0); current = null; } });
-audio.addEventListener("error", () => { if (current){ current.el.classList.add("failed"); setRow(current.el, false); current = null; } });
-
-/* ---------- Mapa ---------- */
-let map;
-async function loadMap(id){
-  const el = document.getElementById("map");
-  if (!el) return;
-  if (!window.L){ el.innerHTML = `<p class="status">Mapa no disponible.</p>`; return; }
-  if (map){ try { map.remove(); } catch(e){} map = null; }
-  map = L.map(el, { scrollWheelZoom: false, worldCopyJump: true, attributionControl: true }).setView([30, 0], 1);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", { maxZoom: 12, attribution: "© OpenStreetMap · © CARTO" }).addTo(map);
-  L.tileLayer(`${API}/grid/{z}/{x}/{y}.png?taxon_id=${id}&verifiable=true&color=%233E7150`, { maxZoom: 12, opacity: .85 }).addTo(map);
-  try {
-    const b = (await getJSON(`${API}/observations?taxon_id=${id}&verifiable=true&return_bounds=true&per_page=0`)).total_bounds;
-    if (b && map) map.fitBounds([[b.swlat, b.swlng], [b.nelat, b.nelng]], { padding: [10, 10], maxZoom: 6 });
-  } catch(e){}
-}
-
-/* ---------- Información (Wikipedia en español) ---------- */
-const SKIP = /^(referencias|notas|bibliografía|enlaces externos|véase también|fuentes|lecturas adicionales|galería)/i;
-async function wikiES(title){
-  const d = await getJSON(`https://es.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&exsectionformat=wiki&redirects=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
-  const p = Object.values(d.query?.pages || {})[0];
-  return (p && !("missing" in p) && p.extract) ? p : null;
-}
-async function esTitleFromEn(enUrl){
-  const title = decodeURIComponent((enUrl || "").split("/wiki/")[1] || "");
-  if (!title) return null;
-  const d = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&prop=langlinks&lllang=es&redirects=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
-  return Object.values(d.query?.pages || {})[0]?.langlinks?.[0]?.["*"] || null;
-}
-const paras = text => text.split(/\n+/).map(s => s.trim()).filter(Boolean).map(s => `<p>${esc(s)}</p>`).join("");
-async function loadInfo(t){
-  let page = null;
-  try { page = await wikiES(t.name); if (!page){ const es = await esTitleFromEn(t.wikipedia_url); if (es) page = await wikiES(es); } } catch(e){}
-  const box = document.getElementById("info");
-  if (!box) return;
-  if (page){
-    const parts = page.extract.split(/^==\s*([^=].*?)\s*==\s*$/m);
-    let html = `<div class="prose">${paras(parts[0])}`;
-    for (let i = 1; i < parts.length; i += 2){
-      const title = parts[i], body = (parts[i+1] || "").trim();
-      if (SKIP.test(title) || body.length < 40) continue;
-      const bodyHTML = body.split(/^===+\s*(.+?)\s*===+\s*$/m).map((c, j) => j % 2 ? `<h4>${esc(c)}</h4>` : paras(c)).join("");
-      html += `<details class="sec"><summary>${esc(title)}</summary>${bodyHTML}</details>`;
-    }
-    html += `</div><p class="source">Fuente: <a href="https://es.wikipedia.org/wiki/${encodeURIComponent(page.title.replace(/ /g, "_"))}" target="_blank" rel="noopener">Wikipedia</a></p>`;
-    box.innerHTML = html;
-  } else if (t.wikipedia_summary){
-    box.innerHTML = `<div class="prose">${paras(t.wikipedia_summary.replace(/<[^>]+>/g, ""))}</div>`;
-  } else box.innerHTML = `<p class="status">No hay información escrita sobre este animal todavía.</p>`;
-}
-
-/* ---------- Escuchar (BirdNET) ---------- */
-const SR = 48000, WIN = 144000;
-const L_ = { worker: null, ready: false, loading: false, on: false, ctx: null, stream: null, node: null, analyser: null,
-  ring: new Float32Array(WIN), w: 0, filled: 0, busy: false, timer: null, raf: null, found: new Map(), geoSent: false, taxa: {} };
-
-function showListen(){
-  window.onscroll = null;
-  document.title = "Escuchar · Fonoteca";
-  const useGeo = lsGet("geo") === "1";
-  $view.innerHTML = `
-    <h1 class="large-title">Escuchar</h1>
-    <p class="subtitle">Identifica las aves que suenan a tu alrededor.</p>
-    <div class="listen-stage">
-      <div class="orb">
-        <span class="ring r3"></span><span class="ring r2"></span><span class="ring"></span>
-        <button id="mic" aria-label="Empezar a escuchar">${micIcon}</button>
-      </div>
-      <div class="listen-status" id="lstat">Toca para escuchar</div>
-      <div class="listen-hint" id="lhint">Acerca el móvil al sonido y mantén silencio un momento.</div>
-      <div class="bar" id="lbar" hidden><i></i></div>
-    </div>
-    <div class="section-head"><h2>Detectados</h2><button id="clearDet">Borrar</button></div>
-    <div class="group" id="dets"></div>
-    <p class="footnote" id="detNote">Aquí aparecerán las aves que reconozca. Toca una para ver su ficha.</p>
-    <div class="section-head"><h2>Ajustes</h2></div>
-    <div class="group">
-      <div class="toggle-row"><div><div class="txt">Usar mi ubicación</div><div class="sub">Descarta aves que no viven en tu zona y acierta más.</div></div>
-        <button class="switch" id="geoSw" role="switch" aria-checked="${useGeo}" aria-label="Usar mi ubicación"></button></div>
-    </div>
-    <footer>Reconocimiento con BirdNET (Cornell Lab of Ornithology y TU Chemnitz), solo aves, para uso no comercial. Todo se procesa en tu móvil: el audio no se envía a ningún sitio. La primera vez descarga el modelo (unos 60 MB).</footer>`;
-  document.getElementById("mic").onclick = () => L_.on ? stopListening() : startListening();
-  document.getElementById("geoSw").onclick = e => {
-    const v = e.currentTarget.getAttribute("aria-checked") !== "true";
-    e.currentTarget.setAttribute("aria-checked", v); lsSet("geo", v ? "1" : "0");
-    if (v && L_.ready) sendGeo();
-  };
-  document.getElementById("clearDet").onclick = () => { L_.found.clear(); renderDets(); };
-  renderDets();
-}
-const micIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>`;
-const stopIcon = `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2.5"/></svg>`;
-function setStatus(a, b){ const s = document.getElementById("lstat"), h = document.getElementById("lhint"); if (s) s.textContent = a; if (h && b !== undefined) h.textContent = b; }
-function setBar(p){ const b = document.getElementById("lbar"); if (!b) return; b.hidden = p == null; if (p != null) b.firstElementChild.style.width = p + "%"; }
-
-function ensureWorker(){
-  return new Promise((resolve, reject) => {
-    if (L_.ready) return resolve();
-    if (!L_.worker){
-      L_.worker = new Worker("birdnet-worker.js");
-      L_.worker.onmessage = ({ data }) => {
-        if (data.message === "progress"){ setBar(data.progress); setStatus("Preparando el reconocimiento… " + data.progress + "%", "Solo la primera vez tarda un poco."); }
-        if (data.message === "ready"){ L_.ready = true; setBar(null); L_._res && L_._res(); }
-        if (data.message === "error"){ L_.worker.terminate(); L_.worker = null; L_._rej && L_._rej(data.error); }
-        if (data.message === "result"){ L_.busy = false; handleResults(data.results); }
-      };
-      L_.worker.onerror = () => { if (L_.worker){ L_.worker.terminate(); L_.worker = null; } L_._rej && L_._rej("load"); };
-    }
-    L_._res = resolve; L_._rej = reject;
-  });
-}
-async function startListening(){
-  const btn = document.getElementById("mic");
-  L_.on = true; btn.classList.add("on"); btn.innerHTML = stopIcon; btn.setAttribute("aria-label", "Dejar de escuchar");
-  try {
-    setStatus("Pidiendo permiso del micrófono…", "");
-    L_.stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
-  } catch(e){ stopListening(); setStatus("Sin acceso al micrófono", "Actívalo en Ajustes › Safari › Micrófono (o en los ajustes de la app) y vuelve a intentarlo."); return; }
-  if (!L_.on) return;
-  try { setStatus("Preparando el reconocimiento…", "Solo la primera vez tarda un poco."); await ensureWorker(); }
-  catch(err){ stopListening(); setStatus("No se pudo preparar el reconocimiento", err === "webgl" ? "Tu iPhone necesita iOS 16.4 o posterior." : "Comprueba tu conexión e inténtalo de nuevo."); return; }
-  if (!L_.on) return;
-  if (lsGet("geo") === "1") sendGeo();
-  try {
-    L_.ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: SR });
-    if (L_.ctx.state === "suspended") await L_.ctx.resume();
-    const src = L_.ctx.createMediaStreamSource(L_.stream);
-    const hp = L_.ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 150;
-    L_.analyser = L_.ctx.createAnalyser(); L_.analyser.fftSize = 1024;
-    src.connect(hp); hp.connect(L_.analyser);
-    await L_.ctx.audioWorklet.addModule("audio-processor.js");
-    L_.node = new AudioWorkletNode(L_.ctx, "audio-processor");
-    const ratio = L_.ctx.sampleRate / SR;
-    L_.node.port.onmessage = ({ data }) => {
-      if (ratio === 1){ for (let i = 0; i < data.length; i++){ L_.ring[L_.w] = data[i]; L_.w = (L_.w + 1) % WIN; } L_.filled += data.length; }
-      else { const n = Math.floor(data.length / ratio); for (let i = 0; i < n; i++){ L_.ring[L_.w] = data[Math.floor(i * ratio)]; L_.w = (L_.w + 1) % WIN; } L_.filled += n; }
-    };
-    hp.connect(L_.node);
-    const mute = L_.ctx.createGain(); mute.gain.value = 0; L_.node.connect(mute); mute.connect(L_.ctx.destination);
-  } catch(e){ stopListening(); setStatus("No se pudo usar el audio", "Prueba a cerrar y abrir la app."); return; }
-  L_.filled = 0; L_.w = 0;
-  setStatus("Escuchando…", "Analizo el sonido cada segundo y medio.");
-  L_.timer = setInterval(tick, 1500);
-  animateOrb();
-}
-function tick(){
-  if (!L_.on || !L_.ready || L_.busy || L_.filled < WIN) return;
-  const pcm = new Float32Array(WIN);
-  pcm.set(L_.ring.subarray(L_.w)); pcm.set(L_.ring.subarray(0, L_.w), WIN - L_.w);
-  L_.busy = true;
-  L_.worker.postMessage({ message: "predict", pcm, threshold: 0.3 }, [pcm.buffer]);
-}
-function sendGeo(){
-  if (!navigator.geolocation || !L_.worker) return;
-  navigator.geolocation.getCurrentPosition(p => {
-    L_.worker.postMessage({ message: "geo", latitude: p.coords.latitude, longitude: p.coords.longitude });
-  }, () => {}, { maximumAge: 3600000, timeout: 10000 });
-}
-function stopListening(){
-  L_.on = false;
-  clearInterval(L_.timer); cancelAnimationFrame(L_.raf);
-  if (L_.stream){ L_.stream.getTracks().forEach(t => t.stop()); L_.stream = null; }
-  if (L_.node){ L_.node.port.onmessage = null; try { L_.node.disconnect(); } catch(e){} L_.node = null; }
-  if (L_.ctx){ L_.ctx.close().catch(()=>{}); L_.ctx = null; }
-  L_.busy = false;
-  const btn = document.getElementById("mic");
-  if (btn){ btn.classList.remove("on"); btn.innerHTML = micIcon; btn.setAttribute("aria-label", "Empezar a escuchar"); setStatus("Toca para escuchar", "Acerca el móvil al sonido y mantén silencio un momento."); setBar(null); }
-  document.querySelectorAll(".orb .ring").forEach(r => r.style.setProperty("--s", 1));
-}
-function animateOrb(){
-  const buf = new Uint8Array(L_.analyser.fftSize);
-  const rings = [...document.querySelectorAll(".orb .ring")];
-  const loop = () => {
-    if (!L_.on || !L_.analyser) return;
-    L_.analyser.getByteTimeDomainData(buf);
-    let sum = 0; for (let i = 0; i < buf.length; i++){ const v = (buf[i] - 128) / 128; sum += v * v; }
-    const lvl = Math.min(1, Math.sqrt(sum / buf.length) * 6);
-    rings.forEach((r, i) => r.style.setProperty("--s", (1 + lvl * (0.12 + i * 0.1)).toFixed(3)));
-    L_.raf = requestAnimationFrame(loop);
-  };
-  loop();
-}
-function handleResults(res){
-  if (!res.length) return;
-  const now = Date.now();
-  for (const r of res){
-    const prev = L_.found.get(r.sci);
-    L_.found.set(r.sci, { ...r, conf: Math.max(r.conf, prev?.conf || 0), last: now, fresh: true });
-  }
-  setStatus("Escuchando…", "Último: " + res[0].common);
-  renderDets();
-}
-async function taxonFor(sci){
-  if (L_.taxa[sci] !== undefined) return L_.taxa[sci];
-  try {
-    const d = await getJSON(`${API}/taxa?q=${encodeURIComponent(sci)}&rank=species&per_page=1&locale=es`);
-    const t = d.results.find(x => x.name.toLowerCase() === sci.toLowerCase()) || d.results[0] || null;
-    L_.taxa[sci] = t;
-  } catch(e){ return null; }
-  return L_.taxa[sci];
-}
-function renderDets(){
-  const box = document.getElementById("dets"), note = document.getElementById("detNote");
-  if (!box) return;
-  const list = [...L_.found.values()].sort((a, b) => b.last - a.last);
-  box.style.display = list.length ? "" : "none";
-  if (note) note.style.display = list.length ? "none" : "";
-  box.innerHTML = list.map(d => {
-    const t = L_.taxa[d.sci], img = t?.default_photo?.square_url, pct = Math.round(d.conf * 100);
-    return `<a class="det${d.fresh ? " fresh" : ""}" ${t ? `href="#/animal/${t.id}"` : ""} data-sci="${esc(d.sci)}">
-      ${img ? `<img src="${esc(img)}" alt="">` : `<span class="ph"></span>`}
-      <span class="txt"><div class="t1">${esc(cap(d.common))}</div><div class="t2">${esc(d.sci)}</div>
-        <div class="conf"><span class="m"><i style="width:${pct}%"></i></span><span>${pct}%</span></div></span>${chev}</a>`;
+function renderGrid(){
+  const g = document.getElementById("grid");
+  g.innerHTML = listFor(SET.cat).map(a => {
+    const col = (CATS.find(c => c.k === a.cat) || {}).c || "var(--mas)";
+    return `<button class="card" data-k="${esc(a.k)}" style="--c:${col}"><img src="${esc(a.photo)}" alt="" loading="lazy"><span>${esc(cap(noun(a.name)))}</span></button>`;
   }).join("");
-  list.forEach(d => { d.fresh = false; });
-  list.filter(d => L_.taxa[d.sci] === undefined).forEach(d => taxonFor(d.sci).then(t => { if (t) renderDets(); }));
-}
-
-/* ---------- Cerca de ti ---------- */
-const N = { lat: null, lng: null, label: "", radius: +(lsGet("nrad") || 10), group: "Aves,Mammalia", layer: lsGet("nlayer") || "map", seq: 0 };
-try { const s = JSON.parse(lsGet("nloc") || "null"); if (s){ N.lat = s.lat; N.lng = s.lng; N.label = s.label; } } catch(e){}
-let nmap = null, nheat = null, ncircle = null, nbase = null;
-const pinIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.3 7-11.8a7 7 0 0 0-14 0C5 14.7 12 21 12 21z"/><circle cx="12" cy="9.2" r="2.5"/></svg>`;
-const gpsIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.9 3.1a.8.8 0 0 0-.9-.2L3.5 9.7a.8.8 0 0 0 .1 1.5l6.9 2.3 2.3 6.9a.8.8 0 0 0 1.5.1l6.8-16.5a.8.8 0 0 0-.2-.9z"/></svg>`;
-const nominatim = "https://nominatim.openstreetmap.org";
-
-function showNearby(){
-  window.onscroll = null;
-  document.title = "Cerca · Fonoteca";
-  $view.innerHTML = `
-    <h1 class="large-title">Cerca de ti</h1>
-    <p class="subtitle">Qué animales se han visto y oído en una zona.</p>
-    <div class="group"><button class="cell action" id="gps">${gpsIcon}<span class="txt">Usar mi ubicación actual</span></button></div>
-    <label class="search" style="margin-top:10px">
-      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="7.2" cy="7.2" r="5.6"/><path d="m11.4 11.4 4.1 4.1"/></svg>
-      <input id="place" type="search" placeholder="O busca un lugar: Guitiriz, Lugo…" autocomplete="off" enterkeyhint="search" aria-label="Buscar lugar">
-    </label>
-    <div class="group" id="placeRes" style="margin-top:8px;display:none"></div>
-    <div id="nearBody"></div>`;
-  document.getElementById("gps").onclick = useGPS;
-  const inp = document.getElementById("place"); let t;
-  inp.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => searchPlace(inp.value.trim()), 450); });
-  inp.addEventListener("keydown", e => { if (e.key === "Enter") inp.blur(); });
-  if (N.lat != null) renderNearby();
-  else document.getElementById("nearBody").innerHTML = `<div class="hint"><b>Elige una zona</b>Usa tu ubicación o busca un pueblo o ciudad. También puedes tocar el mapa para mover el punto.</div>`;
-}
-function setLocation(lat, lng, label){
-  N.lat = +lat; N.lng = +lng; N.label = label || "Punto seleccionado";
-  lsSet("nloc", JSON.stringify({ lat: N.lat, lng: N.lng, label: N.label }));
-  renderNearby();
-}
-function useGPS(){
-  const btn = document.getElementById("gps");
-  if (!navigator.geolocation){ alert("Tu navegador no permite usar la ubicación."); return; }
-  btn.querySelector(".txt").textContent = "Buscando tu ubicación…";
-  navigator.geolocation.getCurrentPosition(async p => {
-    btn.querySelector(".txt").textContent = "Usar mi ubicación actual";
-    const { latitude: la, longitude: lo } = p.coords;
-    setLocation(la, lo, "Tu ubicación");
-    const name = await reverseName(la, lo);
-    if (name && N.lat === la){ N.label = name; lsSet("nloc", JSON.stringify({ lat: la, lng: lo, label: name })); const el = document.getElementById("locName"); if (el) el.textContent = name; }
-  }, () => {
-    btn.querySelector(".txt").textContent = "Usar mi ubicación actual";
-    alert("No tengo permiso para tu ubicación. Actívalo en Ajustes › Privacidad › Localización › Safari, o busca un lugar por su nombre.");
-  }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
-}
-async function reverseName(la, lo){
-  try {
-    const d = await getJSON(`${nominatim}/reverse?lat=${la}&lon=${lo}&format=json&zoom=14&accept-language=es`);
-    const a = d.address || {};
-    return a.village || a.town || a.city || a.municipality || a.county || d.name || null;
-  } catch(e){ return null; }
-}
-let placeSeq = 0;
-async function searchPlace(q){
-  const box = document.getElementById("placeRes");
-  if (!box) return;
-  if (q.length < 3){ box.style.display = "none"; return; }
-  const seq = ++placeSeq;
-  try {
-    const d = await getJSON(`${nominatim}/search?q=${encodeURIComponent(q)}&format=json&limit=5&accept-language=es`);
-    if (seq !== placeSeq) return;
-    box.style.display = d.length ? "" : "none";
-    box.innerHTML = d.map((r, i) => `<button class="cell" data-i="${i}" style="width:100%;text-align:left;min-height:50px"><span class="txt"><div class="t1">${esc(r.name || r.display_name.split(",")[0])}</div><div class="t2" style="font-style:normal">${esc(r.display_name)}</div></span>${chev}</button>`).join("");
-    box.querySelectorAll("button").forEach(b => b.onclick = () => {
-      const r = d[+b.dataset.i];
-      box.style.display = "none"; document.getElementById("place").value = ""; document.getElementById("place").blur();
-      setLocation(r.lat, r.lon, r.name || r.display_name.split(",")[0]);
-    });
-  } catch(e){ if (seq === placeSeq) box.style.display = "none"; }
-}
-const seg = (id, opts, cur) => `<div class="segmented" id="${id}">${opts.map(([v, l]) => `<button data-v="${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`).join("")}</div>`;
-function wireSeg(id, fn){ document.querySelectorAll(`#${id} button`).forEach(b => b.onclick = () => { document.querySelectorAll(`#${id} button`).forEach(x => x.setAttribute("aria-pressed", x === b)); fn(b.dataset.v); }); }
-const areaQ = () => `lat=${N.lat}&lng=${N.lng}&radius=${N.radius}&verifiable=true`;
-
-function renderNearby(){
-  const body = document.getElementById("nearBody");
-  if (!body) return;
-  body.innerHTML = `
-    <div class="loc-head"><span class="pin">${pinIcon}</span><div><div class="t1" id="locName">${esc(N.label)}</div><div class="t2">${N.lat.toFixed(4)}, ${N.lng.toFixed(4)} · toca el mapa para moverte</div></div></div>
-    <p class="seg-label">Radio de búsqueda</p>
-    ${seg("nrad", [[1,"1 km"],[5,"5 km"],[10,"10 km"],[25,"25 km"],[50,"50 km"]], N.radius)}
-    <div style="margin-top:12px">${seg("nlay", [["map","Mapa"],["sat","Satélite"]], N.layer)}</div>
-    <div id="nmap" class="bigmap"></div>
-    <p class="footnote">El mapa de calor muestra dónde hay más avistamientos: cuanto más intenso, más registros.</p>
-    <div class="stats" id="nstats"><div><b>…</b><span>especies</span></div><div><b>…</b><span>avistamientos</span></div><div><b>…</b><span>con sonido</span></div></div>
-    <div class="section-head"><h2>Especies de la zona</h2></div>
-    ${seg("ngrp", [["Aves,Mammalia","Todos"],["Aves","Aves"],["Mammalia","Mamíferos"]], N.group)}
-    <div class="group" id="nspecies" style="margin-top:12px">${loading("Buscando especies…")}</div>
-    <p class="footnote">Ordenadas por número de avistamientos en esta zona.</p>
-    <div id="nmore"></div>
-    <div class="section-head"><h2>Avistamientos recientes</h2></div>
-    <div class="group" id="nrecent">${loading("Cargando…")}</div>
-    <footer>Avistamientos de la comunidad de iNaturalist. Búsqueda de lugares con OpenStreetMap.</footer>`;
-  wireSeg("nrad", v => { N.radius = +v; lsSet("nrad", v); drawNearMap(true); loadNearData(); });
-  wireSeg("nlay", v => { N.layer = v; lsSet("nlayer", v); setBase(); });
-  wireSeg("ngrp", v => { N.group = v; drawHeat(); loadNearData(); });
-  drawNearMap(true);
-  loadNearData();
-}
-function setBase(){
-  if (!nmap) return;
-  if (nbase) nmap.removeLayer(nbase);
-  nbase = N.layer === "sat"
-    ? L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 18, attribution: "Imágenes © Esri" })
-    : L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", { maxZoom: 18, attribution: "© OpenStreetMap · © CARTO" });
-  nbase.addTo(nmap); nbase.bringToBack();
-}
-function drawHeat(){
-  if (!nmap) return;
-  if (nheat) nmap.removeLayer(nheat);
-  nheat = L.tileLayer(`${API}/heatmap/{z}/{x}/{y}.png?iconic_taxa=${N.group}&verifiable=true`, { maxZoom: 18, opacity: .85 }).addTo(nmap);
-}
-function drawNearMap(fit){
-  const el = document.getElementById("nmap");
-  if (!el || !window.L) return;
-  if (!nmap || nmap.getContainer() !== el){
-    if (nmap){ try { nmap.remove(); } catch(e){} }
-    nmap = L.map(el, { scrollWheelZoom: false, zoomControl: true });
-    nbase = null; nheat = null; ncircle = null;
-    setBase(); drawHeat();
-    nmap.on("click", async e => {
-      const { lat, lng } = e.latlng;
-      setLocation(lat, lng, "Punto del mapa");
-      const name = await reverseName(lat, lng);
-      if (name && N.lat === lat){ N.label = name; lsSet("nloc", JSON.stringify({ lat, lng, label: name })); const n = document.getElementById("locName"); if (n) n.textContent = name; }
-    });
-  }
-  if (ncircle) nmap.removeLayer(ncircle);
-  const ring = L.circle([N.lat, N.lng], { radius: N.radius * 1000, color: "#3E7150", weight: 2, fillColor: "#3E7150", fillOpacity: .06, interactive: false });
-  const dot = L.circleMarker([N.lat, N.lng], { radius: 7, color: "#fff", weight: 2.5, fillColor: "#3E7150", fillOpacity: 1, interactive: false });
-  ncircle = L.featureGroup([ring, dot]).addTo(nmap);
-  if (fit) nmap.fitBounds(ring.getBounds(), { padding: [12, 12] });
-}
-async function loadNearData(page = 1){
-  const seq = page === 1 ? ++N.seq : N.seq;
-  const sp = document.getElementById("nspecies"), more = document.getElementById("nmore");
-  if (!sp) return;
-  if (page === 1){
-    sp.innerHTML = loading("Buscando especies…");
-    loadNearStats(seq); loadNearRecent(seq);
-  }
-  try {
-    const d = await getJSON(`${API}/observations/species_counts?${areaQ()}&iconic_taxa=${N.group}&locale=es&per_page=30&page=${page}`);
-    if (seq !== N.seq || !document.getElementById("nspecies")) return;
-    if (page === 1){
-      const st = document.querySelector("#nstats div b"); if (st) st.textContent = fmtN(d.total_results);
-      sp.innerHTML = d.results.length ? "" : `<p class="status" style="padding:20px">No hay avistamientos registrados aquí. Prueba con un radio mayor.</p>`;
-    }
-    sp.insertAdjacentHTML("beforeend", d.results.map(r => cellHTML(r.taxon, fmtN(r.count))).join(""));
-    if (page * 30 < d.total_results){
-      more.innerHTML = `<button class="more">Ver más especies</button>`;
-      more.firstChild.onclick = () => { more.innerHTML = loading(""); loadNearData(page + 1); };
-    } else more.innerHTML = "";
-  } catch(e){ if (seq === N.seq) sp.innerHTML = `<p class="status err" style="padding:20px">No se pudieron cargar las especies.</p>`; }
-}
-async function loadNearStats(seq){
-  try {
-    const [a, b] = await Promise.all([
-      getJSON(`${API}/observations?${areaQ()}&iconic_taxa=${N.group}&per_page=0`),
-      getJSON(`${API}/observations?${areaQ()}&iconic_taxa=${N.group}&sounds=true&per_page=0`)
-    ]);
-    if (seq !== N.seq) return;
-    const bs = document.querySelectorAll("#nstats div b");
-    if (bs[1]) bs[1].textContent = fmtN(a.total_results);
-    if (bs[2]) bs[2].textContent = fmtN(b.total_results);
-  } catch(e){}
-}
-async function loadNearRecent(seq){
-  const box = document.getElementById("nrecent");
-  try {
-    const d = await getJSON(`${API}/observations?${areaQ()}&iconic_taxa=${N.group}&photos=true&order_by=observed_on&per_page=12&locale=es`);
-    if (seq !== N.seq || !document.getElementById("nrecent")) return;
-    box.innerHTML = d.results.filter(o => o.taxon).map(o => {
-      const img = o.photos?.[0]?.url, name = cap(o.taxon.preferred_common_name) || o.taxon.name;
-      return `<a class="cell" href="#/animal/${o.taxon.id}">
-        ${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : `<span class="ph"></span>`}
-        <span class="txt"><div class="t1">${esc(name)}</div><div class="t2" style="font-style:normal">${esc(fmtDate(o.observed_on))}${o.place_guess ? " · " + esc(o.place_guess) : ""}</div></span>${chev}</a>`;
-    }).join("") || `<p class="status" style="padding:20px">Sin avistamientos recientes en esta zona.</p>`;
-  } catch(e){ if (seq === N.seq && box) box.innerHTML = `<p class="status err" style="padding:20px">No se pudieron cargar los avistamientos.</p>`; }
-}
-
-/* ---------- Foto (reconocimiento con MobileNet, en el móvil) ---------- */
-const IMAGENET_ANIMALS = ["tench, Tinca tinca","goldfish, Carassius auratus","great white shark, white shark, man-eater, man-eating shark, Carcharodon carcharias","tiger shark, Galeocerdo cuvieri","hammerhead, hammerhead shark","electric ray, crampfish, numbfish, torpedo","stingray","cock","hen","ostrich, Struthio camelus","brambling, Fringilla montifringilla","goldfinch, Carduelis carduelis","house finch, linnet, Carpodacus mexicanus","junco, snowbird","indigo bunting, indigo finch, indigo bird, Passerina cyanea","robin, American robin, Turdus migratorius","bulbul","jay","magpie","chickadee","water ouzel, dipper","kite","bald eagle, American eagle, Haliaeetus leucocephalus","vulture","great grey owl, great gray owl, Strix nebulosa","European fire salamander, Salamandra salamandra","common newt, Triturus vulgaris","eft","spotted salamander, Ambystoma maculatum","axolotl, mud puppy, Ambystoma mexicanum","bullfrog, Rana catesbeiana","tree frog, tree-frog","tailed frog, bell toad, ribbed toad, tailed toad, Ascaphus trui","loggerhead, loggerhead turtle, Caretta caretta","leatherback turtle, leatherback, leathery turtle, Dermochelys coriacea","mud turtle","terrapin","box turtle, box tortoise","banded gecko","common iguana, iguana, Iguana iguana","American chameleon, anole, Anolis carolinensis","whiptail, whiptail lizard","agama","frilled lizard, Chlamydosaurus kingi","alligator lizard","Gila monster, Heloderma suspectum","green lizard, Lacerta viridis","African chameleon, Chamaeleo chamaeleon","Komodo dragon, Komodo lizard, dragon lizard, giant lizard, Varanus komodoensis","African crocodile, Nile crocodile, Crocodylus niloticus","American alligator, Alligator mississipiensis","triceratops","thunder snake, worm snake, Carphophis amoenus","ringneck snake, ring-necked snake, ring snake","hognose snake, puff adder, sand viper","green snake, grass snake","king snake, kingsnake","garter snake, grass snake","water snake","vine snake","night snake, Hypsiglena torquata","boa constrictor, Constrictor constrictor","rock python, rock snake, Python sebae","Indian cobra, Naja naja","green mamba","sea snake","horned viper, cerastes, sand viper, horned asp, Cerastes cornutus","diamondback, diamondback rattlesnake, Crotalus adamanteus","sidewinder, horned rattlesnake, Crotalus cerastes","trilobite","harvestman, daddy longlegs, Phalangium opilio","scorpion","black and gold garden spider, Argiope aurantia","barn spider, Araneus cavaticus","garden spider, Aranea diademata","black widow, Latrodectus mactans","tarantula","wolf spider, hunting spider","tick","centipede","black grouse","ptarmigan","ruffed grouse, partridge, Bonasa umbellus","prairie chicken, prairie grouse, prairie fowl","peacock","quail","partridge","African grey, African gray, Psittacus erithacus","macaw","sulphur-crested cockatoo, Kakatoe galerita, Cacatua galerita","lorikeet","coucal","bee eater","hornbill","hummingbird","jacamar","toucan","drake","red-breasted merganser, Mergus serrator","goose","black swan, Cygnus atratus","tusker","echidna, spiny anteater, anteater","platypus, duckbill, duckbilled platypus, duck-billed platypus, Ornithorhynchus anatinus","wallaby, brush kangaroo","koala, koala bear, kangaroo bear, native bear, Phascolarctos cinereus","wombat","jelly fish","sea anemone, anemone","brain coral","flatworm, platyhelminth","nematode, nematode worm, roundworm","conch","snail","slug","sea slug, nudibranch","chiton, coat-of-mail shell, sea cradle, polyplacophore","chambered nautilus, pearly nautilus, nautilus","Dungeness crab, Cancer magister","rock crab, Cancer irroratus","fiddler crab","king crab, Alaska crab, Alaskan king crab, Alaska king crab, Paralithodes camtschatica","American lobster, Northern lobster, Maine lobster, Homarus americanus","spiny lobster, langouste, rock lobster, crawfish, crayfish, sea crawfish","crayfish, crawfish, crawdad, crawdaddy","hermit crab","isopod","white stork, Ciconia ciconia","black stork, Ciconia nigra","spoonbill","flamingo","little blue heron, Egretta caerulea","American egret, great white heron, Egretta albus","bittern","crane","limpkin, Aramus pictus","European gallinule, Porphyrio porphyrio","American coot, marsh hen, mud hen, water hen, Fulica americana","bustard","ruddy turnstone, Arenaria interpres","red-backed sandpiper, dunlin, Erolia alpina","redshank, Tringa totanus","dowitcher","oystercatcher, oyster catcher","pelican","king penguin, Aptenodytes patagonica","albatross, mollymawk","grey whale, gray whale, devilfish, Eschrichtius gibbosus, Eschrichtius robustus","killer whale, killer, orca, grampus, sea wolf, Orcinus orca","dugong, Dugong dugon","sea lion","Chihuahua","Japanese spaniel","Maltese dog, Maltese terrier, Maltese","Pekinese, Pekingese, Peke","Shih-Tzu","Blenheim spaniel","papillon","toy terrier","Rhodesian ridgeback","Afghan hound, Afghan","basset, basset hound","beagle","bloodhound, sleuthhound","bluetick","black-and-tan coonhound","Walker hound, Walker foxhound","English foxhound","redbone","borzoi, Russian wolfhound","Irish wolfhound","Italian greyhound","whippet","Ibizan hound, Ibizan Podenco","Norwegian elkhound, elkhound","otterhound, otter hound","Saluki, gazelle hound","Scottish deerhound, deerhound","Weimaraner","Staffordshire bullterrier, Staffordshire bull terrier","American Staffordshire terrier, Staffordshire terrier, American pit bull terrier, pit bull terrier","Bedlington terrier","Border terrier","Kerry blue terrier","Irish terrier","Norfolk terrier","Norwich terrier","Yorkshire terrier","wire-haired fox terrier","Lakeland terrier","Sealyham terrier, Sealyham","Airedale, Airedale terrier","cairn, cairn terrier","Australian terrier","Dandie Dinmont, Dandie Dinmont terrier","Boston bull, Boston terrier","miniature schnauzer","giant schnauzer","standard schnauzer","Scotch terrier, Scottish terrier, Scottie","Tibetan terrier, chrysanthemum dog","silky terrier, Sydney silky","soft-coated wheaten terrier","West Highland white terrier","Lhasa, Lhasa apso","flat-coated retriever","curly-coated retriever","golden retriever","Labrador retriever","Chesapeake Bay retriever","German short-haired pointer","vizsla, Hungarian pointer","English setter","Irish setter, red setter","Gordon setter","Brittany spaniel","clumber, clumber spaniel","English springer, English springer spaniel","Welsh springer spaniel","cocker spaniel, English cocker spaniel, cocker","Sussex spaniel","Irish water spaniel","kuvasz","schipperke","groenendael","malinois","briard","kelpie","komondor","Old English sheepdog, bobtail","Shetland sheepdog, Shetland sheep dog, Shetland","collie","Border collie","Bouvier des Flandres, Bouviers des Flandres","Rottweiler","German shepherd, German shepherd dog, German police dog, alsatian","Doberman, Doberman pinscher","miniature pinscher","Greater Swiss Mountain dog","Bernese mountain dog","Appenzeller","EntleBucher","boxer","bull mastiff","Tibetan mastiff","French bulldog","Great Dane","Saint Bernard, St Bernard","Eskimo dog, husky","malamute, malemute, Alaskan malamute","Siberian husky","dalmatian, coach dog, carriage dog","affenpinscher, monkey pinscher, monkey dog","basenji","pug, pug-dog","Leonberg","Newfoundland, Newfoundland dog","Great Pyrenees","Samoyed, Samoyede","Pomeranian","chow, chow chow","keeshond","Brabancon griffon","Pembroke, Pembroke Welsh corgi","Cardigan, Cardigan Welsh corgi","toy poodle","miniature poodle","standard poodle","Mexican hairless","timber wolf, grey wolf, gray wolf, Canis lupus","white wolf, Arctic wolf, Canis lupus tundrarum","red wolf, maned wolf, Canis rufus, Canis niger","coyote, prairie wolf, brush wolf, Canis latrans","dingo, warrigal, warragal, Canis dingo","dhole, Cuon alpinus","African hunting dog, hyena dog, Cape hunting dog, Lycaon pictus","hyena, hyaena","red fox, Vulpes vulpes","kit fox, Vulpes macrotis","Arctic fox, white fox, Alopex lagopus","grey fox, gray fox, Urocyon cinereoargenteus","tabby, tabby cat","tiger cat","Persian cat","Siamese cat, Siamese","Egyptian cat","cougar, puma, catamount, mountain lion, painter, panther, Felis concolor","lynx, catamount","leopard, Panthera pardus","snow leopard, ounce, Panthera uncia","jaguar, panther, Panthera onca, Felis onca","lion, king of beasts, Panthera leo","tiger, Panthera tigris","cheetah, chetah, Acinonyx jubatus","brown bear, bruin, Ursus arctos","American black bear, black bear, Ursus americanus, Euarctos americanus","ice bear, polar bear, Ursus Maritimus, Thalarctos maritimus","sloth bear, Melursus ursinus, Ursus ursinus","mongoose","meerkat, mierkat","tiger beetle","ladybug, ladybeetle, lady beetle, ladybird, ladybird beetle","ground beetle, carabid beetle","long-horned beetle, longicorn, longicorn beetle","leaf beetle, chrysomelid","dung beetle","rhinoceros beetle","weevil","fly","bee","ant, emmet, pismire","grasshopper, hopper","cricket","walking stick, walkingstick, stick insect","cockroach, roach","mantis, mantid","cicada, cicala","leafhopper","lacewing, lacewing fly","dragonfly, darning needle, devil's darning needle, sewing needle, snake feeder, snake doctor, mosquito hawk, skeeter hawk","damselfly","admiral","ringlet, ringlet butterfly","monarch, monarch butterfly, milkweed butterfly, Danaus plexippus","cabbage butterfly","sulphur butterfly, sulfur butterfly","lycaenid, lycaenid butterfly","starfish, sea star","sea urchin","sea cucumber, holothurian","wood rabbit, cottontail, cottontail rabbit","hare","Angora, Angora rabbit","hamster","porcupine, hedgehog","fox squirrel, eastern fox squirrel, Sciurus niger","marmot","beaver","guinea pig, Cavia cobaya","sorrel","zebra","hog, pig, grunter, squealer, Sus scrofa","wild boar, boar, Sus scrofa","warthog","hippopotamus, hippo, river horse, Hippopotamus amphibius","ox","water buffalo, water ox, Asiatic buffalo, Bubalus bubalis","bison","ram, tup","bighorn, bighorn sheep, cimarron, Rocky Mountain bighorn, Rocky Mountain sheep, Ovis canadensis","ibex, Capra ibex","hartebeest","impala, Aepyceros melampus","gazelle","Arabian camel, dromedary, Camelus dromedarius","llama","weasel","mink","polecat, fitch, foulmart, foumart, Mustela putorius","black-footed ferret, ferret, Mustela nigripes","otter","skunk, polecat, wood pussy","badger","armadillo","three-toed sloth, ai, Bradypus tridactylus","orangutan, orang, orangutang, Pongo pygmaeus","gorilla, Gorilla gorilla","chimpanzee, chimp, Pan troglodytes","gibbon, Hylobates lar","siamang, Hylobates syndactylus, Symphalangus syndactylus","guenon, guenon monkey","patas, hussar monkey, Erythrocebus patas","baboon","macaque","langur","colobus, colobus monkey","proboscis monkey, Nasalis larvatus","marmoset","capuchin, ringtail, Cebus capucinus","howler monkey, howler","titi, titi monkey","spider monkey, Ateles geoffroyi","squirrel monkey, Saimiri sciureus","Madagascar cat, ring-tailed lemur, Lemur catta","indri, indris, Indri indri, Indri brevicaudatus","Indian elephant, Elephas maximus","African elephant, Loxodonta africana","lesser panda, red panda, panda, bear cat, cat bear, Ailurus fulgens","giant panda, panda, panda bear, coon bear, Ailuropoda melanoleuca","barracouta, snoek","eel","coho, cohoe, coho salmon, blue jack, silver salmon, Oncorhynchus kisutch","rock beauty, Holocanthus tricolor","anemone fish","sturgeon","gar, garfish, garpike, billfish, Lepisosteus osseus","lionfish","puffer, pufferfish, blowfish, globefish"];
-const DOG = [151, 268], CAT = [281, 285];
-const CAT_ES = { 281: ["Gato atigrado (tabby)", "Gato atigrado"], 282: ["Gato atigrado", "Gato atigrado"], 283: ["Persa", "Gato persa"], 284: ["Siamés", "Gato siamés"], 285: ["Mau egipcio", "Mau egipcio"] };
-const SCI_FIX = { "cock": "Gallus gallus domesticus", "hen": "Gallus gallus domesticus", "ox": "Bos taurus", "ram, tup": "Ovis aries", "sorrel": "Equus caballus", "zebra": "Equus quagga", "tusker": "Loxodonta africana", "Arctic fox, white fox, Alopex lagopus": "Vulpes lagopus", "Persian cat": "Felis catus" };
-const P = { model: null, loading: null, seq: 0 };
-const camIcon = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.6-2.4h6.8L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/></svg>`;
-const galIcon = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="m4 17 5-4.5 4 3.5 2.5-2 4.5 3.8"/></svg>`;
-
-function loadScript(src){
-  return new Promise((ok, ko) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => ko(new Error("script")); document.head.appendChild(s); });
-}
-function ensureMobilenet(){
-  if (P.model) return Promise.resolve(P.model);
-  if (!P.loading) P.loading = (async () => {
-    if (!window.tf) await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.14.0/dist/tf.min.js");
-    if (!window.mobilenet) await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js");
-    await tf.ready();
-    P.model = await mobilenet.load({ version: 2, alpha: 1.0 });
-    return P.model;
-  })().catch(e => { P.loading = null; throw e; });
-  return P.loading;
-}
-
-function showPhoto(){
-  window.onscroll = null;
-  document.title = "Foto · Fonoteca";
-  $view.innerHTML = `
-    <h1 class="large-title">Foto</h1>
-    <p class="subtitle">Haz o elige una foto y te digo qué animal es.</p>
-    <div class="photo-btns">
-      <label class="pbtn main">${camIcon}<span>Hacer foto</span><input type="file" accept="image/*" capture="environment" id="pCam" hidden></label>
-      <label class="pbtn">${galIcon}<span>Elegir de la galería</span><input type="file" accept="image/*" id="pGal" hidden></label>
-    </div>
-    <div id="pOut"><div class="hint"><b>Consejo</b>Que el animal se vea entero, bien iluminado y ocupando buena parte de la foto.</div></div>
-    <footer>Reconocimiento con MobileNet (Google), hecho en tu móvil: la foto no se envía a ningún sitio. Acierta bien con perros, gatos y animales conocidos; con fauna salvaje puede fallar, así que compara siempre con la ficha. La primera vez descarga el modelo (unos 14 MB).</footer>`;
-  ["pCam", "pGal"].forEach(id => document.getElementById(id).onchange = e => {
-    const f = e.target.files?.[0]; e.target.value = "";
-    if (f) analyzePhoto(f);
+  g.querySelectorAll(".card").forEach(c => c.onclick = () => {
+    sessionStorage.setItem("homeY", window.scrollY);
+    location.hash = "#/a/" + encodeURIComponent(c.dataset.k);
   });
 }
-
-function loadImg(src){
-  return new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = ko; i.src = src; });
-}
-function cropCanvas(img, frac){
-  const w = img.naturalWidth, h = img.naturalHeight, side = Math.min(w, h) * frac;
-  const c = document.createElement("canvas"); c.width = c.height = 300;
-  c.getContext("2d").drawImage(img, (w - side) / 2, (h - side) / 2, side, side, 0, 0, 300, 300);
-  return c;
+function holdToOpen(el, cb){
+  let t;
+  const start = e => { e.preventDefault(); el.classList.add("hold"); t = setTimeout(() => { el.classList.remove("hold"); cb(); }, 1500); };
+  const end = () => { clearTimeout(t); el.classList.remove("hold"); };
+  el.addEventListener("touchstart", start, { passive: false });
+  el.addEventListener("mousedown", start);
+  ["touchend","touchcancel","mouseup","mouseleave"].forEach(ev => el.addEventListener(ev, end));
 }
 
-async function analyzePhoto(file){
-  const seq = ++P.seq, out = document.getElementById("pOut");
-  const url = URL.createObjectURL(file);
-  out.innerHTML = `<div class="ppreview"><img src="${url}" alt="Tu foto"></div><div id="pStat">${loading(P.model ? "Mirando la foto…" : "Preparando el reconocimiento (solo la primera vez)…")}</div><div id="pRes"></div>`;
-  try {
-    const [model, img] = await Promise.all([ensureMobilenet(), loadImg(url)]);
-    if (seq !== P.seq) return;
-    document.getElementById("pStat").innerHTML = loading("Mirando la foto…");
-    // Tres encuadres: entera, centro y centro cercano. Nos quedamos con la mejor puntuación de cada clase.
-    const full = document.createElement("canvas");
-    const k = Math.min(1, 640 / Math.max(img.naturalWidth, img.naturalHeight));
-    full.width = Math.round(img.naturalWidth * k); full.height = Math.round(img.naturalHeight * k);
-    full.getContext("2d").drawImage(img, 0, 0, full.width, full.height);
-    const runs = [];
-    for (const src of [full, cropCanvas(img, 1), cropCanvas(img, .7)]) runs.push(await model.classify(src, 10));
-    const best = {};
-    runs.flat().forEach(r => { best[r.className] = Math.max(best[r.className] || 0, r.probability); });
-    const preds = Object.entries(best).map(([name, p]) => ({ name, p, idx: IMAGENET_ANIMALS.indexOf(name) })).sort((a, b) => b.p - a.p);
-    if (seq !== P.seq) return;
-    await renderPhotoResult(preds, seq);
-  } catch(e){
-    if (seq !== P.seq) return;
-    const st = document.getElementById("pStat");
-    if (st) st.innerHTML = `<p class="status err">No se pudo analizar la foto. Revisa la conexión (la primera vez hay que descargar el modelo) y vuelve a intentarlo.</p>`;
-  }
-}
-
-const isDog = i => i >= DOG[0] && i <= DOG[1];
-const isCat = i => i >= CAT[0] && i <= CAT[1];
-
-async function renderPhotoResult(preds, seq){
-  const st = document.getElementById("pStat"), box = document.getElementById("pRes");
-  const animals = preds.filter(x => x.idx >= 0);
-  const topAny = preds[0];
-  if (!animals.length || animals[0].p < .08 || (topAny.idx < 0 && topAny.p > animals[0].p * 3)){
-    st.innerHTML = `<div class="hint"><b>No veo un animal claro</b>Prueba con otra foto donde el animal se vea más grande y nítido.</div>`;
-    return;
-  }
-  // Agrupamos: todas las razas de perro suman "perro"; igual con gatos.
-  const groups = [];
-  const add = (key, p, item) => { let g = groups.find(x => x.key === key); if (!g) groups.push(g = { key, p: 0, items: [] }); g.p += p; g.items.push(item); };
-  animals.forEach(a => add(isDog(a.idx) ? "dog" : isCat(a.idx) ? "cat" : a.name, a.p, a));
-  groups.sort((a, b) => b.p - a.p);
-  st.innerHTML = loading("Buscando su ficha…");
-  const resolved = await Promise.all(groups.slice(0, 4).map(g => resolveGroup(g).catch(() => null)));
-  if (seq !== P.seq) return;
-  const list = resolved.map((t, i) => t && { ...t, p: Math.min(groups[i].p, 1), g: groups[i] }).filter(Boolean);
-  if (!list.length){ st.innerHTML = `<p class="status err">Lo he reconocido, pero no encuentro su ficha. Prueba otra vez.</p>`; return; }
-  st.innerHTML = "";
-  const top = list[0], pct = Math.round(top.p * 100);
-  const verdict = pct >= 60 ? "Creo que es" : pct >= 30 ? "Puede que sea" : "No estoy seguro, quizá sea";
-  const name = cap(top.taxon.preferred_common_name) || top.taxon.name;
-  const img = top.taxon.default_photo?.medium_url;
-  box.innerHTML = `
-    <div class="pres">
-      <div class="pres-top">
-        ${img ? `<img src="${esc(img)}" alt="">` : `<span class="ph"></span>`}
-        <div class="txt"><div class="k">${verdict}</div><div class="n">${esc(name)}</div><div class="s">${esc(top.taxon.name)}</div></div>
-      </div>
-      <div class="conf"><div class="m"><i style="width:${pct}%"></i></div><span>${pct}%</span></div>
-      ${top.lineage ? `<div class="lin">${esc(top.lineage)}</div>` : ""}
-      <div id="pBreed"></div>
-      <a class="pbtn main wide" href="#/animal/${top.taxon.id}">Ver ficha completa: sonidos, mapa e información</a>
+/* ---------- Ficha a pantalla completa ---------- */
+function stageHTML(a, opts){
+  opts = opts || {};
+  return `<div class="stage" id="stage">
+    <img class="hero" src="${esc(a.photo)}" alt="${esc(a.name)}">
+    <div class="shade"></div>
+    <div class="waves"><i></i><i></i><i></i></div>
+    <div class="tapme">${ICON.ear}</div>
+    <button class="roundbtn home" id="homeBtn" aria-label="Inicio">${ICON.home}</button>
+    ${opts.add ? `<button class="addbtn" id="addBtn">${opts.added ? "✓ En sus animales" : "＋ Añadir a Olivia"}</button>` : ""}
+    <div class="bottom">
+      ${opts.nav ? `<button class="roundbtn prev" id="prevBtn" aria-label="Anterior">${ICON.prev}</button>` : `<span style="width:76px"></span>`}
+      <div class="bigname">${esc(a.name)}</div>
+      ${opts.nav ? `<button class="roundbtn next" id="nextBtn" aria-label="Siguiente">${ICON.next}</button>` : `<span style="width:76px"></span>`}
     </div>
-    ${list.length > 1 ? `<div class="section-head"><h2>Otras posibilidades</h2></div>
-    <div class="group">${list.slice(1).map(o => `<a class="cell" href="#/animal/${o.taxon.id}">
-      ${o.taxon.default_photo?.square_url ? `<img src="${esc(o.taxon.default_photo.square_url)}" alt="" loading="lazy">` : `<span class="ph"></span>`}
-      <span class="txt"><div class="t1">${esc(cap(o.taxon.preferred_common_name) || o.taxon.name)}</div><div class="t2">${esc(o.taxon.name)}</div></span>
-      <span class="val">${Math.max(1, Math.round(o.p * 100))}%</span>${chev}</a>`).join("")}</div>` : ""}`;
-  if (top.g.key === "dog" || top.g.key === "cat") renderBreeds(top.g, seq);
+  </div>`;
+}
+function toast(msg){
+  const st = document.getElementById("stage"); if (!st) return;
+  const d = document.createElement("div"); d.className = "toast"; d.textContent = msg; st.appendChild(d);
+  setTimeout(() => d.remove(), 3500);
+}
+async function present(a){
+  const t = ++TOK, st = document.getElementById("stage");
+  if (!st) return;
+  st.classList.add("playing", "started");
+  try { speechSynthesis.cancel(); } catch(e){} AU.pause();
+  await say("¡" + cap(a.name) + "!");
+  if (t !== TOK) return;
+  const ok = await playAnimal(a);
+  if (t !== TOK) return;
+  if (!ok) toast("Todavía no tenemos el sonido real de este animal.");
+  st.classList.remove("playing");
+}
+function bindStage(a, onPrev, onNext){
+  const st = document.getElementById("stage");
+  document.getElementById("homeBtn").onclick = e => { e.stopPropagation(); location.hash = "#/"; };
+  const p = document.getElementById("prevBtn"), n = document.getElementById("nextBtn");
+  if (p) p.onclick = e => { e.stopPropagation(); onPrev(); };
+  if (n) n.onclick = e => { e.stopPropagation(); onNext(); };
+  let x0 = null, y0 = null, swiped = false;
+  st.addEventListener("click", e => { if (swiped || e.target.closest("button")) return; present(a); });
+  st.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  st.addEventListener("touchend", e => {
+    if (x0 == null || !onNext) return;
+    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+    if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.5){ swiped = true; (dx < 0 ? onNext : onPrev)(); }
+    x0 = null;
+  }, { passive: true });
+}
+function showAnimal(k){
+  const a = byKey(k);
+  if (!a) return location.replace("#/");
+  document.title = cap(noun(a.name)) + " · Olivia";
+  let list = listFor(SET.cat); if (!list.includes(a)) list = ANIMALS.concat(EXTRA);
+  const i = list.indexOf(a);
+  const go = d => location.replace("#/a/" + encodeURIComponent(list[(i + d + list.length) % list.length].k));
+  $app.innerHTML = stageHTML(a, { nav: list.length > 1 });
+  bindStage(a, () => go(-1), () => go(1));
+  const nx = list[(i + 1) % list.length];
+  if (nx){ new Image().src = nx.photo; const s = soundsOf(nx)[0]; if (s) srcFor(s); }
+  present(a);
 }
 
-async function resolveGroup(g){
-  let sci;
-  if (g.key === "dog") sci = "Canis familiaris";
-  else if (g.key === "cat") sci = "Felis catus";
-  else sci = SCI_FIX[g.key];
-  let taxon;
-  if (sci) taxon = await findTaxon([sci]);
-  else {
-    const parts = g.key.split(", ");
-    const sciParts = parts.filter(p => /^[A-Z][a-z]+( [a-z]+){1,2}$/.test(p) && p.split(" ").length >= 2);
-    taxon = await findTaxon([...sciParts, ...parts.filter(p => !sciParts.includes(p))]);
-  }
-  if (!taxon) return null;
-  const full = (await getJSON(`${API}/taxa/${taxon.id}?locale=es`)).results[0] || taxon;
-  const lineage = (full.ancestors || []).filter(a => ["class", "order", "family"].includes(a.rank)).map(a => cap(a.preferred_common_name) || a.name).join(" › ");
-  return { taxon: full, lineage };
+/* ---------- Animales buscados por papa y mama ---------- */
+const taxCache = {};
+async function loadTaxon(id){
+  if (taxCache[id]) return taxCache[id];
+  const both = await Promise.all([
+    getJSON(`${API}/taxa/${id}?locale=es`).then(d => d.results[0]),
+    getJSON(`${API}/observations?taxon_id=${id}&sounds=true&quality_grade=research&order_by=votes&per_page=12`).catch(() => ({ results: [] }))
+  ]);
+  const t = both[0], o = both[1];
+  const ph = ((t.taxon_photos || [])[0] || {}).photo || t.default_photo || {};
+  const sounds = [], credits = [];
+  o.results.forEach(ob => (ob.sounds || []).slice(0, 1).forEach(s => { if (s.file_url){ sounds.push(s.file_url); credits.push((ob.user || {}).name || (ob.user || {}).login); } }));
+  return taxCache[id] = {
+    k: "t" + id, id, name: cap(t.preferred_common_name) || t.name, sci: t.name, cat: "mas",
+    photo: (ph.medium_url || ph.url || "").replace(/square|medium/, "large"), photo_by: ph.attribution || "",
+    sounds: sounds.slice(0, 6), credits
+  };
 }
-async function findTaxon(terms){
-  for (const term of terms){
-    const d = await getJSON(`${API}/taxa/autocomplete?q=${encodeURIComponent(term)}&locale=es&per_page=6&is_active=true`);
-    const ok = d.results.filter(t => t.iconic_taxon_name && !["Plantae", "Fungi", "Chromista", "Protozoa"].includes(t.iconic_taxon_name));
-    const exact = ok.find(t => (t.matched_term || "").toLowerCase() === term.toLowerCase() || t.name.toLowerCase() === term.toLowerCase());
-    if (exact) return exact;
-    if (ok[0] && /^[A-Z][a-z]+ [a-z]+/.test(term)) return ok[0];
-  }
-  // Último intento: la primera palabra clave que dé un animal
-  for (const term of terms){
-    const d = await getJSON(`${API}/taxa/autocomplete?q=${encodeURIComponent(term)}&locale=es&per_page=3&is_active=true`);
-    const t = d.results.find(t => ["Mammalia", "Aves", "Reptilia", "Amphibia", "Actinopterygii", "Insecta", "Arachnida", "Mollusca", "Animalia"].includes(t.iconic_taxon_name));
-    if (t) return t;
-  }
-  return null;
+async function showTaxon(id){
+  $app.innerHTML = loading("Cargando…");
+  let a;
+  try { a = await loadTaxon(id); } catch(e){ $app.innerHTML = `<p class="status">No se pudo cargar. Revisa la conexión.</p>`; return; }
+  const added = () => EXTRA.some(x => x.k === a.k);
+  $app.innerHTML = stageHTML(a, { add: true, added: added() });
+  bindStage(a, null, null);
+  document.getElementById("homeBtn").onclick = e => { e.stopPropagation(); location.hash = "#/padres"; };
+  document.getElementById("addBtn").onclick = e => {
+    e.stopPropagation();
+    if (added()) EXTRA = EXTRA.filter(x => x.k !== a.k);
+    else EXTRA.push({ k: a.k, id: a.id, name: a.name, sci: a.sci, cat: "mas", photo: a.photo, photo_by: a.photo_by, sounds: a.sounds, credits: a.credits });
+    lsSet("extra", JSON.stringify(EXTRA));
+    e.currentTarget.textContent = added() ? "✓ En sus animales" : "＋ Añadir a Olivia";
+  };
+  present(a);
 }
 
-async function wikiBreed(label, isCatKind, idx){
-  // Gatos: nombre en español directo. Perros: Wikipedia inglesa → enlace a la española.
-  let esTitle = null, display = null;
-  if (isCatKind){ [display, esTitle] = CAT_ES[idx] || [label, null]; }
-  else {
-    const base = label.split(", ")[0];
-    const ts = [base + " (dog breed)", base + " (dog)", base];
-    const d = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(ts.join("|"))}&prop=langlinks|pageprops&lllang=es&redirects=1&format=json&origin=*`);
-    const q = d.query || {}, norm = {}, red = {}, pages = {};
-    (q.normalized || []).forEach(x => norm[x.from] = x.to);
-    (q.redirects || []).forEach(x => red[x.from] = x.to);
-    Object.values(q.pages || {}).forEach(p => pages[p.title] = p);
-    for (const t of ts){
-      let t2 = norm[t] || t; t2 = red[t2] || t2;
-      const p = pages[t2];
-      if (p && !("missing" in p) && !(p.pageprops && "disambiguation" in p.pageprops)){ display = p.title.replace(/ \(dog( breed)?\)$/, ""); esTitle = p.langlinks?.[0]?.["*"] || null; break; }
+/* ---------- Juego: ¿Donde esta? ---------- */
+const G = { last: null };
+function showGame(){
+  document.title = "¿Dónde está? · Olivia";
+  $app.innerHTML = `<div class="game">
+    <div class="ghead">
+      <button class="roundbtn home" id="homeBtn" aria-label="Inicio">${ICON.home}</button>
+      <div class="question" id="q"></div>
+      <button class="again" id="again" aria-label="Repetir">${ICON.ear}</button>
+    </div>
+    <div class="choices" id="choices"></div>
+  </div>`;
+  document.getElementById("homeBtn").onclick = () => location.hash = "#/";
+  newRound();
+}
+function shuffle(a){ for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+function newRound(){
+  const box = document.getElementById("choices"); if (!box) return;
+  let pool = listFor(SET.cat).filter(a => soundsOf(a).length);
+  if (pool.length < SET.opts + 1) pool = ANIMALS.slice();
+  let target; do { target = pool[Math.floor(Math.random() * pool.length)]; } while (pool.length > 1 && target === G.last);
+  G.last = target;
+  const others = shuffle(pool.filter(a => a !== target && noun(a.name) !== noun(target.name))).slice(0, SET.opts - 1);
+  const opts = shuffle([target].concat(others));
+  box.className = "choices n" + opts.length; box.style.setProperty("--n", opts.length);
+  box.innerHTML = opts.map(a => `<button class="choice" data-k="${esc(a.k)}"><img src="${esc(a.photo)}" alt=""></button>`).join("");
+  document.getElementById("q").innerHTML = `¿Dónde está <b>${esc(target.name)}</b>?`;
+  const ask = () => { ++TOK; AU.pause(); return say("¿Dónde está " + target.name + "?"); };
+  document.getElementById("again").onclick = ask;
+  ask();
+  let solved = false;
+  box.querySelectorAll(".choice").forEach(btn => btn.onclick = async () => {
+    if (solved) return;
+    const a = byKey(btn.dataset.k), t = ++TOK;
+    AU.pause();
+    if (a === target){
+      solved = true;
+      btn.classList.add("ok");
+      box.querySelectorAll(".choice").forEach(b => { if (b !== btn) b.classList.add("dim"); });
+      confetti();
+      await say("¡Muy bien! ¡Es " + a.name + "!");
+      if (t !== TOK) return;
+      await playAnimal(a);
+      if (t !== TOK) return;
+      setTimeout(() => { if (t === TOK) newRound(); }, 700);
+    } else {
+      btn.classList.remove("no"); void btn.offsetWidth; btn.classList.add("no");
+      await say("Este es " + a.name + ".");
+      if (t !== TOK) return;
+      await playAnimal(a);
+      if (t !== TOK) return;
+      await say("¿Dónde está " + target.name + "?");
     }
-    if (!display) display = cap(base);
-    if (esTitle) display = esTitle.replace(/ \(perro\)$/i, "");
+  });
+}
+function confetti(){
+  const s = document.getElementById("stars"), cols = ["#FFB23F","#F27A5E","#6DBE5B","#3FA2DA","#A777D9","#E9699C","#F2C230"];
+  for (let i = 0; i < 40; i++){
+    const d = document.createElement("i");
+    d.style.left = Math.random() * 100 + "vw"; d.style.background = cols[i % cols.length];
+    d.style.animationDelay = Math.random() * .4 + "s"; d.style.borderRadius = i % 2 ? "50%" : "4px";
+    s.appendChild(d); setTimeout(() => d.remove(), 2200);
   }
-  let extract = "";
-  if (esTitle){
-    try {
-      const e = await getJSON(`https://es.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&redirects=1&titles=${encodeURIComponent(esTitle)}&format=json&origin=*`);
-      extract = Object.values(e.query?.pages || {})[0]?.extract || "";
-    } catch(e){}
-  }
-  return { display: cap(display), extract, esTitle };
 }
 
-async function renderBreeds(g, seq){
-  const el = document.getElementById("pBreed");
-  if (!el) return;
-  const catKind = g.key === "cat";
-  const items = g.items.slice().sort((a, b) => b.p - a.p).slice(0, 3);
-  const total = items.reduce((s, x) => s + x.p, 0) || 1;
-  el.innerHTML = loading(catKind ? "Mirando el tipo de gato…" : "Mirando la raza…");
-  const info = await Promise.all(items.map(x => wikiBreed(x.name, catKind, x.idx).catch(() => ({ display: cap(x.name.split(", ")[0]), extract: "" }))));
-  if (seq !== P.seq || !document.getElementById("pBreed")) return;
-  const main = info[0], mp = Math.round(items[0].p / total * 100);
-  const short = main.extract ? main.extract.split("\n")[0].slice(0, 420) + (main.extract.length > 420 ? "…" : "") : "";
-  el.innerHTML = `
-    <div class="breed">
-      <div class="bk">${catKind ? "Raza o pelaje probable" : "Raza probable"}</div>
-      <div class="bn">${esc(main.display)} <span>${mp}%</span></div>
-      ${short ? `<p>${esc(short)}</p>` : ""}
-      ${main.esTitle ? `<a href="https://es.wikipedia.org/wiki/${encodeURIComponent(main.esTitle.replace(/ /g, "_"))}" target="_blank" rel="noopener">Leer más en Wikipedia</a>` : ""}
-      ${info.length > 1 ? `<div class="bo">También podría ser: ${info.slice(1).map((x, i) => `${esc(x.display)} (${Math.round(items[i + 1].p / total * 100)}%)`).join(", ")}</div>` : ""}
-      <div class="bo">Si es un cruce, puede mezclar rasgos de varias razas.</div>
-    </div>`;
+/* ---------- Zona de papa y mama ---------- */
+function showParents(){
+  document.title = "Papá y mamá · Olivia";
+  window.scrollTo(0, 0);
+  $app.innerHTML = `<div class="parents">
+    <div class="ph"><h1>Papá y mamá</h1><button class="pill" id="back">Volver</button></div>
+    <div class="sec">Buscar cualquier animal</div>
+    <label class="search">${ICON.search}<input id="q" type="search" placeholder="Fénec, gorila, cocodrilo…" autocomplete="off" autocorrect="off" enterkeyhint="search"></label>
+    <div id="res" style="margin-top:12px"></div>
+    <p class="note">Toca uno para verlo como lo ve Olivia (foto y sonido reales). Con «Añadir a Olivia» aparece en su sección <b>Más</b>.</p>
+    <div class="sec">Añadidos por vosotros</div>
+    <div class="box" id="extraBox"></div>
+    <div class="sec">Ajustes</div>
+    <div class="box">
+      <div class="opt"><div><div>Decir el nombre en voz alta</div><div class="s">Antes del sonido, la voz del móvil dice «¡La vaca!»</div></div>
+        <button class="switch" id="vsw" role="switch" aria-checked="${SET.voice}"></button></div>
+      <div class="opt"><div><div>Juego «¿Dónde está?»</div><div class="s">Cuántos animales salen a elegir</div></div>
+        <div class="seg" id="optSeg">${[2,3].map(n => `<button data-n="${n}" aria-pressed="${SET.opts === n}">${n}</button>`).join("")}</div></div>
+    </div>
+    <div class="sec">Sin internet</div>
+    <div class="box">
+      <div class="opt"><div><div>Guardar todo en el móvil</div><div class="s">Fotos y sonidos de sus ${ANIMALS.length} animales, para el coche o el campo.</div></div>
+        <button class="pill" id="dl">Guardar</button></div>
+      <div class="bar" id="dlbar" hidden><i></i></div>
+    </div>
+    <div class="sec">De dónde sale todo</div>
+    <div class="box"><details><summary>Créditos de fotos y sonidos</summary><div class="credits">${creditsHTML()}</div></details></div>
+    <p class="note">Todas las fotos y sonidos son de animales reales, fotografiados y grabados por naturalistas en iNaturalist y Wikimedia Commons. Uso personal, sin fines comerciales.</p>
+  </div>`;
+  document.getElementById("back").onclick = () => location.hash = "#/";
+  const q = document.getElementById("q");
+  let t;
+  q.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => doSearch(q.value.trim()), 350); });
+  q.addEventListener("keydown", e => { if (e.key === "Enter") q.blur(); });
+  document.getElementById("vsw").onclick = e => { SET.voice = !SET.voice; lsSet("voice", SET.voice ? "1" : "0"); e.currentTarget.setAttribute("aria-checked", SET.voice); };
+  document.querySelectorAll("#optSeg button").forEach(b => b.onclick = () => {
+    SET.opts = +b.dataset.n; lsSet("opts", SET.opts);
+    document.querySelectorAll("#optSeg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  });
+  document.getElementById("dl").onclick = saveOffline;
+  renderExtra();
+}
+function renderExtra(){
+  const box = document.getElementById("extraBox"); if (!box) return;
+  box.innerHTML = EXTRA.length ? EXTRA.map(a => `<div class="row"><img src="${esc(a.photo)}" alt=""><div class="t"><div class="t1">${esc(a.name)}</div><div class="t2">${esc(a.sci)}</div></div><button class="x" data-k="${esc(a.k)}" aria-label="Quitar">✕</button></div>`).join("")
+    : `<p class="status">Aún no habéis añadido ninguno.</p>`;
+  box.querySelectorAll(".x").forEach(b => b.onclick = () => { EXTRA = EXTRA.filter(a => a.k !== b.dataset.k); lsSet("extra", JSON.stringify(EXTRA)); renderExtra(); });
+}
+let sSeq = 0;
+async function searchAnimals(q){
+  const found = new Map();
+  const isAnimal = t => ANIMAL_GROUPS.includes(t.iconic_taxon_name);
+  const add = list => list.filter(isAnimal).forEach(t => { if (!found.has(t.id)) found.set(t.id, t); });
+  const ac = term => getJSON(`${API}/taxa/autocomplete?q=${encodeURIComponent(term)}&locale=es&per_page=20&is_active=true`).then(d => d.results).catch(() => []);
+  add(await ac(q));
+  const words = q.split(" ").filter(x => x.length >= 3);
+  if (found.size < 3 || words.length > 1){
+    if (words.length > 1){
+      const lists = await Promise.all(words.map(w => ac(w).then(r => r.filter(isAnimal))));
+      lists.filter(l => l.length).sort((a, b) => a.length - b.length).forEach(add);
+    }
+    if (found.size < 3){
+      try {
+        const w = await getJSON(`https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&srlimit=3&format=json&origin=*`);
+        for (const h of w.query.search) add(await ac(h.title.split(" (")[0]));
+      } catch(e){}
+    }
+  }
+  return Array.from(found.values()).slice(0, 30);
+}
+async function doSearch(q){
+  const box = document.getElementById("res"), seq = ++sSeq;
+  if (q.length < 2){ box.innerHTML = ""; return; }
+  box.innerHTML = loading("Buscando…");
+  const res = await searchAnimals(q);
+  if (seq !== sSeq) return;
+  box.innerHTML = res.length ? `<div class="box">${res.map(t => `<button class="row" data-id="${t.id}">
+      ${t.default_photo && t.default_photo.square_url ? `<img src="${esc(t.default_photo.square_url)}" alt="">` : `<span class="ph0"></span>`}
+      <div class="t"><div class="t1">${esc(cap(t.preferred_common_name) || t.name)}</div><div class="t2">${esc(t.name)}</div></div></button>`).join("")}</div>`
+    : `<p class="status">No encuentro «${esc(q)}». Prueba con otro nombre.</p>`;
+  box.querySelectorAll(".row").forEach(r => r.onclick = () => location.hash = "#/t/" + r.dataset.id);
+}
+function creditsHTML(){
+  const lic = l => (l || "").toUpperCase();
+  return ANIMALS.map(a => `<p><b>${esc(cap(noun(a.name)))}</b> (<i>${esc(a.sci)}</i>). Foto: ${esc(a.photo_by)}. Sonido: ${a.clips.map(c => `<a href="${esc(c.page)}" target="_blank" rel="noopener">${esc(c.by || "autor desconocido")}</a>, ${esc(c.src)}, ${esc(lic(c.lic))}`).join("; ")}.</p>`).join("");
+}
+async function saveOffline(){
+  const bar = document.getElementById("dlbar"), btn = document.getElementById("dl");
+  bar.hidden = false; btn.disabled = true; btn.textContent = "Guardando…";
+  const urls = [];
+  ANIMALS.forEach(a => { urls.push(a.photo); soundsOf(a).forEach(s => urls.push(s)); });
+  let n = 0;
+  for (const u of urls){
+    try { await fetch(u, u.startsWith("http") ? { mode: "no-cors" } : {}); } catch(e){}
+    n++; bar.firstElementChild.style.width = Math.round(n / urls.length * 100) + "%";
+  }
+  btn.textContent = "Guardado ✓";
 }
 
+/* ---------- arranque ---------- */
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 if (!location.hash) history.replaceState(null, "", "#/");
 route();
 </script>
