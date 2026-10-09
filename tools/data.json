@@ -6,7 +6,7 @@
 "sci": "Canis familiaris",
 "id": 47144,
 "photo": "img/perro.jpg?v=19f203b7",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Alec Karcz, some rights reserved (CC BY-NC), uploaded by Alec Karcz",
 "clips": [
 {
 "file": "perro1.mp3",
@@ -33,7 +33,7 @@
 "sci": "Felis catus",
 "id": 118552,
 "photo": "img/gato.jpg?v=2265faf9",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Von.grzanka, some rights reserved (CC BY-SA)",
 "clips": [
 {
 "file": "gato1.mp3",
@@ -60,7 +60,7 @@
 "sci": "Bos taurus",
 "id": 74113,
 "photo": "img/vaca.jpg?v=0ea6ad43",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Verum, some rights reserved (CC BY-SA)",
 "clips": [
 {
 "file": "vaca1.mp3",
@@ -87,7 +87,7 @@
 "sci": "Ovis aries",
 "id": 121578,
 "photo": "img/oveja.jpg?v=7f485d94",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Christopher Stephens, some rights reserved (CC BY-SA), uploaded by Christopher Stephens",
 "clips": [
 {
 "file": "oveja1.mp3",
@@ -114,7 +114,7 @@
 "sci": "Capra hircus",
 "id": 123070,
 "photo": "img/cabra.jpg?v=47a36b02",
-"photo_by": "iNaturalist",
+"photo_by": "(c) James Steamer, some rights reserved (CC BY-NC), uploaded by James Steamer",
 "clips": [
 {
 "file": "cabra1.mp3",
@@ -141,7 +141,7 @@
 "sci": "Sus scrofa domesticus",
 "id": 324492,
 "photo": "img/cerdo.jpg?v=26ab7d80",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Camelotrose, some rights reserved (CC BY-SA)",
 "clips": [
 {
 "file": "cerdo1.mp3",
@@ -168,7 +168,7 @@
 "sci": "Equus caballus",
 "id": 209233,
 "photo": "img/caballo.jpg?v=6c24211d",
-"photo_by": "iNaturalist",
+"photo_by": "(c) copper, some rights reserved (CC BY-NC), uploaded by copper",
 "clips": [
 {
 "file": "caballo1.mp3",
@@ -195,7 +195,7 @@
 "sci": "Equus asinus",
 "id": 148030,
 "photo": "img/burro.jpg?v=ccef7559",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Angela Marie, some rights reserved (CC BY)",
 "clips": [
 {
 "file": "burro1.mp3",
@@ -222,7 +222,7 @@
 "sci": "Gallus gallus domesticus",
 "id": 505478,
 "photo": "img/gallina.jpg?v=fe4d8e1e",
-"photo_by": "iNaturalist",
+"photo_by": "(c) beau, some rights reserved (CC BY-NC)",
 "clips": [
 {
 "file": "gallina1.mp3",
@@ -249,7 +249,7 @@
 "sci": "Gallus gallus domesticus",
 "id": 505478,
 "photo": "img/gallo.jpg?v=d6128200",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Марина Горбунова-Ëлкина, some rights reserved (CC BY-NC)",
 "clips": [
 {
 "file": "gallo1.mp3",
@@ -276,7 +276,7 @@
 "sci": "Anas platyrhynchos",
 "id": 6930,
 "photo": "img/pato.jpg?v=04f7d923",
-"photo_by": "iNaturalist",
+"photo_by": "(c) hedera.baltica, some rights reserved (CC BY-SA)",
 "clips": [
 {
 "file": "pato1.mp3",
@@ -303,7 +303,7 @@
 "sci": "Meleagris gallopavo",
 "id": 906,
 "photo": "img/pavo.jpg?v=71c7402c",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Chris Sanders, some rights reserved (CC BY-NC), uploaded by Chris Sanders",
 "clips": [
 {
 "file": "pavo1.mp3",
@@ -330,7 +330,7 @@
 "sci": "Anser anser",
 "id": 7018,
 "photo": "img/ganso.jpg?v=60e451f3",
-"photo_by": "iNaturalist",
+"photo_by": "(c) bitsnbirds, some rights reserved (CC BY), uploaded by bitsnbirds",
 "clips": [
 {
 "file": "ganso1.mp3",
@@ -357,7 +357,7 @@
 "sci": "Pavo cristatus",
 "id": 1204,
 "photo": "img/pavoreal.jpg?v=af1e8aa2",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Charles (Chuck) Peterson, some rights reserved (CC BY-NC-ND)",
 "clips": [
 {
 "file": "pavoreal1.mp3",
@@ -384,7 +384,7 @@
 "sci": "Panthera leo",
 "id": 41964,
 "photo": "img/leon.jpg?v=388bd301",
-"photo_by": "iNaturalist",
+"photo_by": "(c) seasav, some rights reserved (CC BY-NC-ND), uploaded by seasav",
 "clips": [
 {
 "file": "leon1.mp3",
@@ -411,7 +411,7 @@
 "sci": "Panthera tigris",
 "id": 41967,
 "photo": "img/tigre.jpg?v=90ada828",
-"photo_by": "iNaturalist",
+"photo_by": "(c) omveerchoudhary, some rights reserved (CC BY-NC)",
 "clips": [
 {
 "file": "tigre1.mp3",
@@ -438,7 +438,7 @@
 "sci": "Loxodonta africana",
 "id": 43694,
 "photo": "img/elefante.jpg?v=0c0afc9d",
-"photo_by": "iNaturalist",
+"photo_by": "(c) eslone, some rights reserved (CC BY-NC), uploaded by eslone",
 "clips": [
 {
 "file": "elefante1.mp3",
@@ -465,7 +465,7 @@
 "sci": "Gorilla gorilla",
 "id": 43580,
 "photo": "img/gorila.jpg?v=529ebbd9",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Royle Safaris, some rights reserved (CC BY-NC), uploaded by Royle Safaris",
 "clips": [
 {
 "file": "gorila1.mp3",
@@ -492,7 +492,7 @@
 "sci": "Pan troglodytes",
 "id": 43577,
 "photo": "img/chimpance.jpg?v=e5ab3afb",
-"photo_by": "iNaturalist",
+"photo_by": "(c) gillbsydney, some rights reserved (CC BY-NC), uploaded by gillbsydney",
 "clips": [
 {
 "file": "chimpance1.mp3",
@@ -519,7 +519,7 @@
 "sci": "Alouatta palliata",
 "id": 43436,
 "photo": "img/monoaullador.jpg?v=1d63eea3",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Cephas, some rights reserved (CC BY-SA)",
 "clips": [
 {
 "file": "monoaullador1.mp3",
@@ -546,7 +546,7 @@
 "sci": "Equus quagga",
 "id": 43335,
 "photo": "img/cebra.jpg?v=5c84616b",
-"photo_by": "iNaturalist",
+"photo_by": "(c) ispylifers, some rights reserved (CC BY-NC)",
 "clips": [
 {
 "file": "cebra1.mp3",
@@ -566,7 +566,7 @@
 "sci": "Hippopotamus amphibius",
 "id": 42149,
 "photo": "img/hipopotamo.jpg?v=c12942ca",
-"photo_by": "iNaturalist",
+"photo_by": "(c) John Sullivan, some rights reserved (CC BY-NC), uploaded by John Sullivan",
 "clips": [
 {
 "file": "hipopotamo1.mp3",
@@ -593,7 +593,7 @@
 "sci": "Crocuta crocuta",
 "id": 41886,
 "photo": "img/hiena.jpg?v=c7f5bcfc",
-"photo_by": "iNaturalist",
+"photo_by": "(c) pgkaestner, some rights reserved (CC BY-NC), uploaded by pgkaestner",
 "clips": [
 {
 "file": "hiena1.mp3",
@@ -620,7 +620,7 @@
 "sci": "Ara macao",
 "id": 19022,
 "photo": "img/loro.jpg?v=805dd504",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Matthew Patchett, some rights reserved (CC BY-NC), uploaded by Matthew Patchett",
 "clips": [
 {
 "file": "loro1.mp3",
@@ -647,7 +647,7 @@
 "sci": "Ramphastos sulfuratus",
 "id": 18796,
 "photo": "img/tucan.jpg?v=2c5fc8db",
-"photo_by": "iNaturalist",
+"photo_by": "(c) aguilargm, some rights reserved (CC BY-NC), uploaded by aguilargm",
 "clips": [
 {
 "file": "tucan1.mp3",
@@ -674,7 +674,7 @@
 "sci": "Alligator mississippiensis",
 "id": 26159,
 "photo": "img/caiman.jpg?v=06a08729",
-"photo_by": "iNaturalist",
+"photo_by": "(c) sandiwheeler, some rights reserved (CC BY-NC), uploaded by sandiwheeler",
 "clips": [
 {
 "file": "caiman1.mp3",
@@ -701,7 +701,7 @@
 "sci": "Panthera pardus",
 "id": 41963,
 "photo": "img/leopardo.jpg?v=208e12e4",
-"photo_by": "iNaturalist",
+"photo_by": "(c) janaohrner, some rights reserved (CC BY-NC), uploaded by janaohrner",
 "clips": [
 {
 "file": "leopardo1.mp3",
@@ -728,7 +728,7 @@
 "sci": "Panthera onca",
 "id": 41970,
 "photo": "img/jaguar.jpg?v=c0cd11e2",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Charles J. Sharp , some rights reserved (CC BY-SA)",
 "clips": [
 {
 "file": "jaguar1.mp3",
@@ -748,7 +748,7 @@
 "sci": "Ceratotherium simum",
 "id": 43348,
 "photo": "img/rinoceronte.jpg?v=6bd1659b",
-"photo_by": "iNaturalist",
+"photo_by": "(c) copper, some rights reserved (CC BY-NC), uploaded by copper",
 "clips": [
 {
 "file": "rinoceronte1.mp3",
@@ -775,7 +775,7 @@
 "sci": "Suricata suricatta",
 "id": 41943,
 "photo": "img/suricata.jpg?v=e84172d6",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Cloudtail the Snow Leopard, some rights reserved (CC BY-NC-ND)",
 "clips": [
 {
 "file": "suricata1.mp3",
@@ -802,7 +802,7 @@
 "sci": "Canis lupus",
 "id": 42048,
 "photo": "img/lobo.jpg?v=cbda12c1",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Zhuofei Lu, some rights reserved (CC BY-NC-SA), uploaded by Zhuofei Lu",
 "clips": [
 {
 "file": "lobo1.mp3",
@@ -829,7 +829,7 @@
 "sci": "Ursus arctos",
 "id": 41641,
 "photo": "img/oso.jpg?v=6e05f615",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Annika Lindqvist, some rights reserved (CC BY)",
 "clips": [
 {
 "file": "oso1.mp3",
@@ -856,7 +856,7 @@
 "sci": "Vulpes vulpes",
 "id": 42069,
 "photo": "img/zorro.jpg?v=3aea3bae",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Joanne Muis Redwood, some rights reserved (CC BY-NC), uploaded by Joanne Muis Redwood",
 "clips": [
 {
 "file": "zorro1.mp3",
@@ -883,7 +883,7 @@
 "sci": "Cervus elaphus",
 "id": 204113,
 "photo": "img/ciervo.jpg?v=8804b8b7",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Jon J. Laysell, some rights reserved (CC BY-NC), uploaded by Jon J. Laysell",
 "clips": [
 {
 "file": "ciervo1.mp3",
@@ -910,7 +910,7 @@
 "sci": "Sus scrofa",
 "id": 42134,
 "photo": "img/jabali.jpg?v=7bbfa6ac",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Ouwesok, some rights reserved (CC BY-NC)",
 "clips": [
 {
 "file": "jabali1.mp3",
@@ -937,7 +937,7 @@
 "sci": "Bubo bubo",
 "id": 20059,
 "photo": "img/buho.jpg?v=136c9d76",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Kim, Hyun-tae, some rights reserved (CC BY), uploaded by Kim, Hyun-tae",
 "clips": [
 {
 "file": "buho1.mp3",
@@ -964,7 +964,7 @@
 "sci": "Picus sharpei",
 "id": 144242,
 "photo": "img/carpintero.jpg?v=e05f8d4c",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Jean-Marie GRADOT, some rights reserved (CC BY-NC)",
 "clips": [
 {
 "file": "carpintero1.mp3",
@@ -991,7 +991,7 @@
 "sci": "Cuculus canorus",
 "id": 1907,
 "photo": "img/cuco.jpg?v=051d760e",
-"photo_by": "iNaturalist",
+"photo_by": "no rights reserved, uploaded by Юрий Носков",
 "clips": [
 {
 "file": "cuco1.mp3",
@@ -1018,7 +1018,7 @@
 "sci": "Sciurus vulgaris",
 "id": 46001,
 "photo": "img/ardilla.jpg?v=914fcdd5",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Blondinrikard Fröberg, some rights reserved (CC BY)",
 "clips": [
 {
 "file": "ardilla1.mp3",
@@ -1045,7 +1045,7 @@
 "sci": "Pelophylax perezi",
 "id": 1319812,
 "photo": "img/rana.jpg?v=128a187b",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Tiago Carrapiço, some rights reserved (CC BY-NC), uploaded by Tiago Carrapiço",
 "clips": [
 {
 "file": "rana1.mp3",
@@ -1072,7 +1072,7 @@
 "sci": "Gryllus campestris",
 "id": 71248,
 "photo": "img/grillo.jpg?v=c615a60b",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Ryszard, some rights reserved (CC BY-NC)",
 "clips": [
 {
 "file": "grillo1.mp3",
@@ -1099,7 +1099,7 @@
 "sci": "Lyristes plebejus",
 "id": 361905,
 "photo": "img/cigarra.jpg?v=66257794",
-"photo_by": "iNaturalist",
+"photo_by": "no rights reserved",
 "clips": [
 {
 "file": "cigarra1.mp3",
@@ -1126,7 +1126,7 @@
 "sci": "Apis mellifera",
 "id": 47219,
 "photo": "img/abeja.jpg?v=920f25b6",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Lê Thanh Hoa, some rights reserved (CC BY-NC), uploaded by Lê Thanh Hoa",
 "clips": [
 {
 "file": "abeja1.mp3",
@@ -1153,7 +1153,7 @@
 "sci": "Phascolarctos cinereus",
 "id": 42983,
 "photo": "img/koala.jpg?v=bd2cae33",
-"photo_by": "iNaturalist",
+"photo_by": "(c) toohey-forest-wildlife, some rights reserved (CC BY-NC), uploaded by toohey-forest-wildlife",
 "clips": [
 {
 "file": "koala1.mp3",
@@ -1180,7 +1180,7 @@
 "sci": "Megaptera novaeangliae",
 "id": 41566,
 "photo": "img/ballena.jpg?v=871d8e11",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Tobin Sparling (he/him), some rights reserved (CC BY-NC), uploaded by Tobin Sparling (he/him)",
 "clips": [
 {
 "file": "ballena1.mp3",
@@ -1207,7 +1207,7 @@
 "sci": "Delphinus delphis",
 "id": 41526,
 "photo": "img/delfin.jpg?v=ae8012d7",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Corey Husic, some rights reserved (CC BY-NC), uploaded by Corey Husic",
 "clips": [
 {
 "file": "delfin1.mp3",
@@ -1227,7 +1227,7 @@
 "sci": "Zalophus californianus",
 "id": 41740,
 "photo": "img/leonmarino.jpg?v=90510c12",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Ruben Undheim, some rights reserved (CC BY-SA)",
 "clips": [
 {
 "file": "leonmarino1.mp3",
@@ -1247,7 +1247,7 @@
 "sci": "Spheniscus demersus",
 "id": 3813,
 "photo": "img/pinguino.jpg?v=57a22701",
-"photo_by": "iNaturalist",
+"photo_by": "(c) René Hodges, some rights reserved (CC BY-NC), uploaded by René Hodges",
 "clips": [
 {
 "file": "pinguino1.mp3",
@@ -1274,7 +1274,7 @@
 "sci": "Larus michahellis",
 "id": 59202,
 "photo": "img/gaviota.jpg?v=df1c14e1",
-"photo_by": "iNaturalist",
+"photo_by": "(c) lizamast, some rights reserved (CC BY-NC), uploaded by lizamast",
 "clips": [
 {
 "file": "gaviota1.mp3",
@@ -1294,7 +1294,7 @@
 "sci": "Lutra lutra",
 "id": 41850,
 "photo": "img/nutria.jpg?v=09395415",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Cloudtail the Snow Leopard, some rights reserved (CC BY-NC-ND)",
 "clips": [
 {
 "file": "nutria1.mp3",
@@ -1321,7 +1321,7 @@
 "sci": "Passer domesticus",
 "id": 13858,
 "photo": "img/gorrion.jpg?v=fb1fa39e",
-"photo_by": "iNaturalist",
+"photo_by": "(c) hedera.baltica, some rights reserved (CC BY-SA)",
 "clips": [
 {
 "file": "gorrion1.mp3",
@@ -1348,7 +1348,7 @@
 "sci": "Erithacus rubecula",
 "id": 13094,
 "photo": "img/petirrojo.jpg?v=d9e7185d",
-"photo_by": "iNaturalist",
+"photo_by": "(c) redgannet, some rights reserved (CC BY-NC)",
 "clips": [
 {
 "file": "petirrojo1.mp3",
@@ -1375,7 +1375,7 @@
 "sci": "Turdus merula",
 "id": 12716,
 "photo": "img/mirlo.jpg?v=82b9b37c",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Andreas Trepte, some rights reserved (CC BY-SA)",
 "clips": [
 {
 "file": "mirlo1.mp3",
@@ -1402,7 +1402,7 @@
 "sci": "Corvus corax",
 "id": 8010,
 "photo": "img/cuervo.jpg?v=2b172926",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Tim Healy, some rights reserved (CC BY-NC), uploaded by Tim Healy",
 "clips": [
 {
 "file": "cuervo1.mp3",
@@ -1429,7 +1429,7 @@
 "sci": "Columba livia",
 "id": 3017,
 "photo": "img/paloma.jpg?v=f6468052",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Константин Самодуров, some rights reserved (CC BY-NC), uploaded by Константин Самодуров",
 "clips": [
 {
 "file": "paloma1.mp3",
@@ -1456,7 +1456,7 @@
 "sci": "Serinus canaria",
 "id": 9246,
 "photo": "img/canario.jpg?v=17a24d6a",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Paul Cools, some rights reserved (CC BY-NC), uploaded by Paul Cools",
 "clips": [
 {
 "file": "canario1.mp3",
@@ -1483,7 +1483,7 @@
 "sci": "Ciconia ciconia",
 "id": 4733,
 "photo": "img/ciguena.jpg?v=557fe178",
-"photo_by": "iNaturalist",
+"photo_by": "(c) xulescu_g, some rights reserved (CC BY-SA)",
 "clips": [
 {
 "file": "ciguena1.mp3",
@@ -1510,7 +1510,7 @@
 "sci": "Hirundo rustica",
 "id": 11901,
 "photo": "img/golondrina.jpg?v=395482d9",
-"photo_by": "iNaturalist",
+"photo_by": "no rights reserved, uploaded by Robbie Hannawacker",
 "clips": [
 {
 "file": "golondrina1.mp3",
@@ -1537,7 +1537,7 @@
 "sci": "Aquila chrysaetos",
 "id": 5074,
 "photo": "img/aguila.jpg?v=b14a30cb",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Wendy Feltham, some rights reserved (CC BY-NC), uploaded by Wendy Feltham",
 "clips": [
 {
 "file": "aguila1.mp3",
@@ -1564,7 +1564,7 @@
 "sci": "Phoenicopterus roseus",
 "id": 73222,
 "photo": "img/flamenco.jpg?v=05ad195c",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Diego Delso , some rights reserved (CC BY-SA)",
 "clips": [
 {
 "file": "flamenco1.mp3",
@@ -1591,7 +1591,7 @@
 "sci": "Dacelo novaeguineae",
 "id": 2413,
 "photo": "img/cucaburra.jpg?v=ea3863c6",
-"photo_by": "iNaturalist",
+"photo_by": "(c) Elliot Blythman, some rights reserved (CC BY-NC), uploaded by Elliot Blythman",
 "clips": [
 {
 "file": "cucaburra1.mp3",
