@@ -1,8 +1,41 @@
-name: Preparar sonidos
+name: Preparar la app de Olivia
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "tools/**"
+      - ".github/workflows/sonidos.yml"
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: olivia
+  cancel-in-progress: true
 jobs:
-  noop:
+  preparar:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
-      - run: echo ok
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar herramientas
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+          pip install requests numpy soundfile ai-edge-litert pillow
+          mkdir -p work
+          curl -sL -o work/yamnet.tflite "https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/audio_classification/android/lite-model_yamnet_classification_tflite_1.tflite"
+      - name: Preparar fotos, sonidos y app
+        run: python3 tools/pipeline.py
+      - name: Publicar
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A index.html icon-olivia-*.png sounds
+          git commit -m "App de Olivia: fotos y sonidos reales" || echo "Sin cambios"
+          git push
+      - name: Actualizar la web
+        continue-on-error: true
+        run: |
+          curl -s -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/pages/builds"

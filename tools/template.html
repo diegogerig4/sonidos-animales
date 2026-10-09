@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Olivia">
+<meta name="theme-color" content="#FFF4E0">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-olivia-180.png">
+<title>Los animales de Olivia</title>
+<style>
+:root{
+  --bg:#FFF4E0; --ink:#3A2716; --ink2:#8C7258; --card:#FFFFFF;
+  --shadow:0 8px 22px rgba(110,70,20,.16);
+  --st:env(safe-area-inset-top); --sb:env(safe-area-inset-bottom);
+  --casa:#FFB23F; --granja:#F27A5E; --selva:#6DBE5B; --bosque:#3F9466; --mar:#3FA2DA; --pajaros:#A777D9; --todos:#F2C230; --mas:#E9699C;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);overscroll-behavior:none}
+body{font-family:ui-rounded,"SF Pro Rounded",-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;
+  background-image:radial-gradient(circle at 12% 8%,rgba(255,178,63,.20) 0 120px,transparent 121px),radial-gradient(circle at 92% 30%,rgba(63,162,218,.14) 0 90px,transparent 91px);background-attachment:fixed}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+img{-webkit-user-drag:none}
+#app{max-width:1100px;margin:0 auto;padding:0 16px calc(var(--sb) + 28px)}
+.top{display:flex;align-items:flex-start;justify-content:space-between;padding:calc(var(--st) + 18px) 4px 6px}
+.top h1{margin:0;font-size:34px;line-height:1.05;font-weight:800;letter-spacing:-.01em}
+.top h1 span{color:var(--mas)}
+.lock{position:relative;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--ink2);opacity:.55;flex:none}
+.lock svg.ring{position:absolute;inset:0;width:44px;height:44px;transform:rotate(-90deg)}
+.lock svg.ring circle{fill:none;stroke:var(--mas);stroke-width:4;stroke-dasharray:126;stroke-dashoffset:126;stroke-linecap:round}
+.lock.hold svg.ring circle{transition:stroke-dashoffset 1.4s linear;stroke-dashoffset:0}
+.cats{display:flex;gap:14px;overflow-x:auto;padding:14px 4px 10px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat{flex:none;display:flex;flex-direction:column;align-items:center;gap:6px;width:84px}
+.cat .b{width:78px;height:78px;border-radius:50%;background:var(--c);padding:5px;box-shadow:var(--shadow);transition:transform .15s}
+.cat .b img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;border:3px solid rgba(255,255,255,.9)}
+.cat span{font-size:15px;font-weight:700}
+.cat[aria-pressed="true"] .b{transform:scale(1.1);box-shadow:0 0 0 4px #fff,0 0 0 8px var(--c),var(--shadow)}
+.game-btn{display:flex;align-items:center;gap:14px;width:100%;margin:8px 0 18px;padding:14px 18px;border-radius:26px;background:linear-gradient(135deg,#FFCF4A,#FF9F43);color:#4A2A00;font-size:22px;font-weight:800;box-shadow:var(--shadow)}
+.game-btn .ic{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.7);display:grid;place-items:center;font-size:30px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media (min-width:640px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:960px){.grid{grid-template-columns:repeat(4,1fr)}}
+.card{position:relative;display:block;border-radius:26px;overflow:hidden;background:var(--card);box-shadow:var(--shadow);aspect-ratio:1/1.12;transition:transform .12s}
+.card:active{transform:scale(.96)}
+.card img{width:100%;height:100%;object-fit:cover;display:block;background:#F1E4CC}
+.card span{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 10px;text-align:center;font-size:22px;font-weight:800;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.45);background:linear-gradient(transparent,rgba(0,0,0,.55))}
+.card::before{content:"";position:absolute;inset:0;border:5px solid var(--c,transparent);border-radius:26px;pointer-events:none;z-index:1}
+.stage{position:fixed;inset:0;background:#000;z-index:20;overflow:hidden}
+.stage .hero{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.3,1.6,.5,1)}
+.stage.playing .hero{transform:scale(1.04)}
+.stage .shade{position:absolute;inset:auto 0 0 0;height:42%;background:linear-gradient(transparent,rgba(0,0,0,.65));pointer-events:none}
+.roundbtn{position:absolute;width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.92);color:var(--ink);display:grid;place-items:center;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:3}
+.roundbtn:active{transform:scale(.92)}
+.roundbtn svg{width:32px;height:32px}
+.home{top:calc(var(--st) + 14px);left:14px}
+.addbtn{top:calc(var(--st) + 20px);right:14px;position:absolute;z-index:3;background:rgba(255,255,255,.92);border-radius:22px;padding:10px 16px;font-weight:700;font-size:15px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.bottom{position:absolute;left:0;right:0;bottom:calc(var(--sb) + 18px);display:flex;align-items:center;justify-content:space-between;padding:0 14px;z-index:3;gap:8px}
+.bottom .prev,.bottom .next{position:static;width:76px;height:76px}
+.bottom .prev svg,.bottom .next svg{width:38px;height:38px}
+.bigname{flex:1;text-align:center;color:#fff;font-size:44px;font-weight:800;line-height:1.05;text-shadow:0 3px 12px rgba(0,0,0,.5)}
+.waves{position:absolute;left:50%;top:46%;width:10px;height:10px;z-index:2;pointer-events:none}
+.waves i{position:absolute;left:-90px;top:-90px;width:180px;height:180px;border-radius:50%;border:6px solid rgba(255,255,255,.85);opacity:0}
+.stage.playing .waves i{animation:wave 1.6s ease-out infinite}
+.stage.playing .waves i:nth-child(2){animation-delay:.53s}
+.stage.playing .waves i:nth-child(3){animation-delay:1.06s}
+@keyframes wave{from{transform:scale(.3);opacity:.9}to{transform:scale(1.9);opacity:0}}
+.tapme{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:96px;height:96px;border-radius:50%;background:rgba(255,255,255,.88);display:grid;place-items:center;z-index:2;box-shadow:0 8px 24px rgba(0,0,0,.3);transition:opacity .3s,transform .3s;pointer-events:none}
+.tapme svg{width:46px;height:46px;color:var(--ink)}
+.stage.playing .tapme,.stage.started .tapme{opacity:0;transform:translate(-50%,-50%) scale(.6)}
+.toast{position:absolute;left:50%;top:calc(var(--st) + 90px);transform:translateX(-50%);background:rgba(255,255,255,.95);color:var(--ink);padding:10px 16px;border-radius:16px;font-size:15px;font-weight:600;z-index:4;max-width:86%;text-align:center}
+.game{position:fixed;inset:0;background:var(--bg);z-index:20;display:flex;flex-direction:column;padding:calc(var(--st) + 14px) 16px calc(var(--sb) + 16px)}
+.game .home{position:static;flex:none}
+.ghead{display:flex;align-items:center;gap:12px}
+.question{flex:1;font-size:28px;font-weight:800;line-height:1.1}
+.question b{color:var(--granja)}
+.again{width:64px;height:64px;border-radius:50%;background:#fff;box-shadow:var(--shadow);display:grid;place-items:center;flex:none}
+.again svg{width:30px;height:30px}
+.choices{flex:1;display:grid;gap:14px;margin-top:16px;grid-template-columns:1fr}
+.choices.n3{grid-template-rows:repeat(3,1fr)}
+.choices.n2{grid-template-rows:repeat(2,1fr)}
+@media (orientation:landscape){.choices{grid-template-columns:repeat(var(--n),1fr);grid-template-rows:1fr!important}}
+.choice{position:relative;border-radius:30px;overflow:hidden;box-shadow:var(--shadow);background:#F1E4CC;min-height:0;transition:transform .15s,opacity .3s}
+.choice img{width:100%;height:100%;object-fit:cover;display:block}
+.choice.ok{box-shadow:0 0 0 8px #5BC85B,var(--shadow);transform:scale(1.02)}
+.choice.no{animation:nope .45s}
+.choice.dim{opacity:.35}
+@keyframes nope{20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.stars{position:fixed;inset:0;pointer-events:none;z-index:30;overflow:hidden}
+.stars i{position:absolute;width:16px;height:16px;border-radius:4px;top:-20px;animation:fall 1.6s ease-in forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.parents{padding-top:calc(var(--st) + 10px)}
+.ph{display:flex;align-items:center;justify-content:space-between;margin:10px 0 6px}
+.ph h1{font-size:28px;margin:0;font-weight:800}
+.pill{background:#fff;border-radius:20px;padding:10px 16px;font-weight:700;box-shadow:var(--shadow);color:var(--ink)}
+.sec{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2);font-weight:700;margin:22px 6px 8px}
+.box{background:#fff;border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.search{display:flex;align-items:center;gap:10px;background:#fff;border-radius:18px;padding:12px 14px;box-shadow:var(--shadow)}
+.search input{flex:1;border:0;outline:0;font:inherit;font-size:18px;background:none;color:var(--ink);-webkit-user-select:text;user-select:text}
+.row{display:flex;align-items:center;gap:12px;padding:10px 14px;width:100%;text-align:left;position:relative;min-height:64px}
+.row + .row{border-top:1px solid #F3E8D6}
+.row img,.row .ph0{width:56px;height:56px;border-radius:14px;object-fit:cover;background:#F1E4CC;flex:none}
+.row .t{flex:1;min-width:0}
+.row .t1{font-size:17px;font-weight:700}
+.row .t2{font-size:13px;color:var(--ink2);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .x{width:40px;height:40px;border-radius:50%;background:#F7EEDF;font-size:18px;color:var(--ink2);flex:none}
+.opt{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;gap:12px}
+.opt + .opt{border-top:1px solid #F3E8D6}
+.opt .s{font-size:13px;color:var(--ink2)}
+.switch{position:relative;width:51px;height:31px;border-radius:16px;background:#E6DCCB;flex:none;transition:background .2s}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15);transition:transform .2s}
+.switch[aria-checked="true"]{background:#45B35F}
+.switch[aria-checked="true"]::after{transform:translateX(20px)}
+.seg{display:flex;background:#F2E8D8;border-radius:12px;padding:3px}
+.seg button{padding:7px 16px;border-radius:9px;font-weight:700;color:var(--ink2)}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.status{color:var(--ink2);text-align:center;padding:24px 16px;font-size:15px}
+.spinner{width:28px;height:28px;border-radius:50%;border:3px solid #EADBC2;border-top-color:var(--granja);animation:spin .8s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.credits{font-size:13px;color:var(--ink2);line-height:1.45;padding:12px 16px}
+.credits a{color:var(--ink2)}
+.credits p{margin:0 0 8px}
+details summary{list-style:none;padding:14px 16px;font-weight:700;cursor:pointer}
+details summary::-webkit-details-marker{display:none}
+.note{font-size:14px;color:var(--ink2);margin:8px 6px 0;line-height:1.4}
+.bar{height:8px;border-radius:4px;background:#F2E8D8;overflow:hidden;margin:0 16px 14px}
+.bar i{display:block;height:100%;width:0;background:var(--selva);transition:width .2s}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div class="stars" id="stars"></div>
+<script>
+/* Los animales de Olivia. Fotos reales (iNaturalist) y sonidos reales (iNaturalist y Wikimedia Commons). */
+const ANIMALS = __DATA__;
+const CATS = [
+  { k: "todos", name: "Todos", c: "var(--todos)" },
+  { k: "casa", name: "Casa", c: "var(--casa)" },
+  { k: "granja", name: "Granja", c: "var(--granja)" },
+  { k: "selva", name: "Selva", c: "var(--selva)" },
+  { k: "bosque", name: "Bosque", c: "var(--bosque)" },
+  { k: "mar", name: "Mar", c: "var(--mar)" },
+  { k: "pajaros", name: "Pájaros", c: "var(--pajaros)" },
+  { k: "mas", name: "Más", c: "var(--mas)" }
+];
+const CAT_ICON = { todos: "leon", casa: "perro", granja: "vaca", selva: "elefante", bosque: "zorro", mar: "ballena", pajaros: "petirrojo" };
+const API = "https://api.inaturalist.org/v1";
+const ANIMAL_GROUPS = ["Mammalia","Aves","Reptilia","Amphibia","Actinopterygii","Insecta","Arachnida","Mollusca","Animalia"];
+const $app = document.getElementById("app");
+const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ESC[c]);
+const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+const noun = n => n.replace(/^(el|la|los|las) /i, "");
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch(e){} };
+async function getJSON(u){ const r = await fetch(u); if (!r.ok) throw new Error(r.status); return r.json(); }
+const loading = t => `<div class="status"><div class="spinner"></div>${esc(t)}</div>`;
+const SET = { voice: lsGet("voice") !== "0", opts: +(lsGet("opts") || 2), cat: lsGet("cat") || "todos" };
+let EXTRA = []; try { EXTRA = JSON.parse(lsGet("extra") || "[]"); } catch(e){}
+const byKey = k => ANIMALS.find(a => a.k === k) || EXTRA.find(a => a.k === k);
+const ICON = {
+  home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/></svg>`,
+  prev: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>`,
+  next: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>`,
+  ear: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9v6h4l5 4V5L9 9H5z"/><path d="M17.5 8.5a5 5 0 0 1 0 7M20 6a8.5 8.5 0 0 1 0 12"/></svg>`,
+  gear: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>`,
+  search: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="6"/><path d="m13 13 5 5"/></svg>`
+};
+
+/* ---------- sonido y voz ---------- */
+const AU = new Audio(); AU.preload = "auto"; AU.setAttribute("playsinline", "");
+const SILENT = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
+let unlocked = false, speechOk = false;
+function unlock(){
+  if (!unlocked && AU.paused){ AU.src = SILENT; AU.play().then(() => { unlocked = true; }).catch(() => {}); }
+  if (!speechOk){ try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); speechOk = true; } catch(e){} }
+}
+document.addEventListener("touchend", unlock, { passive: true });
+document.addEventListener("click", unlock);
+document.addEventListener("gesturestart", e => e.preventDefault());
+document.addEventListener("dblclick", e => e.preventDefault());
+let VOICE = null;
+function pickVoice(){
+  if (!window.speechSynthesis) return;
+  const vs = speechSynthesis.getVoices();
+  VOICE = vs.find(v => v.lang === "es-ES" && /m[oó]nica|marisol|paulina|elvira|helena/i.test(v.name))
+       || vs.find(v => v.lang === "es-ES") || vs.find(v => (v.lang || "").startsWith("es")) || null;
+}
+if (window.speechSynthesis){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function say(text){
+  return new Promise(res => {
+    if (!SET.voice || !window.speechSynthesis) return res();
+    let done = false; const fin = () => { if (!done){ done = true; res(); } };
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "es-ES"; if (VOICE) u.voice = VOICE; u.rate = .85; u.pitch = 1.12;
+      u.onend = fin; u.onerror = fin;
+      speechSynthesis.speak(u);
+    } catch(e){ fin(); }
+    setTimeout(fin, 900 + text.length * 110);
+  });
+}
+const blobCache = {};
+function srcFor(url){
+  if (!url.startsWith("sounds/")) return Promise.resolve(url);
+  if (!blobCache[url]) blobCache[url] = fetch(url).then(r => r.blob()).then(b => URL.createObjectURL(b)).catch(() => url);
+  return blobCache[url];
+}
+function fade(){ let v = 1; const t = setInterval(() => { v -= .2; if (v <= 0){ clearInterval(t); AU.pause(); AU.volume = 1; } else AU.volume = v; }, 80); }
+function playURL(url, maxSec){
+  return new Promise(async res => {
+    let done = false, timer;
+    const fin = () => { if (done) return; done = true; clearTimeout(timer); AU.onended = AU.onerror = null; res(); };
+    try {
+      AU.pause(); AU.volume = 1; AU.src = await srcFor(url);
+      AU.onended = fin; AU.onerror = fin;
+      await AU.play();
+      timer = setTimeout(() => { fade(); setTimeout(fin, 450); }, (maxSec || 12) * 1000);
+    } catch(e){ fin(); }
+  });
+}
+let TOK = 0;
+function stopAll(){ TOK++; try { speechSynthesis.cancel(); } catch(e){} AU.pause(); AU.volume = 1; }
+const clipIdx = {};
+function soundsOf(a){ return a.clips ? a.clips.map(c => "sounds/" + c.file) : (a.sounds || []); }
+async function playAnimal(a){
+  const list = soundsOf(a);
+  if (!list.length) return false;
+  const i = clipIdx[a.k] = ((clipIdx[a.k] ?? -1) + 1) % list.length;
+  await playURL(list[i], a.clips ? 12 : 8);
+  return true;
+}
+
+/* ---------- navegacion ---------- */
+window.addEventListener("hashchange", route);
+function route(){
+  stopAll();
+  const h = location.hash || "#/";
+  if (h.startsWith("#/a/")) return showAnimal(decodeURIComponent(h.slice(4)));
+  if (h.startsWith("#/t/")) return showTaxon(parseInt(h.slice(4), 10));
+  if (h.startsWith("#/juego")) return showGame();
+  if (h.startsWith("#/padres")) return showParents();
+  showHome();
+}
+function listFor(cat){
+  if (cat === "mas") return EXTRA;
+  if (cat === "todos") return ANIMALS.concat(EXTRA);
+  return ANIMALS.filter(a => a.cat === cat);
+}
+
+/* ---------- Inicio ---------- */
+function showHome(){
+  document.title = "Los animales de Olivia";
+  const cats = CATS.filter(c => c.k !== "mas" || EXTRA.length);
+  if (!cats.find(c => c.k === SET.cat)) SET.cat = "todos";
+  $app.innerHTML = `
+    <header class="top">
+      <h1>Los animales<br>de <span>Olivia</span></h1>
+      <button class="lock" id="lock" aria-label="Zona de papá y mamá (mantén pulsado)"><svg class="ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20"/></svg>${ICON.gear}</button>
+    </header>
+    <div class="cats" id="cats">${cats.map(c => {
+      const a = c.k === "mas" ? EXTRA[0] : byKey(CAT_ICON[c.k]);
+      return `<button class="cat" data-k="${c.k}" style="--c:${c.c}" aria-pressed="${c.k === SET.cat}"><div class="b">${a ? `<img src="${esc(a.photo)}" alt="">` : ""}</div><span>${c.name}</span></button>`;
+    }).join("")}</div>
+    <button class="game-btn" id="gameBtn"><span class="ic">🎈</span>¿Dónde está?</button>
+    <div class="grid" id="grid"></div>`;
+  renderGrid();
+  document.querySelectorAll(".cat").forEach(b => b.onclick = () => {
+    SET.cat = b.dataset.k; lsSet("cat", SET.cat);
+    document.querySelectorAll(".cat").forEach(x => x.setAttribute("aria-pressed", x === b));
+    renderGrid();
+    const c = CATS.find(c => c.k === SET.cat); say(c.k === "todos" ? "Todos los animales" : c.name);
+  });
+  document.getElementById("gameBtn").onclick = () => location.hash = "#/juego";
+  holdToOpen(document.getElementById("lock"), () => location.hash = "#/padres");
+  const sc = sessionStorage.getItem("homeY"); if (sc) setTimeout(() => window.scrollTo(0, +sc), 0);
+}
+function renderGrid(){
+  const g = document.getElementById("grid");
+  g.innerHTML = listFor(SET.cat).map(a => {
+    const col = (CATS.find(c => c.k === a.cat) || {}).c || "var(--mas)";
+    return `<button class="card" data-k="${esc(a.k)}" style="--c:${col}"><img src="${esc(a.photo)}" alt="" loading="lazy"><span>${esc(cap(noun(a.name)))}</span></button>`;
+  }).join("");
+  g.querySelectorAll(".card").forEach(c => c.onclick = () => {
+    sessionStorage.setItem("homeY", window.scrollY);
+    location.hash = "#/a/" + encodeURIComponent(c.dataset.k);
+  });
+}
+function holdToOpen(el, cb){
+  let t;
+  const start = e => { e.preventDefault(); el.classList.add("hold"); t = setTimeout(() => { el.classList.remove("hold"); cb(); }, 1500); };
+  const end = () => { clearTimeout(t); el.classList.remove("hold"); };
+  el.addEventListener("touchstart", start, { passive: false });
+  el.addEventListener("mousedown", start);
+  ["touchend","touchcancel","mouseup","mouseleave"].forEach(ev => el.addEventListener(ev, end));
+}
+
+/* ---------- Ficha a pantalla completa ---------- */
+function stageHTML(a, opts){
+  opts = opts || {};
+  return `<div class="stage" id="stage">
+    <img class="hero" src="${esc(a.photo)}" alt="${esc(a.name)}">
+    <div class="shade"></div>
+    <div class="waves"><i></i><i></i><i></i></div>
+    <div class="tapme">${ICON.ear}</div>
+    <button class="roundbtn home" id="homeBtn" aria-label="Inicio">${ICON.home}</button>
+    ${opts.add ? `<button class="addbtn" id="addBtn">${opts.added ? "✓ En sus animales" : "＋ Añadir a Olivia"}</button>` : ""}
+    <div class="bottom">
+      ${opts.nav ? `<button class="roundbtn prev" id="prevBtn" aria-label="Anterior">${ICON.prev}</button>` : `<span style="width:76px"></span>`}
+      <div class="bigname">${esc(a.name)}</div>
+      ${opts.nav ? `<button class="roundbtn next" id="nextBtn" aria-label="Siguiente">${ICON.next}</button>` : `<span style="width:76px"></span>`}
+    </div>
+  </div>`;
+}
+function toast(msg){
+  const st = document.getElementById("stage"); if (!st) return;
+  const d = document.createElement("div"); d.className = "toast"; d.textContent = msg; st.appendChild(d);
+  setTimeout(() => d.remove(), 3500);
+}
+async function present(a){
+  const t = ++TOK, st = document.getElementById("stage");
+  if (!st) return;
+  st.classList.add("playing", "started");
+  try { speechSynthesis.cancel(); } catch(e){} AU.pause();
+  await say("¡" + cap(a.name) + "!");
+  if (t !== TOK) return;
+  const ok = await playAnimal(a);
+  if (t !== TOK) return;
+  if (!ok) toast("Todavía no tenemos el sonido real de este animal.");
+  st.classList.remove("playing");
+}
+function bindStage(a, onPrev, onNext){
+  const st = document.getElementById("stage");
+  document.getElementById("homeBtn").onclick = e => { e.stopPropagation(); location.hash = "#/"; };
+  const p = document.getElementById("prevBtn"), n = document.getElementById("nextBtn");
+  if (p) p.onclick = e => { e.stopPropagation(); onPrev(); };
+  if (n) n.onclick = e => { e.stopPropagation(); onNext(); };
+  let x0 = null, y0 = null, swiped = false;
+  st.addEventListener("click", e => { if (swiped || e.target.closest("button")) return; present(a); });
+  st.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  st.addEventListener("touchend", e => {
+    if (x0 == null || !onNext) return;
+    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+    if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.5){ swiped = true; (dx < 0 ? onNext : onPrev)(); }
+    x0 = null;
+  }, { passive: true });
+}
+function showAnimal(k){
+  const a = byKey(k);
+  if (!a) return location.replace("#/");
+  document.title = cap(noun(a.name)) + " · Olivia";
+  let list = listFor(SET.cat); if (!list.includes(a)) list = ANIMALS.concat(EXTRA);
+  const i = list.indexOf(a);
+  const go = d => location.replace("#/a/" + encodeURIComponent(list[(i + d + list.length) % list.length].k));
+  $app.innerHTML = stageHTML(a, { nav: list.length > 1 });
+  bindStage(a, () => go(-1), () => go(1));
+  const nx = list[(i + 1) % list.length];
+  if (nx){ new Image().src = nx.photo; const s = soundsOf(nx)[0]; if (s) srcFor(s); }
+  present(a);
+}
+
+/* ---------- Animales buscados por papa y mama ---------- */
+const taxCache = {};
+async function loadTaxon(id){
+  if (taxCache[id]) return taxCache[id];
+  const both = await Promise.all([
+    getJSON(`${API}/taxa/${id}?locale=es`).then(d => d.results[0]),
+    getJSON(`${API}/observations?taxon_id=${id}&sounds=true&quality_grade=research&order_by=votes&per_page=12`).catch(() => ({ results: [] }))
+  ]);
+  const t = both[0], o = both[1];
+  const ph = ((t.taxon_photos || [])[0] || {}).photo || t.default_photo || {};
+  const sounds = [], credits = [];
+  o.results.forEach(ob => (ob.sounds || []).slice(0, 1).forEach(s => { if (s.file_url){ sounds.push(s.file_url); credits.push((ob.user || {}).name || (ob.user || {}).login); } }));
+  return taxCache[id] = {
+    k: "t" + id, id, name: cap(t.preferred_common_name) || t.name, sci: t.name, cat: "mas",
+    photo: (ph.medium_url || ph.url || "").replace(/square|medium/, "large"), photo_by: ph.attribution || "",
+    sounds: sounds.slice(0, 6), credits
+  };
+}
+async function showTaxon(id){
+  $app.innerHTML = loading("Cargando…");
+  let a;
+  try { a = await loadTaxon(id); } catch(e){ $app.innerHTML = `<p class="status">No se pudo cargar. Revisa la conexión.</p>`; return; }
+  const added = () => EXTRA.some(x => x.k === a.k);
+  $app.innerHTML = stageHTML(a, { add: true, added: added() });
+  bindStage(a, null, null);
+  document.getElementById("homeBtn").onclick = e => { e.stopPropagation(); location.hash = "#/padres"; };
+  document.getElementById("addBtn").onclick = e => {
+    e.stopPropagation();
+    if (added()) EXTRA = EXTRA.filter(x => x.k !== a.k);
+    else EXTRA.push({ k: a.k, id: a.id, name: a.name, sci: a.sci, cat: "mas", photo: a.photo, photo_by: a.photo_by, sounds: a.sounds, credits: a.credits });
+    lsSet("extra", JSON.stringify(EXTRA));
+    e.currentTarget.textContent = added() ? "✓ En sus animales" : "＋ Añadir a Olivia";
+  };
+  present(a);
+}
+
+/* ---------- Juego: ¿Donde esta? ---------- */
+const G = { last: null };
+function showGame(){
+  document.title = "¿Dónde está? · Olivia";
+  $app.innerHTML = `<div class="game">
+    <div class="ghead">
+      <button class="roundbtn home" id="homeBtn" aria-label="Inicio">${ICON.home}</button>
+      <div class="question" id="q"></div>
+      <button class="again" id="again" aria-label="Repetir">${ICON.ear}</button>
+    </div>
+    <div class="choices" id="choices"></div>
+  </div>`;
+  document.getElementById("homeBtn").onclick = () => location.hash = "#/";
+  newRound();
+}
+function shuffle(a){ for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+function newRound(){
+  const box = document.getElementById("choices"); if (!box) return;
+  let pool = listFor(SET.cat).filter(a => soundsOf(a).length);
+  if (pool.length < SET.opts + 1) pool = ANIMALS.slice();
+  let target; do { target = pool[Math.floor(Math.random() * pool.length)]; } while (pool.length > 1 && target === G.last);
+  G.last = target;
+  const others = shuffle(pool.filter(a => a !== target && noun(a.name) !== noun(target.name))).slice(0, SET.opts - 1);
+  const opts = shuffle([target].concat(others));
+  box.className = "choices n" + opts.length; box.style.setProperty("--n", opts.length);
+  box.innerHTML = opts.map(a => `<button class="choice" data-k="${esc(a.k)}"><img src="${esc(a.photo)}" alt=""></button>`).join("");
+  document.getElementById("q").innerHTML = `¿Dónde está <b>${esc(target.name)}</b>?`;
+  const ask = () => { ++TOK; AU.pause(); return say("¿Dónde está " + target.name + "?"); };
+  document.getElementById("again").onclick = ask;
+  ask();
+  let solved = false;
+  box.querySelectorAll(".choice").forEach(btn => btn.onclick = async () => {
+    if (solved) return;
+    const a = byKey(btn.dataset.k), t = ++TOK;
+    AU.pause();
+    if (a === target){
+      solved = true;
+      btn.classList.add("ok");
+      box.querySelectorAll(".choice").forEach(b => { if (b !== btn) b.classList.add("dim"); });
+      confetti();
+      await say("¡Muy bien! ¡Es " + a.name + "!");
+      if (t !== TOK) return;
+      await playAnimal(a);
+      if (t !== TOK) return;
+      setTimeout(() => { if (t === TOK) newRound(); }, 700);
+    } else {
+      btn.classList.remove("no"); void btn.offsetWidth; btn.classList.add("no");
+      await say("Este es " + a.name + ".");
+      if (t !== TOK) return;
+      await playAnimal(a);
+      if (t !== TOK) return;
+      await say("¿Dónde está " + target.name + "?");
+    }
+  });
+}
+function confetti(){
+  const s = document.getElementById("stars"), cols = ["#FFB23F","#F27A5E","#6DBE5B","#3FA2DA","#A777D9","#E9699C","#F2C230"];
+  for (let i = 0; i < 40; i++){
+    const d = document.createElement("i");
+    d.style.left = Math.random() * 100 + "vw"; d.style.background = cols[i % cols.length];
+    d.style.animationDelay = Math.random() * .4 + "s"; d.style.borderRadius = i % 2 ? "50%" : "4px";
+    s.appendChild(d); setTimeout(() => d.remove(), 2200);
+  }
+}
+
+/* ---------- Zona de papa y mama ---------- */
+function showParents(){
+  document.title = "Papá y mamá · Olivia";
+  window.scrollTo(0, 0);
+  $app.innerHTML = `<div class="parents">
+    <div class="ph"><h1>Papá y mamá</h1><button class="pill" id="back">Volver</button></div>
+    <div class="sec">Buscar cualquier animal</div>
+    <label class="search">${ICON.search}<input id="q" type="search" placeholder="Fénec, gorila, cocodrilo…" autocomplete="off" autocorrect="off" enterkeyhint="search"></label>
+    <div id="res" style="margin-top:12px"></div>
+    <p class="note">Toca uno para verlo como lo ve Olivia (foto y sonido reales). Con «Añadir a Olivia» aparece en su sección <b>Más</b>.</p>
+    <div class="sec">Añadidos por vosotros</div>
+    <div class="box" id="extraBox"></div>
+    <div class="sec">Ajustes</div>
+    <div class="box">
+      <div class="opt"><div><div>Decir el nombre en voz alta</div><div class="s">Antes del sonido, la voz del móvil dice «¡La vaca!»</div></div>
+        <button class="switch" id="vsw" role="switch" aria-checked="${SET.voice}"></button></div>
+      <div class="opt"><div><div>Juego «¿Dónde está?»</div><div class="s">Cuántos animales salen a elegir</div></div>
+        <div class="seg" id="optSeg">${[2,3].map(n => `<button data-n="${n}" aria-pressed="${SET.opts === n}">${n}</button>`).join("")}</div></div>
+    </div>
+    <div class="sec">Sin internet</div>
+    <div class="box">
+      <div class="opt"><div><div>Guardar todo en el móvil</div><div class="s">Fotos y sonidos de sus ${ANIMALS.length} animales, para el coche o el campo.</div></div>
+        <button class="pill" id="dl">Guardar</button></div>
+      <div class="bar" id="dlbar" hidden><i></i></div>
+    </div>
+    <div class="sec">De dónde sale todo</div>
+    <div class="box"><details><summary>Créditos de fotos y sonidos</summary><div class="credits">${creditsHTML()}</div></details></div>
+    <p class="note">Todas las fotos y sonidos son de animales reales, fotografiados y grabados por naturalistas en iNaturalist y Wikimedia Commons. Uso personal, sin fines comerciales.</p>
+  </div>`;
+  document.getElementById("back").onclick = () => location.hash = "#/";
+  const q = document.getElementById("q");
+  let t;
+  q.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => doSearch(q.value.trim()), 350); });
+  q.addEventListener("keydown", e => { if (e.key === "Enter") q.blur(); });
+  document.getElementById("vsw").onclick = e => { SET.voice = !SET.voice; lsSet("voice", SET.voice ? "1" : "0"); e.currentTarget.setAttribute("aria-checked", SET.voice); };
+  document.querySelectorAll("#optSeg button").forEach(b => b.onclick = () => {
+    SET.opts = +b.dataset.n; lsSet("opts", SET.opts);
+    document.querySelectorAll("#optSeg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  });
+  document.getElementById("dl").onclick = saveOffline;
+  renderExtra();
+}
+function renderExtra(){
+  const box = document.getElementById("extraBox"); if (!box) return;
+  box.innerHTML = EXTRA.length ? EXTRA.map(a => `<div class="row"><img src="${esc(a.photo)}" alt=""><div class="t"><div class="t1">${esc(a.name)}</div><div class="t2">${esc(a.sci)}</div></div><button class="x" data-k="${esc(a.k)}" aria-label="Quitar">✕</button></div>`).join("")
+    : `<p class="status">Aún no habéis añadido ninguno.</p>`;
+  box.querySelectorAll(".x").forEach(b => b.onclick = () => { EXTRA = EXTRA.filter(a => a.k !== b.dataset.k); lsSet("extra", JSON.stringify(EXTRA)); renderExtra(); });
+}
+let sSeq = 0;
+async function searchAnimals(q){
+  const found = new Map();
+  const isAnimal = t => ANIMAL_GROUPS.includes(t.iconic_taxon_name);
+  const add = list => list.filter(isAnimal).forEach(t => { if (!found.has(t.id)) found.set(t.id, t); });
+  const ac = term => getJSON(`${API}/taxa/autocomplete?q=${encodeURIComponent(term)}&locale=es&per_page=20&is_active=true`).then(d => d.results).catch(() => []);
+  add(await ac(q));
+  const words = q.split(" ").filter(x => x.length >= 3);
+  if (found.size < 3 || words.length > 1){
+    if (words.length > 1){
+      const lists = await Promise.all(words.map(w => ac(w).then(r => r.filter(isAnimal))));
+      lists.filter(l => l.length).sort((a, b) => a.length - b.length).forEach(add);
+    }
+    if (found.size < 3){
+      try {
+        const w = await getJSON(`https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&srlimit=3&format=json&origin=*`);
+        for (const h of w.query.search) add(await ac(h.title.split(" (")[0]));
+      } catch(e){}
+    }
+  }
+  return Array.from(found.values()).slice(0, 30);
+}
+async function doSearch(q){
+  const box = document.getElementById("res"), seq = ++sSeq;
+  if (q.length < 2){ box.innerHTML = ""; return; }
+  box.innerHTML = loading("Buscando…");
+  const res = await searchAnimals(q);
+  if (seq !== sSeq) return;
+  box.innerHTML = res.length ? `<div class="box">${res.map(t => `<button class="row" data-id="${t.id}">
+      ${t.default_photo && t.default_photo.square_url ? `<img src="${esc(t.default_photo.square_url)}" alt="">` : `<span class="ph0"></span>`}
+      <div class="t"><div class="t1">${esc(cap(t.preferred_common_name) || t.name)}</div><div class="t2">${esc(t.name)}</div></div></button>`).join("")}</div>`
+    : `<p class="status">No encuentro «${esc(q)}». Prueba con otro nombre.</p>`;
+  box.querySelectorAll(".row").forEach(r => r.onclick = () => location.hash = "#/t/" + r.dataset.id);
+}
+function creditsHTML(){
+  const lic = l => (l || "").toUpperCase();
+  return ANIMALS.map(a => `<p><b>${esc(cap(noun(a.name)))}</b> (<i>${esc(a.sci)}</i>). Foto: ${esc(a.photo_by)}. Sonido: ${a.clips.map(c => `<a href="${esc(c.page)}" target="_blank" rel="noopener">${esc(c.by || "autor desconocido")}</a>, ${esc(c.src)}, ${esc(lic(c.lic))}`).join("; ")}.</p>`).join("");
+}
+async function saveOffline(){
+  const bar = document.getElementById("dlbar"), btn = document.getElementById("dl");
+  bar.hidden = false; btn.disabled = true; btn.textContent = "Guardando…";
+  const urls = [];
+  ANIMALS.forEach(a => { urls.push(a.photo); soundsOf(a).forEach(s => urls.push(s)); });
+  let n = 0;
+  for (const u of urls){
+    try { await fetch(u, u.startsWith("http") ? { mode: "no-cors" } : {}); } catch(e){}
+    n++; bar.firstElementChild.style.width = Math.round(n / urls.length * 100) + "%";
+  }
+  btn.textContent = "Guardado ✓";
+}
+
+/* ---------- arranque ---------- */
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+if (!location.hash) history.replaceState(null, "", "#/");
+route();
+</script>
+</body>
+</html>

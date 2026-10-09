@@ -1,16 +1,16 @@
 {
-  "name": "Fonoteca Animal",
-  "short_name": "Fonoteca",
+  "name": "Los animales de Olivia",
+  "short_name": "Olivia",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#2F5A3D",
-  "theme_color": "#2F5A3D",
+  "orientation": "any",
+  "background_color": "#FFF4E0",
+  "theme_color": "#FFF4E0",
   "lang": "es",
   "icons": [
-    {
-      "src": "icon-180.png",
-      "sizes": "180x180",
-      "type": "image/png"
-    }
+    { "src": "icon-olivia-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-olivia-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-olivia-180.png", "sizes": "180x180", "type": "image/png" }
   ]
 }
