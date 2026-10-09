@@ -139,15 +139,14 @@ details summary::-webkit-details-marker{display:none}
 const ANIMALS = __DATA__;
 const CATS = [
   { k: "todos", name: "Todos", c: "var(--todos)" },
-  { k: "casa", name: "Casa", c: "var(--casa)" },
-  { k: "granja", name: "Granja", c: "var(--granja)" },
-  { k: "selva", name: "Selva", c: "var(--selva)" },
-  { k: "bosque", name: "Bosque", c: "var(--bosque)" },
-  { k: "mar", name: "Mar", c: "var(--mar)" },
-  { k: "pajaros", name: "Pájaros", c: "var(--pajaros)" },
+  { k: "mamiferos", name: "Mamíferos", c: "var(--granja)" },
+  { k: "aves", name: "Aves", c: "var(--pajaros)" },
+  { k: "reptiles", name: "Reptiles", c: "var(--selva)" },
+  { k: "anfibios", name: "Anfibios", c: "var(--mar)" },
+  { k: "insectos", name: "Insectos", c: "var(--casa)" },
   { k: "mas", name: "Más", c: "var(--mas)" }
 ];
-const CAT_ICON = { todos: "leon", casa: "perro", granja: "vaca", selva: "elefante", bosque: "zorro", mar: "ballena", pajaros: "petirrojo" };
+const CAT_ICON = { todos: "leon", mamiferos: "elefante", aves: "petirrojo", reptiles: "caiman", anfibios: "rana", insectos: "abeja" };
 const API = "https://api.inaturalist.org/v1";
 const ANIMAL_GROUPS = ["Mammalia","Aves","Reptilia","Amphibia","Actinopterygii","Insecta","Arachnida","Mollusca","Animalia"];
 const $app = document.getElementById("app");
@@ -256,7 +255,7 @@ function listFor(cat){
 /* ---------- Inicio ---------- */
 function showHome(){
   document.title = "Los animales de Olivia";
-  const cats = CATS.filter(c => c.k !== "mas" || EXTRA.length);
+  const cats = CATS.filter(c => c.k === "todos" || listFor(c.k).length);
   if (!cats.find(c => c.k === SET.cat)) SET.cat = "todos";
   $app.innerHTML = `
     <header class="top">
